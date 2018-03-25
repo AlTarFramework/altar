@@ -1,0 +1,18 @@
+
+    altar 2.0
+    Copyright (c) 2013-2018 ParaSim Inc.
+    Copyright (c) 2010-2018 California Institute of Technology
+    All Rights Reserved
+
+    This work has been funded in part by the the National Science
+    Foundation.
+
+    Sarah Minson wrote the original C version of CATMIP in 2010 as part of
+    her Ph.D. thesis.
+
+    In late 2011, Michael Aivazis rewrote CATMIP in python and C++, and
+    refactored it into a collection of pyre components.
+
+    altar was born in late 2012 as an attempt to reorganize the previous
+    efforts into an extensible framework for exploring earthquake models
+    using a broad spectrum of stochastic techniques.
