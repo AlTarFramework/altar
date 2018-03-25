@@ -1,0 +1,54 @@
+# -*- python -*-
+# -*- coding: utf-8 -*-
+#
+# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+#
+# (c) 2010-2018 california institute of technology
+# (c) 2013-2018 parasim inc
+# all rights reserved
+#
+
+# expansion placeholders
+date = "TODAY"
+major = MAJOR
+minor = MINOR
+revision = REVISION
+
+
+# assemble the version tuple
+version = (major, minor, revision)
+
+
+# decorations for the help system
+copyright = """
+    (c) 2013-YEAR ParaSim Inc.
+    (c) 2010-YEAR California Institute of Technology
+    ALL RIGHTS RESERVED
+"""
+
+banner = f"""
+    altar {major}.{minor} revision {revision}
+""" + copyright
+
+header = banner + """
+authors:
+    Michael Aïvázis     <michael.aivazis@para-sim.com>
+    Zacharie Duputel    <zacharie.duputel@unistra.fr>
+    Romain Jolivet      <jolivetr@biotite.ens.fr>
+    Sarah Minson        <sminson@usgs.gov>
+    Leif Strand
+    Hailiang Zhang
+    Lijun Zhu           <ljzhu@caltech.edu>
+"""
+
+license = header + """
+license:
+    The complete usage terms can be found in the file LICENSE.txt
+"""
+
+acknowledgments = header + """
+acknowledgments:
+"""
+
+
+# end of file
