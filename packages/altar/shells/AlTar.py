@@ -27,8 +27,8 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
         """
         Place the application banner in the {info} channel
         """
-        # show the license header
-        return altar.meta.license
+        # show the package header
+        return altar.meta.header
 
 
     # interactive session management
