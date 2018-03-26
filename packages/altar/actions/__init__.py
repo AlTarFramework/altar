@@ -8,4 +8,17 @@
 # all rights reserved
 #
 
+# get the package
+import altar
+
+# administrivia
+@altar.foundry(implements=altar.action, tip="display information about this appkication")
+def about():
+    # get the command panel
+    from .About import About
+    # attach the docstring
+    __doc__ = About.__doc__
+    # and  return the panel
+    return About
+
 # end of file
