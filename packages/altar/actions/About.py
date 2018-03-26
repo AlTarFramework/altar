@@ -30,7 +30,7 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the name of the app for configuration purposes
         """
         # show me
-        plexus.info.log("{!r}".format(plexus.pyre_name) or "unknown")
+        plexus.info.log(f"{plexus.pyre_name}")
         # all done
         return
 
@@ -41,7 +41,7 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the application home directory
         """
         # show me
-        plexus.info.log("{}".format(plexus.home))
+        plexus.info.log(altar.home)
         # all done
         return
 
@@ -52,18 +52,18 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the application installation directory
         """
         # show me
-        plexus.info.log("{}".format(plexus.prefix))
+        plexus.info.log(altar.prefix)
         # all done
         return
 
 
     @altar.export(tip="the application configuration directory")
-    def defaults(self, plexus, **kwds):
+    def etc(self, plexus, **kwds):
         """
         Print the application configuration directory
         """
         # show me
-        plexus.info.log("{}".format(plexus.defaults))
+        plexus.info.log(altar.etc)
         # all done
         return
 
@@ -118,7 +118,7 @@ class About(altar.panel(), family='altar.actions.about'):
         Dump the application configuration namespace
         """
         # get the prefix
-        prefix = self.root or 'altar'
+        prefix = self.root or "altar"
         # show me
         plexus.pyre_nameserver.dump(prefix)
         # all done
@@ -131,9 +131,9 @@ class About(altar.panel(), family='altar.actions.about'):
         Dump the application private filesystem
         """
         # build the report
-        report = '\n'.join(plexus.pfs.dump())
+        report = "\n".join(plexus.pfs.dump())
         # sign in
-        plexus.info.line('pfs:')
+        plexus.info.line("pfs:")
         # dump
         plexus.info.log(report)
         # all done
@@ -146,11 +146,11 @@ class About(altar.panel(), family='altar.actions.about'):
         Dump the application virtual filesystem
         """
         # get the prefix
-        prefix = self.root or '/altar'
+        prefix = self.root or "/altar"
         # build the report
         report = '\n'.join(plexus.vfs[prefix].dump())
         # sign in
-        plexus.info.line('vfs: root={!r}'.format(prefix))
+        plexus.info.line(f"vfs: root={prefix}")
         # dump
         plexus.info.log(report)
         # all done

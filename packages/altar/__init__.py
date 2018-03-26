@@ -34,7 +34,7 @@ import journal
 # fire up
 package = executive.registerPackage(name='altar', file=__file__)
 # save the geography
-home, prefix, defaults = package.layout()
+home, prefix, etc = package.layout()
 
 # export my parts
 from . import (
