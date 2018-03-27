@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2010-2018 california institute of technology
 # (c) 2013-2018 parasim inc
+# (c) 2010-2018 california institute of technology
 # all rights reserved
 #
 
@@ -30,8 +30,6 @@ class Sample(altar.panel(), family='altar.actions.sample'):
         """
         Print the name of the app for configuration purposes
         """
-        # show me
-        plexus.info.log(f"sampling '{self.model}'")
         # all done
         return
 

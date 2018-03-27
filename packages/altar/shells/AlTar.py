@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2010-2018 california institute of technology
 # (c) 2013-2018 parasim inc
+# (c) 2010-2018 california institute of technology
 # all rights reserved
 #
 
@@ -20,6 +20,26 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
 
     # types
     from .Action import Action as pyre_action
+
+    # user configurable state
+    gpus = altar.properties.int(default=0)
+    gpus.doc = "the number of gpus per task"
+
+
+    # meta-methods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # grab the programming model from my shell
+        mode = self.shell.model
+        # if the mode is mpi
+        if mode == 'mpi':
+            # i need an mpi aware coordinator
+            pass
+
+        # all done
+        return
+
 
     # pyre framework hooks
     # support for the help system
