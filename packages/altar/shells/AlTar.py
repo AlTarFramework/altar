@@ -26,21 +26,6 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     gpus.doc = "the number of gpus per task"
 
 
-    # meta-methods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # grab the programming model from my shell
-        mode = self.shell.model
-        # if the mode is mpi
-        if mode == 'mpi':
-            # i need an mpi aware coordinator
-            pass
-
-        # all done
-        return
-
-
     # pyre framework hooks
     # support for the help system
     def pyre_banner(self):
