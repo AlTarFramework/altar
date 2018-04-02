@@ -20,8 +20,8 @@ class Sample(altar.panel(), family='altar.actions.sample'):
 
 
     # user configurable state
-    model = altar.properties.str()
-    model.tip = "the name of a model to sample"
+    model = altar.models.model()
+    model.tip = "the AlTar model to sample"
 
 
     # commands
@@ -30,6 +30,9 @@ class Sample(altar.panel(), family='altar.actions.sample'):
         """
         Print the name of the app for configuration purposes
         """
+        # delegate to my model
+        return self.model.posterior(app=self)
+
         # make a channel
         channel = plexus.info
 

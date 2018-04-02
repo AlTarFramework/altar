@@ -40,6 +40,10 @@ home, prefix, etc = package.layout()
 from . import (
     # package meta-data
     meta,
+    # models
+    models,
+    # support for Markov chain Monte Carlo
+    mcmc,
     # user interfaces
     shells, actions,
     )
