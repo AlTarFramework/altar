@@ -103,13 +103,17 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
             available = cuda.manager.count
             # if the user asked for more than we have
             if requested > available:
+                # be civilized
+                taskLabel = "task" if tasks == 1 else "tasks"
+                gpuLabel = "GPU" if gpus == 1 else "GPUs"
                 # pick the channel
                 channel = self.error
                 # complain
                 channel.line(f"not enough GPUs on '{host.hostname}':")
                 channel.line(f" -- available: {available}")
                 channel.line(
-                    f" -- requested: {requested} GPUs: {tasks} tasks x {gpus} GPUs per task")
+                    f" -- requested: {requested} GPUs: "
+                    "{tasks} {taskLabel} x {gpus} {gpuLable} per task")
                 channel.log()
                 # and exit
                 raise SystemExit(1)
