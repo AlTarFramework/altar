@@ -23,10 +23,10 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
 
     # user configurable state
-    sampler = None
+    sampler = altar.bayesian.sampler()
     sampler.doc = "the sampler of the posterior distribution"
 
-    scheduler = None
+    scheduler = altar.bayesian.scheduler()
     scheduler.doc = "the generator of the annealing schedule"
 
     monitor = altar.simulations.monitor()
