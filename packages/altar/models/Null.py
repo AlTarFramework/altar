@@ -8,9 +8,16 @@
 # all rights reserved
 #
 
-# the simple application shell
-from .Application import Application as application
-# the plexus
-from .AlTar import AlTar as altar
+
+# my base class
+from .Bayesian import Bayesian
+
+
+# declaration
+class Null(Bayesian, family="altar.models.null"):
+    """
+    A trivial model that can be used as a base class for deriving interesting ones
+    """
+
 
 # end of file
