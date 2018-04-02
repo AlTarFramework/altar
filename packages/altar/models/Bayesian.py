@@ -113,7 +113,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
                 channel.line(f" -- available: {available}")
                 channel.line(
                     f" -- requested: {requested} GPUs: "
-                    "{tasks} {taskLabel} x {gpus} {gpuLable} per task")
+                    f"{tasks} {taskLabel} x {gpus} {gpuLabel} per task")
                 channel.log()
                 # and exit
                 raise SystemExit(1)
