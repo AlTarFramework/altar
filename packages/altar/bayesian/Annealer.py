@@ -22,6 +22,23 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
     """
 
 
+    # user configurable state
+    sampler = None
+    sampler.doc = "the sampler of the posterior distribution"
+
+    scheduler = None
+    scheduler.doc = "the generator of the annealing schedule"
+
+    monitor = altar.simulations.monitor()
+    monitor.doc = "the handler of simulation notifications"
+
+    archiver = altar.simulations.archiver()
+    archiver.doc = "the archiver of simulation state"
+
+
+    # public data
+
+
     # protocol obligations
     @altar.export
     def posterior(self, model):

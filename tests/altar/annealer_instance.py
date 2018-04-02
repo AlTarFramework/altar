@@ -11,7 +11,7 @@
 
 def test():
     # get the class
-    from altar.mcmc import annealer
+    from altar.bayesian import annealer
     # make an instance
     catmip = annealer()
     # and publish it
