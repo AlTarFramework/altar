@@ -41,6 +41,9 @@ all: python.pkg
 tidy:
 	find . -name \*~ -delete
 
+clean: tidy
+	$(rm.force-recurse) $(blddir)
+
 # general
 $(blddir):
 	${call log.action,mkdir,$(blddir)}

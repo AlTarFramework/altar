@@ -23,7 +23,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     # user configurable state
-    controller = altar.mcmc.controller()
+    controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
 
@@ -104,15 +104,17 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
             # if the user asked for more than we have
             if requested > available:
                 # be civilized
-                taskLabel = "task" if tasks == 1 else "tasks"
+                avlLabel = "GPU" if requested == 1 else "GPUs"
+                reqLabel = "GPU" if requested == 1 else "GPUs"
                 gpuLabel = "GPU" if gpus == 1 else "GPUs"
+                taskLabel = "task" if tasks == 1 else "tasks"
                 # pick the channel
                 channel = self.error
                 # complain
                 channel.line(f"not enough GPUs on '{host.hostname}':")
-                channel.line(f" -- available: {available}")
+                channel.line(f" -- available: {available} {avlLabel}")
                 channel.line(
-                    f" -- requested: {requested} GPUs: "
+                    f" -- requested: {requested} {reqLabel}: "
                     f"{tasks} {taskLabel} x {gpus} {gpuLabel} per task")
                 channel.log()
                 # and exit
