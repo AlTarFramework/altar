@@ -28,8 +28,6 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         """
         Sample the posterior distribution
         """
-        print(f"controller: {self}")
-        print(f"  model: {model}")
         # all done
         return
 

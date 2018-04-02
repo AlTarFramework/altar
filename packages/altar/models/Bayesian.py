@@ -41,13 +41,84 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         return
 
 
+    # meta-methods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # local state
+        self.hosts = 1
+        self.tasksPerHost = 1
+        self.gpusPerTask = 0
+        # all done
+        return
+
+
     # implementation details
     def initialize(self, app):
         """
         Initialize the state of the model given a {problem} specification
         """
-        # and my controller
+        # get the host
+        host = self.pyre_executive.host
+        # grab the journal channels
+        self.info = app.info
+        self.warning = app.warning
+        self.error = app.error
+        self.debug = app.debug
+        self.firewall = app.firewall
+
+        # grab the application shell
+        shell = app.shell
+        # if it's mpi capable
+        if shell.model == "mpi":
+            # record the machine layout
+            self.hosts = shell.hosts
+            self.tasksPerHost = shell.tasks
+
+        # the hosts and tasks settings are vetted by the shell; let's figure out the GPU
+        # situation; get what the user asked for
+        gpus = app.gpus
+        # attempt to
+        try:
+            # get support for cuda
+            import cuda
+        # if this fails
+        except ImportError:
+            # if the user asked for GPUs
+            if gpus:
+                # pick a channel
+                channel = self.warning
+                # complain
+                channel.line(f"no runtime support for CUDA on '{host.hostname}'")
+                channel.log(f" -- setting the number of GPUs per task to 0")
+            # no GPUs
+            self.gpusPerTask = 0
+        # if it succeeds
+        else:
+            # unpack the requested resources
+            tasks = self.tasksPerHost
+            # get the requested number
+            requested = tasks * gpus
+            # get the total GPU count on this node
+            available = cuda.manager.count
+            # if the user asked for more than we have
+            if requested > available:
+                # pick the channel
+                channel = self.error
+                # complain
+                channel.line(f"not enough GPUs on '{host.hostname}':")
+                channel.line(f" -- available: {available}")
+                channel.line(
+                    f" -- requested: {requested} GPUs: {tasks} tasks x {gpus} GPUs per task")
+                channel.log()
+                # and exit
+                raise SystemExit(1)
+            # otherwise, we are good
+            self.gpusPerTask = gpus
+
+        # initialize my controller
         self.controller.initialize(model=self)
+
         # all done
         return
 

@@ -31,7 +31,7 @@ class Sample(altar.panel(), family='altar.actions.sample'):
         Print the name of the app for configuration purposes
         """
         # delegate to my model
-        return self.model.posterior(app=self)
+        return self.model.posterior(app=plexus)
 
         # make a channel
         channel = plexus.info

@@ -20,6 +20,9 @@ class Application(altar.application, family="altar.shells.application"):
 
 
     # user configurable state
+    gpus = altar.properties.int(default=0)
+    gpus.doc = "the number of GPUs per task"
+
     model = altar.models.model()
     model.doc = "the AlTar model to sample"
 
