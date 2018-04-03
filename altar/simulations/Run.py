@@ -22,6 +22,9 @@ class Run(altar.protocol, family="altar.runs"):
     name = altar.properties.str()
     name.doc = "the name of the job; used as a stem for making filenames, etc."
 
+    mode = altar.properties.str()
+    mode = "the programming model"
+
     hosts = altar.properties.int(default=1)
     hosts.doc = "the number of hosts to run on"
 
