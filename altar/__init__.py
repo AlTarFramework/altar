@@ -40,10 +40,10 @@ home, prefix, etc = package.layout()
 from . import (
     # package meta-data
     meta,
-    # simulation support
-    simulations,
     # models
     models,
+    # simulation support
+    simulations,
     # support for Bayesian explorations using Markov chain Monte Carlo
     bayesian,
     # user interfaces
