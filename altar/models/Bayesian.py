@@ -67,17 +67,12 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         self.debug = app.debug
         self.firewall = app.firewall
 
-        # grab the application shell
-        shell = app.shell
-        # if it's mpi capable
-        if shell.model == "mpi":
-            # record the machine layout
-            self.hosts = shell.hosts
-            self.tasksPerHost = shell.tasks
+        # get the job parameters
+        self.job = job = app.job
 
         # the hosts and tasks settings are vetted by the shell; let's figure out the GPU
         # situation; get what the user asked for
-        gpus = app.gpus
+        gpus = job.gpus
         # attempt to
         try:
             # get support for cuda
@@ -96,7 +91,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         # if it succeeds
         else:
             # unpack the requested resources
-            tasks = self.tasksPerHost
+            tasks = job.tasks
             # get the requested number
             requested = tasks * gpus
             # get the total GPU count on this node
@@ -127,6 +122,17 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
         # all done
         return
+
+
+    # public data
+    # job parameters
+    job = None
+    # journal channels
+    info = None
+    warning = None
+    error = None
+    default = None
+    firewall = None
 
 
 # end of file
