@@ -12,26 +12,30 @@ python ?= python3
 
 # python
 python.bin.root := bin
-python.src.root := packages
+python.src.root := altar
 
 # sources
 python.sources := ${shell find $(python.src.root) -name \*.py}
 python.scripts := ${shell find $(python.bin.root) -type f}
 
 # products
-python.pkg.root := $(blddir)
+python.pkg.root := $(blddir)/packages
 python.pkg.bin := $(blddir)/bin
 python.pkg.stems := ${basename $(python.sources)}
-python.pkg.altar.meta := $(python.pkg.root)/packages/altar/meta.pyc
+python.pkg.altar.meta := $(python.pkg.root)/altar/meta.pyc
 python.pkg.pyc := $(python.pkg.stems:%=$(python.pkg.root)/%.pyc)
 python.pkg.dirs := ${sort ${dir $(python.pkg.pyc)}}
-python.pkg.scripts := $(python.scripts:%=$(python.pkg.root)/%)
+python.pkg.scripts := $(python.scripts:%=$(blddir)/%)
+
+foo:
+	echo python.pkg.scripts: $(python.pkg.scripts)
+	echo python.pkg.root: $(python.pkg.root)
 
 # the overall python recipe
 python.pkg: $(python.pkg.pyc) $(python.pkg.altar.meta) $(python.pkg.scripts)
 
 # the scripts
-$(python.pkg.scripts): $(python.pkg.root)/% : % | $(python.pkg.bin)
+$(python.pkg.scripts): $(blddir)/% : % | $(python.pkg.bin)
 	${call log.action,cp,$<}
 	$(cp) $< $(python.pkg.bin)
 
@@ -41,13 +45,13 @@ $(python.pkg.pyc): $(python.pkg.root)/%.pyc: %.py | $(python.pkg.dirs)
 	$(python) -m compileall -b -q ${abspath $<}
 	$(mv) $(<:.py=.pyc) $@
 
-$(python.pkg.altar.meta): $(python.src.root)/altar/meta.py
+$(python.pkg.altar.meta): $(python.src.root)/meta.py
 	${call log.action,python,$<}
 	$(python) -m compileall -b -q ${abspath $<}
 	$(mv) $(<:.py=.pyc) $@
-	$(rm) $(python.src.root)/altar/meta.py
+	$(rm) $<
 
-$(python.src.root)/altar/meta.py: $(python.src.root)/altar/meta
+$(python.src.root)/meta.py: $(python.src.root)/meta
 	${call log.action,sed,$<}
 	$(sed) \
           -e "s:MAJOR:$(altar.major):g" \
