@@ -14,8 +14,20 @@ import altar
 # the protocols
 from .Archiver import Archiver as archiver
 from .Monitor import Monitor as monitor
+from .Run import Run as run
+
 
 # the implementations
+@altar.foundry(implements=run, tip="the default job parameter specification")
+def job():
+    # grab the factory
+    from .Job import Job as job
+    # attach its docstring
+    __doc__ = job.__doc__
+    # and return it
+    return job
+
+
 @altar.foundry(implements=archiver, tip="a simple in-memory archiver")
 def recorder():
     # grab the factory

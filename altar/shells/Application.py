@@ -20,11 +20,8 @@ class Application(altar.application, family="altar.shells.application"):
 
 
     # user configurable state
-    gpus = altar.properties.int(default=0)
-    gpus.doc = "the number of GPUs per task"
-
-    model = altar.models.model()
-    model.doc = "the AlTar model to sample"
+    job = altar.simulations.run()
+    job.doc = "the job input parameters"
 
 
     # protocol obligations
@@ -34,7 +31,7 @@ class Application(altar.application, family="altar.shells.application"):
         The main entry point
         """
         # tell my model to do its thing
-        return self.model.posterior(app=self)
+        return self.job.model.posterior(app=self)
 
 
     # pyre framework hooks
