@@ -36,21 +36,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         # initialize my parts
         self.initialize(app=app)
         # ask my controller to help me sample my posterior distribution
-        self.controller.posterior(model=self)
-        # all done
-        return
-
-
-    # meta-methods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # local state
-        self.hosts = 1
-        self.tasksPerHost = 1
-        self.gpusPerTask = 0
-        # all done
-        return
+        return self.controller.posterior(model=self)
 
 
     # implementation details
@@ -87,7 +73,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
                 channel.line(f"no runtime support for CUDA on '{host.hostname}'")
                 channel.log(f" -- setting the number of GPUs per task to 0")
             # no GPUs
-            self.gpusPerTask = 0
+            job.gpus = 0
         # if it succeeds
         else:
             # unpack the requested resources
@@ -114,14 +100,12 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
                 channel.log()
                 # and exit
                 raise SystemExit(1)
-            # otherwise, we are good
-            self.gpusPerTask = gpus
 
         # initialize my controller
         self.controller.initialize(model=self)
 
         # all done
-        return
+        return self
 
 
     # public data

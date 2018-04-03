@@ -22,4 +22,14 @@ class Recorder(altar.component, family="altar.archivers.recorder", implements=ar
     """
 
 
+    # protocol obligations
+    @altar.provides
+    def initialize(self, model):
+        """
+        Initialize me given a {model}
+        """
+        # all done
+        return self
+
+
 # end of file

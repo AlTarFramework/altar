@@ -21,6 +21,12 @@ class Monitor(altar.protocol, family="altar.monitors"):
     Monitors respond to simulation events by generating user diagnostics to report progress
     """
 
+    # protocol obligations
+    @altar.provides
+    def initialize(self, model):
+        """
+        Initialize me given a {model}
+        """
 
     # framework hooks
     @classmethod

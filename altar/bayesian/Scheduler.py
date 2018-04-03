@@ -56,8 +56,8 @@ class Scheduler(altar.protocol, family="altar.schedulers"):
         """
         Supply a default implementation
         """
-        # by default, we do CATMIP as encapsulated by the {Annealer} class
-        from .Annealer import Annealer as default
+        # by default, use COV
+        from .COV import COV as default
         # and return it
         return default
 

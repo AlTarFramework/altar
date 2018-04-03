@@ -31,5 +31,40 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         COV(w_m) := <w_m> / \sqrt{<(w_m-<w_m>)^2>}
     """
 
+    # protocol obligations
+    @altar.export
+    def initialize(self, model):
+        """
+        Initialize me and my parts given a {model}
+        """
+
+
+    @altar.export
+    def update(self, coolingStep):
+        """
+        Push {coolingStep} forward along the annealing schedule
+        """
+
+
+    @altar.export
+    def updateTemperature(self, coolingStep):
+        """
+        Generate the next temperature increment
+        """
+
+
+    @altar.export
+    def computeCovariance(self, coolingStep):
+        """
+        Compute the parameter covariance of the sample in the {coolingStep}
+        """
+
+
+    @altar.export
+    def rank(self, coolingStep):
+        """
+        Rebuild the sample and its statistics sorted by the likelihood of the parameter values
+        """
+
 
 # end of file

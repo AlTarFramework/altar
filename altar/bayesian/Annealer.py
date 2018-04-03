@@ -42,8 +42,8 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         """
         Sample the posterior distribution
         """
-        # all done
-        return
+        # all done; indicate success
+        return 0
 
 
     @altar.export
@@ -51,8 +51,13 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         """
         Initialize me and my parts given a {model}
         """
+        # initialize my parts
+        self.sampler.initialize(model=model)
+        self.scheduler.initialize(model=model)
+        self.monitor.initialize(model=model)
+        self.archiver.initialize(model=model)
         # all done
-        return
+        return self
 
 
 # end of file
