@@ -21,6 +21,13 @@ class Archiver(altar.protocol, family="altar.archivers"):
     """
 
 
+    # required behavior
+    @altar.provides
+    def initialize(self, model):
+        """
+        Initialize me given a {model}
+        """
+
     # framework hooks
     @classmethod
     def pyre_default(cls, **kwds):
