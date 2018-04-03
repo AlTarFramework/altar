@@ -21,7 +21,7 @@ class Job(altar.component, family="altar.runs.job", implements=run):
     """
 
     # user configurable state
-    name = alter.properties.str(default="sample")
+    name = altar.properties.str(default="sample")
     name.doc = "the name of the job; used as a stem for making filenames, etc."
 
     hosts = altar.properties.int(default=1)
@@ -41,6 +41,23 @@ class Job(altar.component, family="altar.runs.job", implements=run):
 
     model = altar.models.model()
     model.doc = "the AlTar model to sample"
+
+
+    # initialize
+    def initialize(self, app):
+        """
+        Initialize the job parameters with information from the application context
+        """
+        # grab my shell
+        shell = app.shell
+        # if it is mpi aware
+        if shell.model == 'mpi':
+            # transfer the host count
+            self.hosts = shell.hosts
+            # and the tasks per host
+            self.tasks = shell.tasks
+        # all done
+        return
 
 
 # end of file

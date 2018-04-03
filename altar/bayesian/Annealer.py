@@ -36,9 +36,6 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
     archiver.doc = "the archiver of simulation state"
 
 
-    # public data
-
-
     # protocol obligations
     @altar.export
     def posterior(self, model):

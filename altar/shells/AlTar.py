@@ -22,8 +22,23 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     from .Action import Action as pyre_action
 
     # user configurable state
-    gpus = altar.properties.int(default=0)
-    gpus.doc = "the number of gpus per task"
+    # user configurable state
+    job = altar.simulations.run()
+    job.doc = "the job input parameters"
+
+
+    # protocol obligations
+    @altar.export
+    def main(self, *args, **kwds):
+        """
+        The main entry point
+        """
+        # grab the job parameters
+        job = self.job
+        # initialize it
+        job.initialize(app=self)
+        # chain up
+        return super().main(*args, **kwds)
 
 
     # pyre framework hooks
