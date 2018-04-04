@@ -86,7 +86,7 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
         # if it succeeds
         else:
             # unpack the requested resources
-            tasks = job.tasks
+            tasks = self.tasks
             # get the requested number
             requested = tasks * gpus
             # get the total GPU count on this node
