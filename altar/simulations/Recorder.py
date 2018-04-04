@@ -16,7 +16,7 @@ from .Archiver import Archiver as archiver
 
 
 # an implementation of the archiver protocol
-class Recorder(altar.component, family="altar.archivers.recorder", implements=archiver):
+class Recorder(altar.component, family="altar.simulations.archivers.recorder", implements=archiver):
     """
     Recorder stores the intermediate simulation state in memory
     """

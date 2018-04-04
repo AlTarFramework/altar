@@ -16,7 +16,7 @@ from .Monitor import Monitor as monitor
 
 
 # an implementation of the monitor protocol
-class Reporter(altar.component, family="altar.monitors.reporter", implements=monitor):
+class Reporter(altar.component, family="altar.simulations.monitors.reporter", implements=monitor):
     """
     Reporter reports simulation progress by using application journal channels
     """

@@ -8,13 +8,11 @@
 # all rights reserved
 #
 
-
 # the package
 import altar
 
-
 # the monitor protocol
-class Monitor(altar.protocol, family="altar.monitors"):
+class Monitor(altar.protocol, family="altar.simulations.monitors"):
     """
     The protocol that all AlTar simulation monitors must implement
 
@@ -38,6 +36,5 @@ class Monitor(altar.protocol, family="altar.monitors"):
         from .Reporter import Reporter as default
         # and return it
         return default
-
 
 # end of file

@@ -15,7 +15,7 @@ from .Run import Run as run
 
 
 # the run protocol
-class Job(altar.component, family="altar.runs.job", implements=run):
+class Job(altar.component, family="altar.simulations.runs.job", implements=run):
     """
     The set of parameters in an AlTar run
     """

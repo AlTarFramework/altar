@@ -13,7 +13,7 @@ import altar
 
 
 # the run protocol
-class Run(altar.protocol, family="altar.runs"):
+class Run(altar.protocol, family="altar.simulations.runs"):
     """
     Protocol that specifies the job parameter set
     """
