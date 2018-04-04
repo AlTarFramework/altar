@@ -57,12 +57,12 @@ home, prefix, etc = package.layout()
 from . import (
     # package meta-data
     meta,
-    # models
-    models,
     # simulation support
     simulations,
     # support for Bayesian explorations using Markov chain Monte Carlo
     bayesian,
+    # models
+    models,
     # user interfaces
     shells, actions,
     )

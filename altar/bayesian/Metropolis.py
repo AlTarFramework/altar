@@ -124,15 +124,20 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         cprior = altar.vector(shape=samples)
         cdata = altar.vector(shape=samples)
         cpost = altar.vector(shape=samples)
+        # a fake covariance matrix for the candidate steps, just so we don't have to rebuild it
+        # every time
+        csigma = altar.matrix(shape=(parameters,parameters)).zero()
         # and a vector with random numbers for the Metropolis acceptance
         dice = altar.vector(shape=samples)
 
         # step all chains together
         for step in range(self.steps):
-            # initialize the candidate sample
+            # initialize the candidate sample by randomly displacing the current one
             cθ = self.displace(sample=θ)
             # build a candidate state
-            candidate = self.CoolingStep(beta=β, theta=cθ, likelihoods=(cprior,cdata,cpost))
+            candidate = self.CoolingStep(beta=β,
+                                         theta=cθ, likelihoods=(cprior,cdata,cpost),
+                                         sigma=csigma)
             # the random displacement may have generated candidates that are outside the
             # support of the model, so we must give it an opportunity to reject them
             rejects = model.verify(candidate)
@@ -167,7 +172,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
                 # original and it wasn't saved by the {dice}
                 if log(dice[sample]) > diff[sample]:
                     # nothing to do: θ, priorL, dataL, and postL contain the right statistics
-                    # for this sample; just update the rejection count
+                    # for this sample; just update the unlikely count
                     unlikely += 1
                     # and move on
                     continue

@@ -25,10 +25,10 @@ class Sample(altar.panel(), family='altar.actions.sample'):
         """
         Sample the model posterior distribution
         """
-        # get the job parameters
-        job = plexus.job
-        # sample the posterior distribution
-        return job.model.posterior(application=plexus)
+        # get the model
+        model = plexus.model
+        # sample its posterior distribution
+        return model.posterior(application=plexus)
 
 
 # end of file

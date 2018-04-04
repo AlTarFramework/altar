@@ -42,17 +42,27 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
     tolerance = altar.properties.float(default=1.0e-3)
     tolerance.doc = "convergence tolerance for β->1.0"
 
-    model = altar.models.model()
-    model.doc = "the AlTar model to sample"
-
 
     # initialize
-    def initialize(self, app):
+    @altar.export
+    def initialize(self, application):
         """
         Initialize the job parameters with information from the application context
         """
+        # validate the machine layout
+        self.validateMachineLayout(application=application)
+        # all done
+        return self
+
+
+    # implementation details
+    def validateMachineLayout(self, application):
+        """
+        Adjust the machine parameters based on the {application} context and the runtime
+        environment
+        """
         # grab my shell
-        shell = app.shell
+        shell = application.shell
         # set the programming model
         self.mode = shell.model
         # if it is mpi aware
@@ -65,7 +75,7 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
                 myLbl = "task" if self.tasks == 1 else "tasks"
                 shLbl = "task" if shell.tasks == 1 else "tasks"
                 # pick a channel
-                channel = app.warning
+                channel = application.warning
                 # complain
                 channel.line("inconsistency in the number of tasks per host:")
                 channel.line(f" -- from the MPI runtime: {shell.tasks} {shLbl} per host")
@@ -89,7 +99,7 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
             # if the user asked for GPUs
             if gpus:
                 # pick a channel
-                channel = app.warning
+                channel = application.warning
                 # complain
                 channel.line(f"no runtime support for CUDA on '{host.hostname}'")
                 channel.log(f" -- setting the number of GPUs per task to 0")
@@ -111,7 +121,7 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
                 gpuLabel = "GPU" if gpus == 1 else "GPUs"
                 taskLabel = "task" if tasks == 1 else "tasks"
                 # pick the channel
-                channel = app.error
+                channel = application.error
                 # complain
                 channel.line(f"not enough GPUs on '{host.hostname}':")
                 channel.line(f" -- available: {available} {avlLabel}")
@@ -125,7 +135,7 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
         # if the user specified more than one host, we had better be running with mpi
         if self.hosts > 1 and self.mode != 'mpi':
             # otherwise, grab a channel
-            channel = app.error
+            channel = application.error
             # complain
             channel.line(f"an MPI runtime is required to run on {self.hosts} hosts")
             channel.line(f" -- please launch using an MPI compatible shell")
