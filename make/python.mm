@@ -27,10 +27,6 @@ python.pkg.pyc := $(python.pkg.stems:%=$(python.pkg.root)/%.pyc)
 python.pkg.dirs := ${sort ${dir $(python.pkg.pyc)}}
 python.pkg.scripts := $(python.scripts:%=$(blddir)/%)
 
-foo:
-	echo python.pkg.scripts: $(python.pkg.scripts)
-	echo python.pkg.root: $(python.pkg.root)
-
 # the overall python recipe
 python.pkg: $(python.pkg.pyc) $(python.pkg.altar.meta) $(python.pkg.scripts)
 
