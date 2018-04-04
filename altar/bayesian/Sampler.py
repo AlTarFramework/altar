@@ -28,14 +28,14 @@ class Sampler(altar.protocol, family="altar.samplers"):
 
 
     @altar.provides
-    def sample(self, coolingStep):
+    def sample(self, annealer, step):
         """
         Sample the posterior distribution
         """
 
 
     @altar.provides
-    def equilibrate(self, statistics):
+    def equilibrate(self, annealer, statistics):
         """
         Update my statistics based on the results of walking my Markov chains
         """

@@ -37,34 +37,44 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         Initialize me and my parts given a {model}
         """
+        # all done
+        return self
 
 
     @altar.export
-    def update(self, coolingStep):
+    def update(self, step):
         """
-        Push {coolingStep} forward along the annealing schedule
+        Push {step} forward along the annealing schedule
         """
+        # all done
+        return self
 
 
     @altar.export
-    def updateTemperature(self, coolingStep):
+    def updateTemperature(self, step):
         """
         Generate the next temperature increment
         """
+        # all done
+        return self
 
 
     @altar.export
-    def computeCovariance(self, coolingStep):
+    def computeCovariance(self, step):
         """
-        Compute the parameter covariance of the sample in the {coolingStep}
+        Compute the parameter covariance of the sample in the {step}
         """
+        # all done
+        return self
 
 
     @altar.export
-    def rank(self, coolingStep):
+    def rank(self, step):
         """
         Rebuild the sample and its statistics sorted by the likelihood of the parameter values
         """
+        # all done
+        return self
 
 
 # end of file

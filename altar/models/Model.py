@@ -20,10 +20,65 @@ class Model(altar.protocol, family="altar.models"):
 
 
     # required behavior
+    # high level interface
     @altar.provides
-    def posterior(self, app):
+    def posterior(self, application):
         """
         Sample my posterior distribution
+        """
+
+    @altar.provides
+    def parameters(self):
+        """
+        Return the number of independent degrees of freedom in the model
+        """
+
+    # services for the simulation controller
+    @altar.provides
+    def initialize(self, application):
+        """
+        Initialize the state of the model given a {problem} specification
+        """
+
+    @altar.provides
+    def sample(self, step):
+        """
+        Fill {step.theta} with an initial random sample from my prior distribution.
+        """
+
+    @altar.provides
+    def priorLikelihood(self, step):
+        """
+        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        distribution
+        """
+
+    @altar.provides
+    def dataLikelihood(self, step):
+        """
+        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        data. This is what is usually referred to as the "forward model"
+        """
+
+    @altar.provides
+    def posteriorLikelihood(self, step):
+        """
+        Given the {step.prior} and {step.data} likelihoods, compute a generalized posterior using
+        {step.beta} and deposit the result in {step.post}
+        """
+
+    @altar.provides
+    def likelihoods(self, step):
+        """
+        Convenience function that computes all three likelihoods at once given the current {step}
+        of the problem
+        """
+
+    @altar.provides
+    def verify(self, step):
+        """
+        Check whether the samples in {step.theta} are consistent with the model requirements and
+        return a vector with zeroes for valid samples and ones for the invalid ones
         """
 
 

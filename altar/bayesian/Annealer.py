@@ -23,6 +23,9 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
 
     # user configurable state
+    rng = altar.simulations.rng()
+    rng.doc = "the random number generator"
+
     sampler = altar.bayesian.sampler()
     sampler.doc = "the sampler of the posterior distribution"
 
@@ -38,26 +41,156 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
     # protocol obligations
     @altar.export
-    def posterior(self, model):
-        """
-        Sample the posterior distribution
-        """
-        # all done; indicate success
-        return 0
-
-
-    @altar.export
     def initialize(self, model):
         """
         Initialize me and my parts given a {model}
         """
+        # deduce my annealing method
+        self.worker = self.deduceAnnealingMethod(job=model.job)
+
         # initialize my parts
+        self.rng.initialize()
         self.sampler.initialize(model=model)
         self.scheduler.initialize(model=model)
         self.monitor.initialize(model=model)
         self.archiver.initialize(model=model)
+
+        # borrow the canonical journal channels from the model
+        self.info = model.info
+        self.warning = model.warning
+        self.error = model.error
+        self.debug = model.debug
+        self.firewall = model.firewall
+
         # all done
         return self
+
+
+    @altar.export
+    def posterior(self, model):
+        """
+        Sample the posterior distribution
+        """
+        # record the model so that everybody has easy access to it
+        self.model = model
+        # unpack what we need
+        tolerance = model.job.tolerance
+        # get my worker
+        worker = self.worker
+
+        # start the process
+        worker.start(annealer=self)
+
+        # iterate until β is sufficiently close to one
+        while worker.beta + tolerance < 1:
+            # notify the worker we are at the top of the current step
+            worker.top(annealer=self)
+            # compute a new temperature
+            worker.cool(annealer=self)
+            # re-sample
+            statistics = worker.resample(annealer=self)
+            # equilibrate
+            worker.equilibrate(annealer=self, statistics=statistics)
+            # notify the worker we are at the bottom of the current step
+            worker.bottom(annealer=self)
+
+        # finish up
+        worker.finish(annealer=self)
+
+        # forget the model
+        self.model = None
+
+        # all done; indicate success
+        return 0
+
+
+    # implementation details
+    def deduceAnnealingMethod(self, job):
+        """
+        Instantiate an annealing method compatible the user choices
+        """
+        # the machine layout part of the {job} parameters has already been vetted; if we get
+        # this far, we have what the user asked for; unpack the parameters we use
+        mode = job.mode
+        hosts = job.hosts
+        tasks = job.tasks
+        gpus = job.gpus
+
+        # first let's figure out the base worker: if the user asked for gpus and we have them,
+        # go CUDA, else use plain vanilla sequential
+        worker = self.cuda() if gpus > 0 else self.sequential()
+
+        # if i don't have mpi
+        if mode != "mpi":
+            # we need threads if either {tasks} or {gpus} is greater than one
+            if gpus > 1 or tasks > 1:
+                # compute the number  of threads we need
+                threads = tasks * gpus or tasks or gpus
+                # build the method
+                worker = self.threaded(threads=threads, worker=worker)
+        # if we are running with mpi
+        else:
+            # i need threads if the number of {gpus} per task is greater than one
+            if gpus > 1:
+                # i need as many threads as there are gpus per task
+                threads = gpus
+                # build the worker
+                worker = self.threaded(threads=threads, worker=worker)
+            # in any case, use the mpi aware annealing method
+            worker = self.mpi(worker=worker)
+
+        # all done
+        return worker
+
+
+    def sequential(self):
+        """
+        Instantiate the plain sequential annealing method
+        """
+        # import the sequential annealer
+        from .SequentialAnnealing import SequentialAnnealing
+        # instantiate it and return it
+        return SequentialAnnealing(annealer=self)
+
+
+    def cuda(self):
+        """
+        Instantiate a CUDA aware annealing method
+        """
+        # import the CUDA annealing method
+        from .CUDAAnnealing import CUDAAnnealing
+        # instantiate it and return it
+        return CUDAAnnealing(annealer=self)
+
+
+    def threaded(self, threads, worker):
+        """
+        Instantiate the multi-threaded annealing method
+        """
+        # get the threaded annealer
+        from .ThreadedAnnealing import ThreadedAnnealing
+        # instantiate it and return it
+        return ThreadedAnnealing(annealer=self, threads=threads, worker=worker)
+
+
+    def mpi(self, worker):
+        """
+        Instantiate the MPI aware annealing method
+        """
+        from .MPIAnnealing import MPIAnnealing
+        # instantiate it and return it
+        return MPIAnnealing(annealer=self, worker=worker)
+
+
+    # private data
+    model = None  # the model i'm sampling
+    worker = None # the annealing method
+    # journal channels shared with the application
+    info = None
+    warning = None
+    error = None
+    debug = None
+    firewall = None
 
 
 # end of file

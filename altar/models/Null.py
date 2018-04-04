@@ -9,6 +9,8 @@
 #
 
 
+# the package
+import altar
 # my base class
 from .Bayesian import Bayesian
 
@@ -18,6 +20,15 @@ class Null(Bayesian, family="altar.models.null"):
     """
     A trivial model that can be used as a base class for deriving interesting ones
     """
+
+
+    @altar.export
+    def parameters(self):
+        """
+        The number of parameters in the 'null' model
+        """
+        # make something up
+        return 1
 
 
 # end of file

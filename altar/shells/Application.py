@@ -33,9 +33,9 @@ class Application(altar.application, family="altar.shells.application"):
         # grab the job parameters
         job = self.job
         # initialize it
-        job.initialize(app=self)
+        job.initialize(application=self)
         # sample the posterior distribution
-        return job.model.posterior(app=self)
+        return job.model.posterior(application=self)
 
 
     # pyre framework hooks

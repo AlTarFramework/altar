@@ -26,25 +26,25 @@ class Scheduler(altar.protocol, family="altar.schedulers"):
         """
 
     @altar.provides
-    def update(self, coolingStep):
+    def update(self, step):
         """
-        Push {coolingStep} forward along the annealing schedule
+        Push {step} forward along the annealing schedule
         """
 
     @altar.provides
-    def updateTemperature(self, coolingStep):
+    def updateTemperature(self, step):
         """
         Generate the next temperature increment
         """
 
     @altar.provides
-    def computeCovariance(self, coolingStep):
+    def computeCovariance(self, step):
         """
-        Compute the parameter covariance of the sample in the {coolingStep}
+        Compute the parameter covariance of the sample in the {step}
         """
 
     @altar.provides
-    def rank(self, coolingStep):
+    def rank(self, step):
         """
         Rebuild the sample and its statistics sorted by the likelihood of the parameter values
         """
