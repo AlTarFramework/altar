@@ -29,14 +29,31 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
     # protocol obligations
     @altar.export
+    def initialize(self, application):
+        """
+        Initialize the state of the model given a {problem} specification
+        """
+        # get the job parameters
+        self.job = application.job
+        # borrow the journal channels
+        self.info = application.info
+        self.warning = application.warning
+        self.error = application.error
+        self.debug = application.debug
+        self.firewall = application.firewall
+
+        # initialize my controller
+        self.controller.initialize(model=self)
+
+        # all done
+        return self
+
+
+    @altar.export
     def posterior(self, application):
         """
         Sample my posterior distribution
         """
-        # initialize my parts
-        self.initialize(application=application)
-        self.info.log(f"model: {self}")
-        return 0
         # ask my controller to help me sample my posterior distribution
         return self.controller.posterior(model=self)
 
@@ -92,28 +109,6 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Check whether the samples in {step.theta} are consistent with the model requirements and
         return a vector with zeroes for valid samples and ones for the invalid ones
         """
-
-    # implementation details
-    @altar.export
-    def initialize(self, application):
-        """
-        Initialize the state of the model given a {problem} specification
-        """
-        # get the job parameters
-        self.job = application.job
-        # borrow the journal channels
-        self.info = application.info
-        self.warning = application.warning
-        self.error = application.error
-        self.debug = application.debug
-        self.firewall = application.firewall
-
-        # initialize my controller
-        self.controller.initialize(model=self)
-
-        # all done
-        return self
-
 
     # public data
     # job parameters
