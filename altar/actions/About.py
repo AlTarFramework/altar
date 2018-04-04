@@ -8,6 +8,7 @@
 # all rights reserved
 #
 
+
 # get the package
 import altar
 
@@ -41,7 +42,7 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the application home directory
         """
         # show me
-        plexus.info.log(altar.home)
+        print(altar.home)
         # all done
         return
 
@@ -52,7 +53,18 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the application installation directory
         """
         # show me
-        plexus.info.log(altar.prefix)
+        print(altar.prefix)
+        # all done
+        return
+
+
+    @altar.export(tip="the directory with the altar models")
+    def models(self, plexus, **kwds):
+        """
+        Print the altar model directory
+        """
+        # show me
+        print(altar.modelPrefix)
         # all done
         return
 
@@ -63,7 +75,7 @@ class About(altar.panel(), family='altar.actions.about'):
         Print the application configuration directory
         """
         # show me
-        plexus.info.log(altar.etc)
+        print(altar.etc)
         # all done
         return
 

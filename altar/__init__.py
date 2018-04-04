@@ -13,6 +13,9 @@
 # pyre is sufficient; the only problem is that the error message complains about pyre, not
 # altar; is this worth fixing?
 
+# externals
+import os
+
 # pull the framework parts
 from pyre import (
     # protocols, components and traits
@@ -52,6 +55,8 @@ from gsl import (
 package = executive.registerPackage(name='altar', file=__file__)
 # save the geography
 home, prefix, etc = package.layout()
+# the directory with my models
+modelPrefix = os.path.join(home, "models")
 
 # export my parts
 from . import (
