@@ -11,15 +11,13 @@
 # the package
 import altar
 
-
 # the archiver protocol
-class Archiver(altar.protocol, family="altar.archivers"):
+class Archiver(altar.protocol, family="altar.simulations.archivers"):
     """
     The protocol that all AlTar simulation archivers must implement
 
     Archivers persist intermediate simulation state and can be used to restart a simulation
     """
-
 
     # required behavior
     @altar.provides
@@ -38,6 +36,5 @@ class Archiver(altar.protocol, family="altar.archivers"):
         from .Recorder import Recorder as default
         # and return it
         return default
-
 
 # end of file
