@@ -32,7 +32,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     @altar.export
-    def sample(self, model):
+    def sample(self, annealer, step):
         """
         Sample the posterior distribution
         """
@@ -41,7 +41,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     @altar.provides
-    def equilibrate(self, statistics):
+    def equilibrate(self, annealer, statistics):
         """
         Update my statistics based on the results of walking my Markov chains
         """

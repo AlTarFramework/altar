@@ -28,8 +28,25 @@ from pyre import (
     # plexus support
     action, command, panel, plexus, application
     )
+
 # grab the journal
 import journal
+
+# numerics
+from gsl import (
+    # matrices
+    matrix,
+    # vectors
+    vector,
+    # basic linear algebra
+    blas,
+    # higher level linear algebra
+    linalg as lapack,
+    # random number generators
+    rng,
+    # probability distribution functions
+    pdf,
+)
 
 # fire up
 package = executive.registerPackage(name='altar', file=__file__)

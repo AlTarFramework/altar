@@ -28,7 +28,7 @@ class Sample(altar.panel(), family='altar.actions.sample'):
         # get the job parameters
         job = plexus.job
         # sample the posterior distribution
-        return job.model.posterior(app=plexus)
+        return job.model.posterior(application=plexus)
 
 
 # end of file
