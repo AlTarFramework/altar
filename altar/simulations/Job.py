@@ -59,8 +59,20 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
         if shell.model == 'mpi':
             # transfer the host count
             self.hosts = shell.hosts
-            # and the tasks per host
-            self.tasks = shell.tasks
+            # check {tasks} for consistency
+            if self.tasks != shell.tasks:
+                # be civilized
+                myLbl = "task" if self.tasks == 1 else "tasks"
+                shLbl = "task" if shell.tasks == 1 else "tasks"
+                # pick a channel
+                channel = app.warning
+                # complain
+                channel.line("inconsistency in the number of tasks per host:")
+                channel.line(f" -- from the MPI runtime: {shell.tasks} {shLbl} per host")
+                channel.line(f" -- from the job specification: {self.tasks} {myLbl} per host")
+                channel.log(f" -- setting the number of tasks per host to {shell.tasks}")
+                # and adjust the value
+                self.tasks = shell.tasks
 
         # get the host info
         host = self.pyre_executive.host

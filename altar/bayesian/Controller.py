@@ -19,6 +19,14 @@ class Controller(altar.protocol, family="altar.controllers"):
     """
 
 
+    # required user configurable state
+    monitor = altar.simulations.monitor()
+    monitor.doc = "the handler of simulation notifications"
+
+    archiver = altar.simulations.archiver()
+    archiver.doc = "the archiver of simulation state"
+
+
     # required behavior
     @altar.provides
     def posterior(self, model):

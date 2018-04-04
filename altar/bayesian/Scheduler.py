@@ -11,7 +11,6 @@
 # get the package
 import altar
 
-
 # the scheduler protocol
 class Scheduler(altar.protocol, family="altar.schedulers"):
     """
@@ -49,7 +48,6 @@ class Scheduler(altar.protocol, family="altar.schedulers"):
         Rebuild the sample and its statistics sorted by the likelihood of the parameter values
         """
 
-
     # framework hooks
     @classmethod
     def pyre_default(cls, **kwds):
@@ -60,6 +58,5 @@ class Scheduler(altar.protocol, family="altar.schedulers"):
         from .COV import COV as default
         # and return it
         return default
-
 
 # end of file
