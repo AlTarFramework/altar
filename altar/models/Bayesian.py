@@ -35,6 +35,8 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         """
         # initialize my parts
         self.initialize(application=application)
+        self.info.log(f"model: {self}")
+        return 0
         # ask my controller to help me sample my posterior distribution
         return self.controller.posterior(model=self)
 

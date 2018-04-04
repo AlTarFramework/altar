@@ -13,6 +13,8 @@
 import altar
 # the protocol
 from .Model import Model as model
+# the base class
+from .Bayesian import Bayesian as bayesian
 
 
 # implementations

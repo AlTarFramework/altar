@@ -30,12 +30,12 @@ class Application(altar.application, family="altar.shells.application"):
         """
         The main entry point
         """
-        # grab the job parameters
-        job = self.job
-        # initialize it
-        job.initialize(application=self)
+        # initialize the job parameters
+        self.job.initialize(application=self)
+        # and the model
+        self.model.initialize(application=self)
         # sample the posterior distribution
-        return job.model.posterior(application=self)
+        return self.model.posterior(application=self)
 
 
     # pyre framework hooks

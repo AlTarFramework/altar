@@ -22,9 +22,11 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     from .Action import Action as pyre_action
 
     # user configurable state
-    # user configurable state
     job = altar.simulations.run()
     job.doc = "the job input parameters"
+
+    model = altar.models.model()
+    model.doc = "the AlTar model to sample"
 
 
     # protocol obligations
@@ -33,10 +35,10 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
         """
         The main entry point
         """
-        # grab the job parameters
-        job = self.job
-        # initialize it
-        job.initialize(app=self)
+        # initialize the job parameters
+        self.job.initialize(application=self)
+        # and the model
+        self.model.initialize(application=self)
         # chain up
         return super().main(*args, **kwds)
 

@@ -40,8 +40,13 @@ class Run(altar.protocol, family="altar.simulations.runs"):
     tolerance = altar.properties.float(default=1.0e-3)
     tolerance.doc = "convergence tolerance for β->1.0"
 
-    model = altar.models.model()
-    model.doc = "the AlTar model to sample"
+
+    # required behavior
+    @altar.provides
+    def initialize(self, application):
+        """
+        Initialize the run components with context from {application}
+        """
 
 
     # framework hooks
