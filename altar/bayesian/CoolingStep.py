@@ -63,7 +63,7 @@ class CoolingStep:
         # initialize it
         model.sample(step=step)
         # compute the likelihoods
-        model.likelihoods(step)
+        model.likelihoods(step=step)
 
         # return the initialized state
         return step

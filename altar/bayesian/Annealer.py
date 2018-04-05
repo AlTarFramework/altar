@@ -51,7 +51,7 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         # initialize my parts
         self.rng.initialize()
         self.sampler.initialize(controller=self, model=model)
-        self.scheduler.initialize(model=model)
+        self.scheduler.initialize(controller=self, model=model)
         self.monitor.initialize(model=model)
         self.archiver.initialize(model=model)
 
