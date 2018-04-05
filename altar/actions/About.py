@@ -69,6 +69,17 @@ class About(altar.panel(), family='altar.actions.about'):
         return
 
 
+    @altar.export(tip="print the build timestamp")
+    def when(self, plexus, **kwds):
+        """
+        Print the build timestamp
+        """
+        # show me
+        print(altar.meta.date)
+        # all done
+        return
+
+
     @altar.export(tip="the application configuration directory")
     def etc(self, plexus, **kwds):
         """
