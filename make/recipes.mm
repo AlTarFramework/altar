@@ -9,6 +9,6 @@ tidy:
 	find . -name \*~ -delete
 
 clean: tidy
-	$(rm.force-recurse) $(dest)
+	$(rm.force-recurse) $(prefix)
 
 # end of file

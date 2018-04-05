@@ -5,9 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
-$(dest):
-	${call log.action,mkdir,$(dest)}
-	$(mkdirp) $(dest)
+$(prefix):
+	${call log.action,mkdir,$(prefix)}
+	$(mkdirp) $(prefix)
 
 
 # end of file

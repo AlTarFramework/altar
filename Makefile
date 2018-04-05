@@ -13,7 +13,9 @@ project := altar
 # the source directory
 src := .
 # the destination directory
-dest := build
+prefix := build
+# the models
+models := ${wildcard models/*}
 
 # metadata
 altar.major := 2
@@ -23,7 +25,14 @@ now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 
 # recipes
-all: python.pkg
+all: python.pkg $(models)
+
+# recipes for building the models
+$(models): python.pkg $(prefix)
+	${call log.action,recurse,$@}
+	$(MAKE) -C $@ -I ${realpath .} prefix=${realpath $(prefix)}
+
+.PHONY: $(models)
 
 # get the master makefile
 include make/master.mm

@@ -17,6 +17,7 @@ src.lib ?= lib
 src.ext ?= ext
 src.bin ?= bin
 # destination layout
+dest ?= $(prefix)
 dest.py ?= $(dest)/packages
 dest.lib ?= $(dest)/lib
 dest.ext ?= $(dest.py)/$(project)/ext
@@ -87,6 +88,7 @@ $(python.prod.meta): $(python.src.meta) | ${dir $(python.prod.meta)}
 $(python.src.meta): ${wildcard $(python.src.py)/meta}
 	${call log.action,sed,$<}
 	$(sed) \
+          -e "s:PROJECT:$(project):g" \
           -e "s:MAJOR:$($(project).major):g" \
           -e "s:MINOR:$($(project).minor):g" \
           -e "s:REVISION:$($(project).revision):g" \
