@@ -7,62 +7,25 @@
 # all rights reserved
 #
 
-# get the master makefile
-include make/master.mm
+# project
+project := altar
+
+# the source directory
+src := .
+# the destination directory
+dest := build
 
 # metadata
 altar.major := 2
 altar.minor := 0
-altar.revision := ${strip ${shell $(bzr.revno) || echo 0}}
-now.year := ${strip ${shell $(date.year)}}
-now.date := ${strip ${shell $(date.stamp)}}
-
-# compilers
-c ?= gcc
-c++ ?= g++
-python ?= python3
-cython ?= cython -3
-
-# directories
-blddir = build
-# c++
-c++.src.root := lib
-
-# sources
-c++.sources := ${shell find $(c++.src.root) -name \*.cc}
-c++.headers := ${shell find $(c++.src.root) -name \*.h -name \*.icc}
-
-# python packages
-include make/python.mm
+altar.revision = ${strip ${shell $(bzr.revno) || echo 0}}
+now.year = ${strip ${shell $(date.year)}}
+now.date = ${strip ${shell $(date.stamp)}}
 
 # recipes
 all: python.pkg
 
-tidy:
-	find . -name \*~ -delete
-
-clean: tidy
-	$(rm.force-recurse) $(blddir)
-
-# general
-$(blddir):
-	${call log.action,mkdir,$(blddir)}
-	$(mkdirp) $(blddir)
-
-# info and makefile debugging
-log.c++.sources:
-	echo $(c++.sources)
-
-log.c++.headers:
-	echo $(c++.headers)
-
-log.c++.objects:
-	echo $(c++.objects)
-
-log.python.sources:
-	echo $(python.sources)
-
-log.python.pyc:
-	echo $(python.pkg.pyc)
+# get the master makefile
+include make/master.mm
 
 # end of file
