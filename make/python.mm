@@ -87,9 +87,9 @@ $(python.prod.meta): $(python.src.meta) | ${dir $(python.prod.meta)}
 $(python.src.meta): ${wildcard $(python.src.py)/meta}
 	${call log.action,sed,$<}
 	$(sed) \
-          -e "s:MAJOR:$(altar.major):g" \
-          -e "s:MINOR:$(altar.minor):g" \
-          -e "s:REVISION:$(altar.revision):g" \
+          -e "s:MAJOR:$($(project).major):g" \
+          -e "s:MINOR:$($(project).minor):g" \
+          -e "s:REVISION:$($(project).revision):g" \
           -e "s|YEAR|$(now.year)|g" \
           -e "s|TODAY|$(now.date)|g" \
           $< > $<.py
