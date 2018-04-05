@@ -69,7 +69,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # walk the chains
         statistics = self.walkChains(model=annealer.model, step=step)
         # all done
-        return
+        return statistics
 
 
     @altar.provides
@@ -77,6 +77,8 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         """
         Update my statistics based on the results of walking my Markov chains
         """
+        # update the scaling of the parameter covariance matrix
+        self.adjustCovarianceScaling(*statistics)
         # all done
         return
 
@@ -155,7 +157,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # build a vector to hold the difference of the two posterior likelihoods
             diff = cpost.clone()
             # subtract the previous posterior
-            diff -= post
+            diff -= posterior
             # randomize the Metropolis acceptance vector
             dice.random(self.uniform)
 
@@ -184,7 +186,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
                 # and its likelihoods
                 prior[sample] = cprior[sample]
                 data[sample] = cdata[sample]
-                post[sample] = cpost[sample]
+                posterior[sample] = cpost[sample]
 
         # all done
         return accepted, rejected, unlikely
@@ -216,7 +218,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         return δ
 
 
-    def adjustCovarianceScaling(self, accepted, rejected):
+    def adjustCovarianceScaling(self, accepted, rejected, unlikely):
         """
         Compute a new value for the covariance sacling factor based on the acceptance/rejection
         ratio
@@ -225,7 +227,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         aw = self.acceptanceWeight
         rw = self.rejectionWeight
         # compute the acceptance ratio
-        acceptance = accepted / (accepted + rejected)
+        acceptance = accepted / (accepted + rejected + unlikely)
         # the fudge factor
         kc = (aw*acceptance + rw)/(aw+rw)
         # don't let it get too small
