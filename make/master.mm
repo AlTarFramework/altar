@@ -7,8 +7,16 @@
 
 # defaults
 include make/defaults/defaults.mm
+# build diretory layout
+include make/dest.mm
+# stadard targets
+include make/recipes.mm
+# c++
+include make/c++.mm
+# python packages
+include make/python.mm
 
-# show me the dfault goal
+# show me the default goal
 default.info:
 	$(log) default goal: ${.DEFAULT_GOAL}
 

@@ -7,47 +7,84 @@
 # all rights reserved
 #
 
-# compilers
+# compiler
 python ?= python3
 
-# python
-python.bin.root := bin
-python.src.root := altar
+# default values for user choices
+# source layout
+src.py ?= $(project)
+src.lib ?= lib
+src.ext ?= ext
+src.bin ?= bin
+# destination layout
+dest.py ?= $(dest)/packages
+dest.lib ?= $(dest)/lib
+dest.ext ?= $(dest.py)/$(project)/ext
+dest.bin ?= $(dest)/bin
+
+# the layout of the source directory
+python.src.py := $(src.py)
+python.src.lib := $(src.lib)
+python.src.ext := $(src.ext)
+python.src.bin := $(src.bin)
+
+# the layout of the destination directory
+python.dest.py := $(dest.py)
+python.dest.lib := $(dest.lib)
+python.dest.ext := $(dest.py)/$(project)/ext
+python.dest.bin := $(dest.bin)
 
 # sources
-python.sources := ${shell find $(python.src.root) -name \*.py}
-python.scripts := ${shell find $(python.bin.root) -type f}
-
+# compute the full list of python sources
+python.sources := ${shell find $(python.src.py) -name \*.py}
+# the full list of python drivers
+python.drivers := ${subst bin/,,${wildcard $(python.src.bin)/*}}
 # products
-python.pkg.root := $(blddir)/packages
-python.pkg.bin := $(blddir)/bin
-python.pkg.stems := ${basename $(python.sources)}
-python.pkg.altar.meta := $(python.pkg.root)/altar/meta.pyc
-python.pkg.pyc := $(python.pkg.stems:%=$(python.pkg.root)/%.pyc)
-python.pkg.dirs := ${sort ${dir $(python.pkg.pyc)}}
-python.pkg.scripts := $(python.scripts:%=$(blddir)/%)
+# the stems of the python sources; used to build the target {.pyc} filenames
+python.prod.stems := ${basename $(python.sources)}
+# the target {.pyc}
+python.prod.pyc := $(python.prod.stems:%=$(python.dest.py)/%.pyc)
+# the directory layout in the destination
+python.prod.dirs := ${sort ${dir $(python.prod.pyc)}}
+# the list of drivers
+python.prod.drivers := $(python.drivers:%=$(python.dest.bin)/%)
 
-# the overall python recipe
-python.pkg: $(python.pkg.pyc) $(python.pkg.altar.meta) $(python.pkg.scripts)
+# the package meta-data
+python.src.meta.raw := ${wildcard $(python.src.py)/meta}
+python.src.meta = ${if $(python.src.meta.raw),$(python.src.meta.raw).py,}
+python.prod.meta = ${if $(python.src.meta.raw),$(python.dest.py)/$(python.src.meta.raw).pyc,}
 
-# the scripts
-$(python.pkg.scripts): $(blddir)/% : % | $(python.pkg.bin)
+
+# the main recipe
+python.pkg: $(python.prod.pyc) $(python.prod.meta) $(python.prod.drivers)
+
+
+# the directories
+$(python.prod.dirs) $(python.dest.bin): | $(dest)
+	${foreach dir,$(@),${call log.action,mkdir,$(dir)};}
+	$(mkdirp) $(@)
+
+
+# the drivers
+$(python.prod.drivers): $(python.dest.bin)/% : $(python.src.bin)/% | $(python.dest.bin)
 	${call log.action,cp,$<}
-	$(cp) $< $(python.pkg.bin)
+	$(cp) $< $(python.dest.bin)
 
-# python
-$(python.pkg.pyc): $(python.pkg.root)/%.pyc: %.py | $(python.pkg.dirs)
+
+# pyc files
+$(python.prod.pyc): $(python.dest.py)/%.pyc: %.py | $(python.prod.dirs)
 	${call log.action,python,$<}
 	$(python) -m compileall -b -q ${abspath $<}
 	$(mv) $(<:.py=.pyc) $@
 
-$(python.pkg.altar.meta): $(python.src.root)/meta.py
+# package meta-data
+$(python.prod.meta): $(python.src.meta) | ${dir $(python.prod.meta)}
 	${call log.action,python,$<}
 	$(python) -m compileall -b -q ${abspath $<}
 	$(mv) $(<:.py=.pyc) $@
 	$(rm) $<
 
-$(python.src.root)/meta.py: $(python.src.root)/meta
+$(python.src.meta): ${wildcard $(python.src.py)/meta}
 	${call log.action,sed,$<}
 	$(sed) \
           -e "s:MAJOR:$(altar.major):g" \
@@ -57,23 +94,47 @@ $(python.src.root)/meta.py: $(python.src.root)/meta
           -e "s|TODAY|$(now.date)|g" \
           $< > $<.py
 
-$(python.pkg.dirs) $(python.pkg.bin): | $(blddir)
-	${foreach dir,$(@),${call log.action,mkdir,$(dir)};}
-	$(mkdirp) $(@)
+# debug targets
+python.src:
+	${call log.sec,"python source layout",}
+	${call log.var,"sources",$(python.src.py)}
+	${call log.var,"lib",$(python.src.lib)}
+	${call log.var,"extension",$(python.src.ext)}
+	${call log.var,"bin",$(python.src.bin)}
 
-# debug target
+
+python.dest:
+	${call log.sec,"python destination layout",}
+	${call log.var,"packages",$(python.dest.py)}
+	${call log.var,"lib",$(python.dest.lib)}
+	${call log.var,"extension",$(python.dest.ext)}
+	${call log.var,"bin",$(python.dest.bin)}
+
+
 python.sources:
 	${call log.sec,"python sources","in 'packages'"}
 	${foreach src,${sort $(python.sources)},${call log.info,$(log.indent)$(src)};}
 
+
 python.directories:
-	${call log.sec,"python product directories","in '$(python.pkg.root)'"}
-	${foreach dir,${sort $(python.pkg.dirs)},${call log.info,$(log.indent)$(dir)};}
+	${call log.sec,"python product directories","in '$(python.dest.py)'"}
+	${foreach dir,${sort $(python.prod.dirs)},${call log.info,$(log.indent)$(dir)};}
 
 python.pyc:
 	${call log.sec,"python byte compiled files","in '$(python.pkg.root)'"}
 	${foreach pyc,\
             ${sort $(python.pkg.pyc) $(python.pkg.altar.meta)}, \
             ${call log.info,$(log.indent)$(pyc)};}
+
+log.python.sources:
+	echo $(python.sources)
+
+log.python.pyc:
+	echo $(python.prod.pyc)
+
+log.python.drivers:
+	echo $(python.drivers)
+	echo $(python.prod.drivers)
+
 
 # end of file
