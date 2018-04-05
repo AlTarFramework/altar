@@ -79,14 +79,8 @@ $(python.prod.pyc): $(python.dest.py)/%.pyc: %.py | $(python.prod.dirs)
 	$(mv) $(<:.py=.pyc) $@
 
 # package meta-data
-$(python.prod.meta): $(python.src.meta) | ${dir $(python.prod.meta)}
-	${call log.action,python,$<}
-	$(python) -m compileall -b -q ${abspath $<}
-	$(mv) $(<:.py=.pyc) $@
-	$(rm) $<
-
-$(python.src.meta): ${wildcard $(python.src.py)/meta}
-	${call log.action,sed,$<}
+$(python.prod.meta): $(python.src.meta.raw) | ${dir $(python.prod.meta)}
+	${call log.action,sed,$(python.src.meta.raw)}
 	$(sed) \
           -e "s:PROJECT:$(project):g" \
           -e "s:MAJOR:$($(project).major):g" \
@@ -95,6 +89,10 @@ $(python.src.meta): ${wildcard $(python.src.py)/meta}
           -e "s|YEAR|$(now.year)|g" \
           -e "s|TODAY|$(now.date)|g" \
           $< > $<.py
+	${call log.action,python,$(python.src.meta)}
+	$(python) -m compileall -b -q ${abspath $(python.src.meta)}
+	$(mv) $(python.src.meta:.py=.pyc) $@
+	$(rm) $(python.src.meta)
 
 # debug targets
 python.src:
