@@ -23,6 +23,9 @@ class Application(altar.application, family="altar.shells.application"):
     job = altar.simulations.run()
     job.doc = "the job input parameters"
 
+    model = altar.models.model()
+    model.doc = "the AlTar model to sample"
+
 
     # protocol obligations
     @altar.export

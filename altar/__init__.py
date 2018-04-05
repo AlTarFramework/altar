@@ -19,7 +19,7 @@ import os
 # pull the framework parts
 from pyre import (
     # protocols, components and traits
-    schemata, protocol, component, foundry, properties, constraints, application,
+    schemata, protocol, component, foundry, properties, constraints,
     # decorators
     export, provides,
     # the runtime manager
