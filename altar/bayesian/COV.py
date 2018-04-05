@@ -31,12 +31,34 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         COV(w_m) := <w_m> / \sqrt{<(w_m-<w_m>)^2>}
     """
 
+    # user configurable state
+    target = altar.properties.float(default=1.0)
+    target.doc = 'the target value for COV'
+
+    tolerance = altar.properties.float(default=.01)
+    tolerance.doc = 'the fractional tolerance for achieving the {target} COV value'
+
+    maxiter = altar.properties.int(default=10**3)
+    maxiter.doc = 'the maximum number of iterations while looking for a δβ'
+
+
+    # public data
+    w = None # the vector of re-sampling weights
+    cov = 0.0 # the actual value for COV we were able to attain
+
+
     # protocol obligations
     @altar.export
-    def initialize(self, model):
+    def initialize(self, controller, model):
         """
-        Initialize me and my parts given a {model}
+        Initialize me and my parts given a {controller} and a {model}
         """
+        # get the rng wrapper
+        rng = controller.rng.rng
+        # instantiate my COV calculator; {beta.cov} needs the {rng} capsule
+        self.minimizer = beta.cov(rng.rng, self.maxiter, self.tolerance, self.target)
+        # set up the distribution for building the sample multiplicities
+        self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
         # all done
         return self
 
@@ -75,6 +97,11 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # all done
         return self
+
+
+    # private data
+    uniform = None
+    minimizer = None
 
 
 # end of file
