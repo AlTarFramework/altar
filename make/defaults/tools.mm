@@ -43,9 +43,9 @@ chown.flags.recurse = -R
 
 # copy
 cp = cp
-cp.f = $(cp) $(cp.flags.force)
-cp.r = $(cp) $(cp.flags.recurse)
-cp.fr = $(cp) $(cp.flags.force-recurse)
+cp.force = $(cp) $(cp.flags.force)
+cp.recurse = $(cp) $(cp.flags.recurse)
+cp.force-recurse = $(cp) $(cp.flags.force-recurse)
 cp.flags.force = -f
 cp.flags.recurse = -r
 cp.flags.force-recurse = -fr
