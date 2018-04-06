@@ -2,8 +2,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2010-2018 california institute of technology
 # (c) 2013-2018 parasim inc
+# (c) 2010-2018 california institute of technology
 # all rights reserved
 #
 
@@ -25,10 +25,12 @@ now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 
 # recipes
-all: python.pkg $(models)
+all: altar $(models)
+
+altar: project.package project.libraries
 
 # recipes for building the models
-$(models): python.pkg $(prefix)
+$(models): project.package $(prefix)
 	${call log.action,recurse,$@}
 	$(MAKE) -C $@ -I ${realpath .} prefix=${realpath $(prefix)}
 
