@@ -2,31 +2,16 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2010-2018 california institute of technology
 # (c) 2013-2018 parasim inc
+# (c) 2010-2018 california institute of technology
 # all rights reserved
 #
 
 # compiler
 python ?= python3
 
-# default values for user choices
-# source layout
-src.py ?= $(project)
-src.lib ?= lib
-src.ext ?= ext
-src.bin ?= bin
-# destination layout
-dest ?= $(prefix)
-dest.py ?= $(dest)/packages
-dest.lib ?= $(dest)/lib
-dest.ext ?= $(dest.py)/$(project)/ext
-dest.bin ?= $(dest)/bin
-
 # the layout of the source directory
 python.src.py := $(src.py)
-python.src.lib := $(src.lib)
-python.src.ext := $(src.ext)
 python.src.bin := $(src.bin)
 
 # the layout of the destination directory
@@ -57,11 +42,11 @@ python.prod.meta = ${if $(python.src.meta.raw),$(python.dest.py)/$(python.src.me
 
 
 # the main recipe
-python.pkg: $(python.prod.pyc) $(python.prod.meta) $(python.prod.drivers)
+project.package: $(python.prod.pyc) $(python.prod.meta) $(python.prod.drivers)
 
 
 # the directories
-$(python.prod.dirs) $(python.dest.bin): | $(dest)
+$(python.prod.dirs) : | $(dest) $(python.dest.bin)
 	${foreach dir,$(@),${call log.action,mkdir,$(dir)};}
 	$(mkdirp) $(@)
 
@@ -98,8 +83,6 @@ $(python.prod.meta): $(python.src.meta.raw) | ${dir $(python.prod.meta)}
 python.src:
 	${call log.sec,"python source layout",}
 	${call log.var,"sources",$(python.src.py)}
-	${call log.var,"lib",$(python.src.lib)}
-	${call log.var,"extension",$(python.src.ext)}
 	${call log.var,"bin",$(python.src.bin)}
 
 

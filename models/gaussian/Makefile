@@ -28,7 +28,9 @@ now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 
 # recipes
-all: python.pkg
+all: gaussian
+
+gaussian: project.package
 
 # get the master makefile
 include make/master.mm
