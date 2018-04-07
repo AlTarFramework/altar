@@ -16,7 +16,7 @@ src := .
 prefix := build
 
 # the altar libraries
-altar.libraries := libaltar
+altar.libraries :=
 
 # the models
 models := ${wildcard models/*}
@@ -34,7 +34,7 @@ now.date = ${strip ${shell $(date.stamp)}}
 all: altar $(priors) $(models)
 
 # make the altar python package and its libraries
-altar: project.package project.libraries
+altar: altar.package altar.libraries
 
 # recipes for building priors and models
 $(priors) $(models) : altar $(prefix)

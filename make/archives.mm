@@ -116,7 +116,7 @@ ${foreach \
     ${call library.dirs,$(library)} \
 }
 
-# make a target that bulds them all
-project.libraries: $($(project).libraries)
+# make a target that builds them all
+$(project).libraries: $($(project).libraries)
 
 # end of file
