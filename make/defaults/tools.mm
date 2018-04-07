@@ -16,7 +16,7 @@ ar.update = $(ar) $(ar.flags.update)
 ar.flags.create = rc
 ar.flags.extract = x
 ar.flags.remove = d
-ar.flags.update = ru
+ar.flags.update = cru
 
 # bzr
 bzr = bzr
