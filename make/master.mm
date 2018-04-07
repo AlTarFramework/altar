@@ -9,12 +9,12 @@
 
 # defaults
 include make/defaults/defaults.mm
-# the directory layout
-include make/layout.mm
-# recipes for building the destination directories
+# variables and recipes for building the destination directories
 include make/dest.mm
 # stadard targets
 include make/recipes.mm
+# c++ compilations
+include make/c++.mm
 # python packages
 include make/python.mm
 # archive

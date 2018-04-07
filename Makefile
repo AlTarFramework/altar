@@ -14,8 +14,14 @@ project := altar
 src := .
 # the destination directory
 prefix := build
+
+# the altar libraries
+altar.libraries := libaltar
+
 # the models
 models := ${wildcard models/*}
+# the priors
+priors := ${wildcard priors/*}
 
 # metadata
 altar.major := 2
@@ -25,16 +31,18 @@ now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 
 # recipes
-all: altar $(models)
+all: altar $(priors) $(models)
 
+# make the altar python package and its libraries
 altar: project.package project.libraries
 
-# recipes for building the models
-$(models): project.package $(prefix)
+# recipes for building priors and models
+$(priors) $(models) : altar $(prefix)
 	${call log.action,recurse,$@}
 	$(MAKE) -C $@ -I ${realpath .} prefix=${realpath $(prefix)}
 
-.PHONY: $(models)
+# mark targets that are directories as phony
+.PHONY: altar $(priors) $(models)
 
 # get the master makefile
 include make/master.mm
