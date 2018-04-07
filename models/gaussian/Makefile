@@ -34,7 +34,7 @@ now.date = ${strip ${shell $(date.stamp)}}
 # recipes
 all: gaussian
 
-gaussian: project.package project.libraries
+gaussian: gaussian.package gaussian.libraries
 
 # get the master makefile
 include make/master.mm
