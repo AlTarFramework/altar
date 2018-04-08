@@ -41,6 +41,11 @@ log.action = \
     $(palette.blue)"  [$(1)]"$(palette.normal) \
     $(2)
 
+log.action.attn = \
+    $(log) \
+    $(palette.purple)"  [$(1)]"$(palette.normal) \
+    $(2)
+
 # terminals that support the ansi color commands
 terminals.ansi = ansi vt100 vt102 xterm xterm-color xterm-256color
 
