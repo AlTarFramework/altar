@@ -18,6 +18,11 @@ prefix := build
 # the altar libraries
 altar.libraries :=
 
+# the altar extensions
+altar.extensions := altarmodule
+# external dependencies
+altarmodule.packages := gsl python
+
 # the models
 models := ${wildcard models/*}
 # the priors
@@ -37,8 +42,8 @@ all: altar $(priors) $(models)
 altar: altar.package altar.libraries
 
 # recipes for building priors and models
-$(priors) $(models) : altar $(prefix)
-	${call log.action,recurse,$@}
+$(priors) $(models) : altar
+	${call log.action.attn,recurse,$@}
 	$(MAKE) -C $@ -I ${realpath .} prefix=${realpath $(prefix)}
 
 # mark targets that are directories as phony

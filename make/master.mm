@@ -11,17 +11,17 @@
 include make/defaults/defaults.mm
 # variables and recipes for building the destination directories
 include make/dest.mm
-# stadard targets
-include make/recipes.mm
+# external packages
+include make/packages.mm
 # c++ compilations
 include make/c++.mm
 # python packages
 include make/python.mm
-# archive
+# archives
 include make/archives.mm
-
-# show me the default goal
-default.info:
-	$(log) default goal: ${.DEFAULT_GOAL}
+# extensions
+include make/extensions.mm
+# stadard targets
+include make/recipes.mm
 
 # end of file

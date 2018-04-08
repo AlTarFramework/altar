@@ -15,19 +15,20 @@ ext.dll := .so
 # there are three potential libraries to build:
 # the base library, a library with the cuda code, and a library with mpi code
 
-library.init = \
+# the name and layout of the library
+library.layout = \
   ${eval $(1).name := $(1)} \
-  ${eval $(1).src := $(src.lib)/$($(1).name)} \
-  ${eval $(1).lib := $(dest.lib)} \
-  ${eval $(1).inc := $(dest.inc)} \
-  ${eval $(1).staging := $(dest.staging)/$($(1).name)}
+  ${eval $(1).src ?= $(src.lib)/$($(1).name)} \
+  ${eval $(1).lib ?= $(dest.lib)} \
+  ${eval $(1).inc ?= $(dest.inc)} \
+  ${eval $(1).staging ?= $(dest.staging)/$($(1).name)}
 
 # discover the library assets
 library.assets = \
  \
   ${eval $(1).sources ?= ${shell find $($(1).src) -name \*.cc}} \
   ${eval $(1).headers ?= ${shell find $($(1).src) -name \*.h -or -name \*.icc}} \
-  ${eval $(1).archive ?= $($(1).lib)/$($(1).name)$(ext.lib)}
+  ${eval $(1).archive ?= $($(1).lib)/$($(1).name)$(ext.lib)} \
 
 # publish the library public headers
 library.api = \
@@ -105,15 +106,20 @@ library.dirs = \
       $(mkdirp) $$@ \
   }
 
+# the constructor
+library.init = \
+  ${call library.layout,$(1)} \
+  ${call library.assets,$(1)} \
+  ${call library.api,$(1)} \
+  ${call library.archive,$(1)} \
+  ${call library.dirs,$(1)} \
+
+
 # instantiate all the project libraries
 ${foreach \
-    library,\
-    $($(project).libraries), \
-    ${call library.init,$(library)} \
-    ${call library.assets,$(library)} \
-    ${call library.api,$(library)} \
-    ${call library.archive,$(library)} \
-    ${call library.dirs,$(library)} \
+  library,\
+  $($(project).libraries), \
+  ${call library.init,$(library)} \
 }
 
 # make a target that builds them all
