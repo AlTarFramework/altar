@@ -30,6 +30,6 @@ python.libpath ?= $(python.dir)/lib
 python.libraries ?= $(python.interpreter)
 
 # now include some platform specific settings
-include packages/python/$(platform).mm
+# include packages/python/$(platform).mm
 
 # end of file
