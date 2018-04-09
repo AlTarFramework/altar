@@ -23,7 +23,7 @@ libaltar.packages := gsl pyre
 # the altar extensions
 altar.extensions := altarmodule
 # external dependencies
-altarmodule.packages := libaltar python
+altarmodule.packages := libaltar gsl pyre python
 
 # the models
 models := ${wildcard models/*}
