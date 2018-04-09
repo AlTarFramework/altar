@@ -30,6 +30,12 @@ library.assets = \
   ${eval $(1).headers ?= ${shell find $($(1).src) -name \*.h -or -name \*.icc}} \
   ${eval $(1).archive ?= $($(1).lib)/$($(1).name)$(ext.lib)} \
 
+# accommodate the external dependencies
+library.packages = \
+  ${eval $(1).packages ?=} \
+  ${eval include $($(1).packages:%=make/packages/%/config.mm)} \
+  ${eval $(1).packages: $($(1).packages:%=%.config) }
+
 # publish the library public headers
 library.api = \
  \
@@ -106,13 +112,26 @@ library.dirs = \
       $(mkdirp) $$@ \
   }
 
+# debugging targets
+library.log = \
+  ${eval \
+    $(1).c++ : $(1).packages ; \
+      ${call log.sec,$(1),compiling} ; \
+      ${call log.var,compiler,$(c++)}; \
+      ${call log.var,packages,$($(1).packages)}; \
+      ${call log.var,compile,${call c++.compile.options,$($(1).packages)}}; \
+      ${call log.var,link,${call c++.link.options,$($(1).packages)}}; \
+  }
+
 # the constructor
 library.init = \
   ${call library.layout,$(1)} \
+  ${call library.packages,$(1)} \
   ${call library.assets,$(1)} \
   ${call library.api,$(1)} \
   ${call library.archive,$(1)} \
   ${call library.dirs,$(1)} \
+  ${call library.log,$(1)} \
 
 
 # instantiate all the project libraries

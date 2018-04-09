@@ -25,7 +25,7 @@ c++.compile = \
   $($(c++).compile.only) $(3) \
   $($(c++).compile.output) $(2) \
   $($(c++).compile.generate-dependencies) \
-  ${call c++.compile.options,$($(1).externals)} \
+  ${call c++.compile.options,$($(1).packages)} \
 
 
 # build the complete link command line
@@ -42,14 +42,14 @@ c++.link = \
 # usage: c++.compile.options {dependencies}
 c++.compile.options = \
   ${call packages.compile.options,$(1)} \
-  ${call mm.compile.options,$(1)}
+  ${call mm.compile.options}
 
 
 # assemble the contrinutios to the linker command line
 # usage: c++.link.options {dependencies}
 c++.link.options = \
-  ${call packages.link.options,c++,$(1)} \
-  ${call mm.link.options,$(1)}
+  ${call packages.link.options,$(1)} \
+  ${call mm.link.options}
 
 
 # end of file

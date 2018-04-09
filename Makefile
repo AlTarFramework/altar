@@ -39,7 +39,7 @@ now.date = ${strip ${shell $(date.stamp)}}
 all: altar $(priors) $(models)
 
 # make the altar python package and its libraries
-altar: altar.package altar.libraries
+altar: altar.package altar.libraries altar.extensions
 
 # recipes for building priors and models
 $(priors) $(models) : altar

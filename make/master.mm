@@ -11,6 +11,8 @@
 include make/defaults/defaults.mm
 # variables and recipes for building the destination directories
 include make/dest.mm
+# build system
+include make/mm.mm
 # external packages
 include make/packages.mm
 # c++ compilations
@@ -23,5 +25,7 @@ include make/archives.mm
 include make/extensions.mm
 # stadard targets
 include make/recipes.mm
+# pull it all together
+include make/project.mm
 
 # end of file

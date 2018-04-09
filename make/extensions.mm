@@ -22,16 +22,20 @@ extension.lib = \
   ${eval $($(1).library).sources := \
       ${shell find $($(1).src) -name \*.cc -and -not -name $(1:%module=%).cc}} \
   ${eval $($(1).library).headers :=} \
+  ${eval $($(1).library).packages := $($(1).packages)} \
  \
   ${call library.init,$($(1).library)} \
- \
-  ${eval $(1).archive: $($(1).library).archive}
 
 # accommodate the external dependencies
 extension.packages = \
   ${eval $(1).packages ?=} \
   ${eval include $($(1).packages:%=make/packages/%/config.mm)} \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
+
+extension.targets = \
+  ${eval $(1): $($(project).libraries) $(1).archive | $(1).packages} \
+ \
+  ${eval $(1).archive: $($(1).library).archive} \
 
 # debugging targets
 extension.log = \
@@ -41,6 +45,7 @@ extension.log = \
       ${call log.var,compiler,$(c++)}; \
       ${call log.var,packages,$($(1).packages)}; \
       ${call log.var,compile,${call c++.compile.options,$($(1).packages)}}; \
+      ${call log.var,link,${call c++.link.options,$($(1).packages)}}; \
   }
 
 # the constructor
@@ -48,6 +53,7 @@ extension.init = \
   ${call extension.layout,$(1)} \
   ${call extension.packages,$(1)} \
   ${call extension.lib,$(1)} \
+  ${call extension.targets,$(1)} \
   ${call extension.log,$(1)} \
 
 # instantiate the project extensions
@@ -56,5 +62,8 @@ ${foreach \
   $($(project).extensions), \
   ${call extension.init,$(extension)} \
 }
+
+# make a target that builds them all
+$(project).extensions: $($(project).extensions)
 
 # end of file
