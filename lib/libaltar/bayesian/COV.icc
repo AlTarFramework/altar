@@ -1,0 +1,41 @@
+// -*- C++ -*-
+//
+// michael a.g. aïvázis
+// california institute of technology
+// (c) 2010-2013 all rights reserved
+//
+
+// code guard
+#if !defined(altar_bayesian_COV_icc)
+#error This file contains implementation details of the class altar::bayesian::COV
+#endif
+
+// accessors
+auto
+altar::bayesian::COV::
+cov() const
+{
+    return _cov;
+}
+
+
+auto
+altar::bayesian::COV::
+beta() const
+{
+    return _beta;
+}
+
+
+// meta-methods
+altar::bayesian::COV::
+COV(rng_t * rng, double tolerance, size_t maxIterations, double target) :
+    _betaMin(0), _betaMax(1),
+    _rng(rng),
+    _tolerance(tolerance), _maxIterations(maxIterations), _target(target),
+    _beta(0), _cov(0)
+{
+}
+
+
+// end of file

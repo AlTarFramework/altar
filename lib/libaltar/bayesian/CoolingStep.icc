@@ -1,0 +1,103 @@
+// -*- C++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+//
+// (c) 2013-2018 parasim inc
+// (c) 2010-2018 california institute of technology
+// all rights reserved
+//
+
+// code guard
+#if !defined(altar_bayesian_CoolingStep_icc)
+#error This file contains implementation details of the class {altar::bayesian::CoolingStep}
+#endif
+
+
+// interface
+// accessors
+auto
+altar::bayesian::CoolingStep::
+samples() const
+{
+    return _samples;
+}
+
+auto
+altar::bayesian::CoolingStep::
+parameters() const
+{
+    return _parameters;
+}
+
+auto
+altar::bayesian::CoolingStep::
+beta() const
+{
+    return _beta;
+}
+
+void
+altar::bayesian::CoolingStep::
+beta(double value)
+{
+    _beta = value;
+}
+
+auto
+altar::bayesian::CoolingStep::
+theta() const
+{
+    return _theta;
+}
+
+auto
+altar::bayesian::CoolingStep::
+prior() const
+{
+    return _prior;
+}
+
+auto
+altar::bayesian::CoolingStep::
+data() const
+{
+    return _data;
+}
+
+auto
+altar::bayesian::CoolingStep::
+posterior() const
+{
+    return _posterior;
+}
+
+auto
+altar::bayesian::CoolingStep::
+sigma() const
+{
+    return _sigma;
+}
+
+// meta-methods
+// constructor
+altar::bayesian::CoolingStep::
+CoolingStep(size_t samples, size_t parameters, double beta) :
+    _samples(samples),
+    _parameters(parameters),
+    _beta(beta),
+    _theta(gsl_matrix_alloc(samples, parameters)),
+    _prior(gsl_vector_alloc(samples)),
+    _data(gsl_vector_alloc(samples)),
+    _posterior(gsl_vector_alloc(samples)),
+    _sigma(gsl_matrix_alloc(parameters, parameters))
+{
+    // zero everything out
+    gsl_matrix_set_zero(_theta);
+    gsl_vector_set_zero(_prior);
+    gsl_vector_set_zero(_data);
+    gsl_vector_set_zero(_posterior);
+    gsl_matrix_set_zero(_sigma);
+}
+
+
+// end of file
