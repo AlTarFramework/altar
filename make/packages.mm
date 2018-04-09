@@ -8,6 +8,9 @@
 # the list of external dependencies of the project
 packages ?=
 
+# load the package configuration file
+include $(mm.home)/config.mm
+
 # a pattern for loading package configuration files
 %.config : make/packages/%/config.mm
 	${call show.action,include,$^}
@@ -68,7 +71,7 @@ packages.link.options = \
     ${foreach \
         package, \
         $(1), \
-        ${call package.link.options,$(1),$(package)} \
+        ${call package.link.options,$(package)} \
     }
 
 
