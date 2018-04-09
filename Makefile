@@ -16,12 +16,14 @@ src := .
 prefix := build
 
 # the altar libraries
-altar.libraries :=
+altar.libraries := libaltar
+# external dependencies
+libaltar.packages := gsl pyre
 
 # the altar extensions
 altar.extensions := altarmodule
 # external dependencies
-altarmodule.packages := gsl python
+altarmodule.packages := libaltar python
 
 # the models
 models := ${wildcard models/*}
@@ -38,7 +40,7 @@ now.date = ${strip ${shell $(date.stamp)}}
 # recipes
 all: altar $(priors) $(models)
 
-# make the altar python package and its libraries
+# make the altar python package, its libraries, and extensions
 altar: altar.package altar.libraries altar.extensions
 
 # recipes for building priors and models
