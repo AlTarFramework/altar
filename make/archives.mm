@@ -33,7 +33,7 @@ library.assets = \
 # accommodate the external dependencies
 library.packages = \
   ${eval $(1).packages ?=} \
-  ${eval include $($(1).packages:%=make/packages/%/config.mm)} \
+  ${eval include ${realpath $($(1).packages:%=make/packages/%/config.mm)}} \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
 
 # publish the library public headers
@@ -102,6 +102,15 @@ library.archive = \
     } \
   }
 
+# the library as a dependency
+library.package = \
+  ${eval $(1).flags ?=} \
+  ${eval $(1).defines ?=} \
+  ${eval $(1).incpath ?= $($(1).inc)} \
+  ${eval $(1).ldflags ?=} \
+  ${eval $(1).libpath ?= $($(1).lib)} \
+  ${eval $(1).libraries ?= -l$(1:lib%=%)} \
+
 # build all relevant directories
 library.dirs = \
  \
@@ -131,6 +140,7 @@ library.init = \
   ${call library.api,$(1)} \
   ${call library.archive,$(1)} \
   ${call library.dirs,$(1)} \
+  ${call library.package,$(1)} \
   ${call library.log,$(1)} \
 
 

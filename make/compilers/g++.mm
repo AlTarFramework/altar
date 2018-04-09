@@ -11,10 +11,10 @@ compiler.c++ := g++
 # prefices for specific categories
 g++.prefix.flags :=
 g++.prefix.defines := -D
-g++.prefix.incpath := -I
+g++.prefix.incpath := -I$(space)
 
 g++.prefix.ldflags :=
-g++.prefix.libpath := -L
+g++.prefix.libpath := -L$(space)
 g++.prefix.libraries := -l
 
 # compile time flags

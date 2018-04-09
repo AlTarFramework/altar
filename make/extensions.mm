@@ -33,7 +33,7 @@ extension.packages = \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
 
 extension.targets = \
-  ${eval $(1): $($(project).libraries) $(1).archive | $(1).packages} \
+  ${eval $(1): $($(project).libraries) $(1).archive} \
  \
   ${eval $(1).archive: $($(1).library).archive} \
 
@@ -51,7 +51,6 @@ extension.log = \
 # the constructor
 extension.init = \
   ${call extension.layout,$(1)} \
-  ${call extension.packages,$(1)} \
   ${call extension.lib,$(1)} \
   ${call extension.targets,$(1)} \
   ${call extension.log,$(1)} \
