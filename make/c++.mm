@@ -25,6 +25,7 @@ c++.compile = \
   $($(c++).compile.only) $(3) \
   $($(c++).compile.output) $(2) \
   $($(c++).compile.generate-dependencies) \
+  -fPIC \
   ${call c++.compile.options,$($(1).packages)} \
 
 
@@ -32,6 +33,14 @@ c++.compile = \
 # usage c++.link {executable} {source-file} {dependencies}
 c++.link = \
   $(c++) \
+  $(2) \
+  $($(c++).link.output) $(1) \
+  ${call c++.compile.options,$(3)} \
+  ${call c++.link.options,$(3)} \
+
+c++.so = \
+  $(c++) \
+  -shared \
   $(2) \
   $($(c++).link.output) $(1) \
   ${call c++.compile.options,$(3)} \
