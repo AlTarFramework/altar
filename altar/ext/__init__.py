@@ -8,7 +8,8 @@
 # all rights reserved
 #
 
-# pull the extension module
+# pull the extension module; this must exist, so let import errors bubble up
 from . import altar as libaltar
+
 
 # end of file
