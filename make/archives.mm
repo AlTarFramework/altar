@@ -142,7 +142,7 @@ library.init = \
   ${call library.dirs,$(1)} \
   ${call library.package,$(1)} \
   ${call library.log,$(1)} \
-
+  ${eval -include $($(1).objs:.o=.d)} \
 
 # instantiate all the project libraries
 ${foreach \
