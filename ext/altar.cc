@@ -48,7 +48,7 @@ namespace altar {
             // header
             PyModuleDef_HEAD_INIT,
             // the name of the module
-            "beta",
+            "altar",
             // the module documentation string
             __doc__,
             // size of the per-interpreter state of the module; -1 if this state is global
@@ -61,9 +61,9 @@ namespace altar {
 
 
 // initialization function for the module
-// *must* be called PyInit_beta
+// *must* be called PyInit_altar
 PyMODINIT_FUNC
-PyInit_beta()
+PyInit_altar()
 {
     // create the module
     PyObject * module = PyModule_Create(&altar::extensions::module_definition);
