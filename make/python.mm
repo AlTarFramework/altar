@@ -10,6 +10,9 @@
 # compiler
 python ?= python3
 
+# compute the module suffix
+python.module-suffix := ${shell $(python)-config --extension-suffix}
+
 # the layout of the source directory
 python.src.py := $(src.py)
 python.src.bin := $(src.bin)
