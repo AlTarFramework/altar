@@ -73,6 +73,9 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         """
         Fill {step.theta} with an initial random sample from my prior distribution.
         """
+        # i don't know what to do, so...
+        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
+
 
     @altar.export
     def priorLikelihood(self, step):
@@ -80,6 +83,8 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
+        # i don't know what to do, so...
+        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
 
 
     @altar.export
@@ -88,6 +93,9 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
+        # i don't know what to do, so...
+        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
+
 
     @altar.export
     def posteriorLikelihood(self, step):
@@ -95,6 +103,13 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Given the {step.prior} and {step.data} likelihoods, compute a generalized posterior using
         {step.beta} and deposit the result in {step.post}
         """
+        # prime the posterior
+        step.posterior.copy(step.prior)
+        # compute it; this expression reduces to Bayes' theorem for β->1
+        altar.blas.daxpy(step.beta, step.data, step.posterior)
+        # all done
+        return self
+
 
     @altar.export
     def likelihoods(self, step):
@@ -102,6 +117,15 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Convenience function that computes all three likelihoods at once given the current {step}
         of the problem
         """
+        # first the prior
+        self.priorLikelihood(step=step)
+        # now the likelihood of the prior given the data
+        self.dataLikelihood(step=step)
+        # finally, the posterior at this temperature
+        self.posteriorLikelihood(step=step)
+        # bundle them and return them
+        return self
+
 
     @altar.export
     def verify(self, step):

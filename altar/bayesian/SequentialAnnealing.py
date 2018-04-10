@@ -38,4 +38,24 @@ class SequentialAnnealing(AnnealingMethod):
         return self
 
 
+    def top(self, annealer):
+        """
+        Notification that we are at the beginning of an update
+        """
+        # ask my step to render itself
+        self.step.print(channel=annealer.info)
+        # all done
+        return self
+
+
+    def finish(self, annealer):
+        """
+        Notification that we are at the beginning of an update
+        """
+        # ask my step to render itself
+        self.step.print(channel=annealer.info)
+        # all done
+        return self
+
+
 # end of file
