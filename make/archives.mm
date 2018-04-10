@@ -109,7 +109,7 @@ library.package = \
   ${eval $(1).incpath ?= $($(1).inc)} \
   ${eval $(1).ldflags ?=} \
   ${eval $(1).libpath ?= $($(1).lib)} \
-  ${eval $(1).libraries ?= -l$(1:lib%=%)} \
+  ${eval $(1).libraries ?= $(1:lib%=%)} \
 
 # build all relevant directories
 library.dirs = \
