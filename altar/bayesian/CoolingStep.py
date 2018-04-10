@@ -75,11 +75,11 @@ class CoolingStep:
         Allocate storage for the parts of a cooling step
         """
         # allocate the initial sample set
-        theta = altar.matrix(shape=(samples, parameters))
+        theta = altar.matrix(shape=(samples, parameters)).zero()
         # allocate the likelihood vectors
-        prior = altar.vector(shape=samples)
-        data = altar.vector(shape=samples)
-        posterior = altar.vector(shape=samples)
+        prior = altar.vector(shape=samples).zero()
+        data = altar.vector(shape=samples).zero()
+        posterior = altar.vector(shape=samples).zero()
         # build one of my instances and return it
         return cls(beta=0, theta=theta, likelihoods=(prior, data, posterior))
 
@@ -118,6 +118,53 @@ class CoolingStep:
 
         # all done
         return
+
+
+    # implementation details
+    def print(self, channel, indent=' '*2):
+        """
+        Print info about this step
+        """
+        # unpack my shape
+        samples = self.samples
+        parameters = self.parameters
+
+        # say something
+        channel.line(f"step")
+        # show me the temperature
+        channel.line(f"{indent}β: {self.beta}")
+        # the sample
+        θ = self.theta
+        channel.line(f"{indent}θ: ({θ.rows} samples) x ({θ.columns} parameters)")
+        if θ.rows <= 10 and θ.columns <= 10:
+            channel.line("\n".join(θ.print(interactive=False, indent=indent*2)))
+
+        if samples < 10:
+            # the prior
+            prior = self.prior
+            channel.line(f"{indent}prior:")
+            channel.line(prior.print(interactive=False, indent=indent*2))
+            # the data
+            data = self.data
+            channel.line(f"{indent}data:")
+            channel.line(data.print(interactive=False, indent=indent*2))
+            # the posterior
+            posterior = self.posterior
+            channel.line(f"{indent}posterior:")
+            channel.line(posterior.print(interactive=False, indent=indent*2))
+
+        if parameters < 10:
+            # the data covariance
+            Σ = self.sigma
+            channel.line(f"{indent}Σ: {Σ.rows} x {Σ.columns}")
+            channel.line("\n".join(Σ.print(interactive=False, indent=indent*2)))
+
+        # flush
+        channel.log()
+
+        # all done
+        return channel
+
 
 
 # end of file

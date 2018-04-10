@@ -49,6 +49,8 @@ from gsl import (
     rng,
     # probability distribution functions
     pdf,
+    # histograms
+    histogram,
 )
 
 # fire up

@@ -9,14 +9,12 @@
 #
 
 
-# the protocol
-from .Model import Model as model
 # my superclass
-from .Null import Null
+from .Bayesian import Bayesian
 
 
 # declaration
-class Ensemble(Null, family="altar.models.ensemble"):
+class Ensemble(Bayesian, family="altar.models.ensemble"):
     """
     A collection of AlTar models that comprise a single model
     """
