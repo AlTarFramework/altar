@@ -11,7 +11,15 @@
 extension.layout = \
   ${eval $(1).name := $(1)} \
   ${eval $(1).src := $(src.ext)} \
+  ${eval $(1).lib := $(dest.lib)} \
+  ${eval $(1).ext := $(dest.ext)} \
   ${eval $(1).staging := $(dest.staging)/$($(1).name)} \
+
+# the parts necessary to build the extension module
+extension.products = \
+  ${eval $(1).module := $(1:%module=%)} \
+  ${eval $(1).module.src := $($(1).src)/$($(1).module).cc} \
+  ${eval $(1).module.so := $($(1).ext)/$($(1).module)$(python.module-suffix)} \
 
 # make the module library
 extension.lib = \
@@ -20,7 +28,7 @@ extension.lib = \
   ${eval $($(1).library).staging := $($(1).staging)} \
  \
   ${eval $($(1).library).sources := \
-      ${shell find $($(1).src) -name \*.cc -and -not -name $(1:%module=%).cc}} \
+      ${shell find $($(1).src) -name \*.cc -and -not -name $($(1).module.src)}} \
   ${eval $($(1).library).headers :=} \
   ${eval $($(1).library).packages := $($(1).packages)} \
  \
@@ -33,9 +41,25 @@ extension.packages = \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
 
 extension.targets = \
-  ${eval $(1): $($(project).libraries) $(1).archive} \
+  ${eval $(1).module.dep := \
+    $($(1).module.src) \
+    ${foreach lib,$($(project).libraries),$($(lib).archive)} \
+    $($($(1).library).archive) } \
+ \
+  ${eval $(1): $(1).archive $(1).extension } \
  \
   ${eval $(1).archive: $($(1).library).archive} \
+ \
+  ${eval $(1).extension : $(1).module} \
+ \
+  ${eval $(1).module : $($(1).module.so)} \
+ \
+  ${eval \
+    $($(1).module.so) : $($(1).module.dep)\
+    ; \
+      ${call log.action,shared,$$@} ; \
+      ${call c++.so,$$@,$$<,$($(1).packages)}; \
+  } \
 
 # debugging targets
 extension.log = \
@@ -51,6 +75,7 @@ extension.log = \
 # the constructor
 extension.init = \
   ${call extension.layout,$(1)} \
+  ${call extension.products,$(1)} \
   ${call extension.lib,$(1)} \
   ${call extension.targets,$(1)} \
   ${call extension.log,$(1)} \
