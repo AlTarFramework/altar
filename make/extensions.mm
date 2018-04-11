@@ -18,7 +18,8 @@ extension.layout = \
 # the parts necessary to build the extension module
 extension.products = \
   ${eval $(1).module := $(1:%module=%)} \
-  ${eval $(1).module.src := $($(1).src)/$($(1).module).cc} \
+  ${eval $(1).module.entry := $($(1).module).cc} \
+  ${eval $(1).module.src := $($(1).src)/$($(1).module.entry)} \
   ${eval $(1).module.so := $($(1).ext)/$($(1).module)$(python.module-suffix)} \
 
 # make the module library
@@ -28,7 +29,7 @@ extension.lib = \
   ${eval $($(1).library).staging := $($(1).staging)} \
  \
   ${eval $($(1).library).sources := \
-      ${shell find $($(1).src) -name \*.cc -and -not -name $($(1).module.src)}} \
+      ${shell find $($(1).src) -name \*.cc -and -not -name $($(1).module.entry)}} \
   ${eval $($(1).library).headers :=} \
   ${eval $($(1).library).packages := $($(1).packages)} \
  \
