@@ -40,7 +40,7 @@ c++.link = \
 
 c++.so = \
   $(c++) \
-  -shared \
+  -shared -fPIC \
   $(2) \
   $($(c++).link.output) $(1) \
   ${call c++.compile.options,$(3)} \
