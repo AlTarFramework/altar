@@ -78,7 +78,7 @@ library.archive = \
  \
   ${eval $($(1).archive): $($(1).objs) ; \
     ${call log.action,ar,$$@} ; \
-    $(ar.update) $$@ $$^ ; \
+    $(ar.create) $$@ $$^ ; \
   } \
  \
   ${eval ${foreach source,$($(1).sources),\
