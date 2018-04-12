@@ -89,6 +89,6 @@ ${foreach \
 }
 
 # make a target that builds them all
-$(project).extensions: $($(project).extensions)
+$(project).extensions: $(project).libraries $($(project).extensions)
 
 # end of file
