@@ -26,8 +26,8 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
 
     # user configurable state
-    dof = altar.properties.int(default=2)
-    dof.doc = "the number of variables"
+    parameters = altar.properties.int(default=2)
+    parameters.doc = "the number of model degrees of freedom"
 
     support = altar.properties.array(default=(-1,1))
     support.doc = "the support interval of the prior distribution"
@@ -45,15 +45,6 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
     # protocol obligations
     @altar.export
-    def parameters(self):
-        """
-        The number of parameters in this model
-        """
-        # return the number of degrees of freedom
-        return self.dof
-
-
-    @altar.export
     def initialize(self, application):
         """
         Initialize the state of the model given a {problem} specification
@@ -69,7 +60,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
 
     @altar.export
-    def sample(self, step):
+    def initializeSample(self, step):
         """
         Fill {step.θ} with an initial random sample from my prior distribution.
         """
@@ -170,7 +161,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         super().__init__(**kwds)
 
         # the number of model parameters
-        dof = self.dof
+        dof = self.parameters
 
         # convert the central value into a vector; allocate
         peak = altar.vector(shape=dof)

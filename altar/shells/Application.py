@@ -35,8 +35,9 @@ class Application(altar.application, family="altar.shells.application"):
         """
         # initialize the job parameters
         self.job.initialize(application=self)
-        # and the model
-        self.model.initialize(application=self)
+        # and the model; attach whatever the model initialization returns, just in case the
+        # model selects an implementation strategy based on my context
+        self.model = self.model.initialize(application=self)
         # sample the posterior distribution
         return self.model.posterior(application=self)
 
