@@ -58,10 +58,10 @@ class CoolingStep:
         (perhaps trivial) posterior
         """
         # build an uninitialized step
-        step = cls.alloc(samples=model.job.chains, parameters=model.parameters())
+        step = cls.alloc(samples=model.job.chains, parameters=model.parameters)
 
         # initialize it
-        model.sample(step=step)
+        model.initializeSample(step=step)
         # compute the likelihoods
         model.likelihoods(step=step)
 

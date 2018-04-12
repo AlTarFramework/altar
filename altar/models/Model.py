@@ -27,12 +27,6 @@ class Model(altar.protocol, family="altar.models"):
         Sample my posterior distribution
         """
 
-    @altar.provides
-    def parameters(self):
-        """
-        Return the number of independent degrees of freedom in the model
-        """
-
     # services for the simulation controller
     @altar.provides
     def initialize(self, application):

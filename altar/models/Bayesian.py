@@ -26,6 +26,9 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
     controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
+    parameters = altar.properties.int(default=2)
+    parameters.doc = "the number of model degrees of freedom"
+
 
     # protocol obligations
     @altar.export
@@ -56,15 +59,6 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         """
         # ask my controller to help me sample my posterior distribution
         return self.controller.posterior(model=self)
-
-
-    @altar.export
-    def parameters(self):
-        """
-        Return the number of parameters in the model
-        """
-        # i don't know what to do, so...
-        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
 
 
     # services
