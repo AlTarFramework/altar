@@ -24,6 +24,8 @@ from pyre import (
     export, provides,
     # the runtime manager
     executive,
+    # support for accessing virtual and local filesystems
+    filesystem,
     # miscellaneous packages
     patterns, primitives, timers, tracking, units,
     # support for asynchrony
