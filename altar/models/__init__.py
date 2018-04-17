@@ -11,6 +11,8 @@
 
 # the package
 import altar
+
+
 # the protocol
 from .Model import Model as model
 # the base class
