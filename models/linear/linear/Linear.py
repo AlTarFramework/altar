@@ -16,10 +16,6 @@ import altar
 # declaration
 class Linear(altar.models.bayesian, family="altar.models.linear"):
     """
-    A model that emulates the probability density for a single observation of the model
-    parameters. The observation is treated as normally distributed around a given mean, with a
-    covariance constructed out of its eigenvalues and a rotation in configuration
-    space. Currently, only two dimensional parameter spaces are supported.
     """
 
 
@@ -51,25 +47,11 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         """
         # chain up
         super().initialize(application=application)
-        # mount my data space; if anything goes wrong, {mount} doesn't return, so we can assume
-        # all is well safely
-        self.dfs = self.mount()
 
-        # allocate a matrix for the Green functions
-        green = altar.matrix(shape=(self.observations,self.parameters))
-        # load the green functions from the input file
-        green.load(self.patch / self.green)
-
-        # allocate a vector for the data
-        data = altar.vector(shape=self.observations)
-        # load the data from the input file
-        data.load(self.patch / self.data)
-
-        # allocate a matrix for the data covariance matrix
-        cd = altar.matrix(shape=(self.observations,self.observations))
-        # load the covariance matrix from the input file
-        cd.load(self.patch / self.cd)
-
+        # mount my input data space
+        self.ifs = self.mountInputDataspace(pfs=application.pfs)
+        # convert the input filenames into data
+        self.green, self.data, self.cd = self.loadInputs()
 
         # grab a channel
         channel = self.info
@@ -78,7 +60,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         channel.line(f" -- model: {self}")
         # and the contents of the data filesystem
         channel.line(f" -- contents of '{self.patch}':")
-        channel.line("\n".join(self.dfs.dump(indent=4)))
+        channel.line("\n".join(self.ifs.dump(indent=2)))
         # flush
         channel.log()
 
@@ -101,6 +83,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
+        print("Linear.priorLikelihood")
         step.print(channel=self.info)
         raise SystemExit(0)
         # all done
@@ -113,6 +96,8 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
+        print("Linear.dataLikelihood")
+        raise SystemExit(0)
         # all done
         return self
 
@@ -128,11 +113,14 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
 
 
     # implementation details
-    def mount(self, **kwds):
+    def mountInputDataspace(self, pfs):
+        """
+        Mount the directory with my input files
+        """
         # attempt to
         try:
             # mount the directory with my input data
-            dfs = altar.filesystem.local(root=self.patch)
+            ifs = altar.filesystem.local(root=self.patch)
         # if it fails
         except altar.filesystem.MountPointError as error:
             # grab my error channel
@@ -143,12 +131,82 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
             # and bail
             raise SystemExit(1)
 
-        # if all goes well, explore the filesystem and return it
-        return dfs.discover()
+        # if all goes well, explore it and mount it
+        pfs["inputs"] = ifs.discover()
+        # all done
+        return ifs
+
+
+    def loadInputs(self):
+        """
+        Load the data in the input files into memory
+        """
+        # grab the input dataspace
+        ifs = self.ifs
+
+        # first the green functions
+        try:
+            # get the path to the file
+            gf = ifs[self.green]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing Green functions: no '{self.green}' in '{self.patch}'")
+            # and raise the exception again
+            raise
+        # if all goes well
+        else:
+            # allocate the matrix
+            green = altar.matrix(shape=(self.observations, self.parameters))
+            # and load the file contents into memory
+            green.load(gf.uri)
+
+        # next, the observations
+        try:
+            # get the path to the file
+            df = ifs[self.data]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing observations: no '{self.data}' in '{self.patch}'")
+            # and raise the exception again
+            raise
+        # if all goes well
+        else:
+            # allocate the vector
+            data = altar.vector(shape=self.observations)
+            # and load the file contents into memory
+            data.load(df.uri)
+
+        # finally, the data covariance
+        try:
+            # get the path to the file
+            cf = ifs[self.cd]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing data covariance matrix: no '{self.cd}' in '{self.patch}'")
+            # and raise the exception again
+            raise
+        # if all goes well
+        else:
+            # allocate the matrix
+            cd = altar.matrix(shape=(self.observations, self.observations))
+            # and load the file contents into memory
+            cd.load(cf.uri)
+
+        # all done
+        return green, data, covariance
 
 
     # private data
-    dfs = None
+    ifs = None
 
 
 # end of file
