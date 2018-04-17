@@ -51,16 +51,21 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # mount my input data space
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # convert the input filenames into data
-        self.green, self.data, self.cd = self.loadInputs()
+        self.G, self.d, self.Cd = self.loadInputs()
 
         # grab a channel
         channel = self.info
         channel.line("run info:")
         # show me the model
         channel.line(f" -- model: {self}")
-        # and the contents of the data filesystem
+        # the contents of the data filesystem
         channel.line(f" -- contents of '{self.patch}':")
         channel.line("\n".join(self.ifs.dump(indent=2)))
+        # the loaded data
+        channel.line(f" -- inputs in memory:")
+        channel.line(f"    green functions: {self.G.shape}")
+        channel.line(f"       observations: {self.d.shape}")
+        channel.line(f"    data covariance: {self.Cd.shape}")
         # flush
         channel.log()
 
@@ -202,11 +207,14 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
             cd.load(cf.uri)
 
         # all done
-        return green, data, covariance
+        return green, data, cd
 
 
     # private data
     ifs = None
+    G = None # the Green functions
+    d = None # the vector with the observations
+    Cd = None # the data covariance matrix
 
 
 # end of file
