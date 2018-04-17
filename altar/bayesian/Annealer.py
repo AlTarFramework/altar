@@ -87,7 +87,7 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
             worker.top(annealer=self)
             # compute a new temperature
             worker.cool(annealer=self)
-            # re-sample
+            # walk the chains
             statistics = worker.resample(annealer=self)
             # equilibrate
             worker.equilibrate(annealer=self, statistics=statistics)
@@ -116,9 +116,13 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         tasks = job.tasks
         gpus = job.gpus
 
-        # first let's figure out the base worker: if the user asked for gpus and we have them,
-        # go CUDA, else use plain vanilla sequential
-        worker = self.cuda() if gpus > 0 else self.sequential()
+        # first let's figure out the base worker factory: if the user asked for gpus and we
+        # have them, go CUDA, else use plain vanilla sequential
+
+        # N.B.: we don't actually instantiate a worker here; just figure out how to make one;
+        # the reason is that the threaded annealing method must be able to instantiate more
+        # that one of these guys once we know the thread count
+        worker = self.cuda if gpus > 0 else self.sequential
 
         # if i don't have mpi
         if mode != "mpi":
@@ -128,6 +132,10 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
                 threads = tasks * gpus or tasks or gpus
                 # build the method
                 worker = self.threaded(threads=threads, worker=worker)
+            # otherwise
+            else:
+                # ask the factory for a worker instance
+                worker = worker()
         # if we are running with mpi
         else:
             # i need threads if the number of {gpus} per task is greater than one
@@ -136,6 +144,11 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
                 threads = gpus
                 # build the worker
                 worker = self.threaded(threads=threads, worker=worker)
+            # otherwise
+            else:
+                # ask the factory for a worker instance
+                worker = worker()
+
             # in any case, use the mpi aware annealing method
             worker = self.mpi(worker=worker)
 
