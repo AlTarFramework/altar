@@ -51,10 +51,14 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         """
         # chain up
         super().initialize(application=application)
-        # get the random number generator from my controller
+        # get my random number generator
         rng = self.rng
+
         # build my prior pdf
-        self.priorPDF = altar.pdf.uniform(support=self.support, rng=rng.rng)
+        self.prior = altar.pdf.uniform(support=self.support, rng=rng.rng)
+        # my initializer is also a uniform pdf
+        self.initializer = altar.pdf.uniform(support=self.support, rng=rng.rng)
+
         # all done
         return self
 
@@ -64,8 +68,10 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         """
         Fill {step.θ} with an initial random sample from my prior distribution.
         """
-        # fill the sample set with random numbers from my prior
-        step.theta.random(pdf=self.priorPDF)
+        # grab the portion of the sample that's mine
+        θ = self.restrict(step=step)
+        # fill it with random numbers from my initializer
+        θ.random(pdf=self.initializer)
         # and return
         return self
 
@@ -76,18 +82,21 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
-        # cache my pdf
-        pdf = self.priorPDF
+        # cache my prior pdf
+        pdf = self.prior
         # find out how many samples in the set
         samples = step.samples
-        # grab the sample set
-        θ = step.theta
+
+        # grab the portion of the sample that's mine
+        θ = self.restrict(step=step)
         # and the storage for the prior likelihoods
         prior = step.prior
+
         # for each sample
         for sample in range(samples):
             # fill the vector with the log likelihoods in the prior
-            prior[sample] = sum(math.log(pdf.density(parameter)) for parameter in θ.getRow(sample))
+            prior[sample] += sum(math.log(pdf.density(parameter)) for parameter in θ.getRow(sample))
+
         # all done
         return self
 
@@ -100,11 +109,11 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         """
         # cache the inverse of {σ}
         σ_inv = self.σ_inv
+
         # find out how many samples in the set
         samples = step.samples
-
-        # grab the sample set
-        θ = step.theta
+        # grab the portion of the sample that's mine
+        θ = self.restrict(step=step)
         # and the storage for the data likelihoods
         data = step.data
 
@@ -120,7 +129,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
             # finally, form {δ^T . σ_inv . δ}
             v = altar.blas.ddot(δ, y)
             # compute and return the log-likelihood of the data given this sample
-            data[sample] = self.normalization - v/2
+            data[sample] += self.normalization - v/2
 
         # all done
         return self
@@ -137,8 +146,16 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # build the rejection map
         rejects = altar.vector(shape=step.samples).zero()
 
+        # find out how many samples in the set
+        samples = step.samples
+        # get my parameter count
+        parameters = self.parameters
+        # get my offset in the samples
+        offset = self.offset
+
         # grab the sample set
-        θ = step.theta
+        θ = step.theta.view(start=(0,offset), shape=(samples, parameters))
+
         # go through the samples in θ
         for sample in range(θ.rows):
             # and the parameters in this sample
@@ -206,7 +223,8 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
     σ_inv = None # the inverse of my data covariance
     normalization = 1 # the normalization factor for my prior distribution
 
-    priorPDF = None # my prior probability distribution function; set in {initialize}
+    prior = None # my prior pdf; set in {initialize}
+    initializer = None # the pdf that is used to create the initial sample; set in {initialize}
 
 
 # end of file

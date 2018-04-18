@@ -35,7 +35,7 @@ class Model(altar.protocol, family="altar.models"):
         """
 
     @altar.provides
-    def sample(self, step):
+    def initializeSample(self, step):
         """
         Fill {step.theta} with an initial random sample from my prior distribution.
         """
