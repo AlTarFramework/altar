@@ -82,7 +82,7 @@ class AnnealingMethod:
         # get the sampler
         sampler = annealer.sampler
         # ask it to sample the posterior pdf
-        stats = sampler.sample(annealer=annealer, step=self.step)
+        stats = sampler.samplePosterior(annealer=annealer, step=self.step)
         # return the acceptance statistics
         return stats
 

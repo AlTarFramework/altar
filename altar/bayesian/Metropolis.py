@@ -60,7 +60,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     @altar.export
-    def sample(self, annealer, step):
+    def samplePosterior(self, annealer, step):
         """
         Sample the posterior distribution
         """
@@ -128,7 +128,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         cpost = altar.vector(shape=samples)
         # a fake covariance matrix for the candidate steps, just so we don't have to rebuild it
         # every time
-        csigma = altar.matrix(shape=(parameters,parameters)).zero()
+        csigma = altar.matrix(shape=(parameters,parameters))
         # and a vector with random numbers for the Metropolis acceptance
         dice = altar.vector(shape=samples)
 
@@ -136,10 +136,13 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         for step in range(self.steps):
             # initialize the candidate sample by randomly displacing the current one
             cθ = self.displace(sample=θ)
+            # initialize the likelihoods
+            likelihoods = cprior.zero(), cdata.zero(), cpost.zero()
+            # and the covariance matrix
+            csigma.zero()
             # build a candidate state
-            candidate = self.CoolingStep(beta=β,
-                                         theta=cθ, likelihoods=(cprior,cdata,cpost),
-                                         sigma=csigma)
+            candidate = self.CoolingStep(beta=β, theta=cθ,
+                                         likelihoods=likelihoods, sigma=csigma)
             # the random displacement may have generated candidates that are outside the
             # support of the model, so we must give it an opportunity to reject them
             rejects = model.verify(candidate)

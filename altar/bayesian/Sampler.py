@@ -25,7 +25,7 @@ class Sampler(altar.protocol, family="altar.samplers"):
         """
 
     @altar.provides
-    def sample(self, controller, step):
+    def samplePosterior(self, controller, step):
         """
         Sample the posterior distribution
         """
