@@ -29,6 +29,9 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
     controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
+    offset = altar.properties.int(default=0)
+    offset.doc = "the starting point of my state in the overall controller state"
+
     parameters = altar.properties.int(default=2)
     parameters.doc = "the number of model degrees of freedom"
 
@@ -67,12 +70,13 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
     # services
     @altar.export
-    def sample(self, step):
+    def initializeSample(self, step):
         """
         Fill {step.theta} with an initial random sample from my prior distribution.
         """
         # i don't know what to do, so...
-        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
+        raise NotImplementedError(
+            f"model '{type(self).__name__}' must implement 'initializeSample'")
 
 
     @altar.export
@@ -82,7 +86,8 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         distribution
         """
         # i don't know what to do, so...
-        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
+        raise NotImplementedError(
+            f"model '{type(self).__name__}' must implement 'priorLikelihood'")
 
 
     @altar.export
@@ -92,7 +97,8 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         data. This is what is usually referred to as the "forward model"
         """
         # i don't know what to do, so...
-        raise NotImplementedError(f"model '{type(self).__name__}' must implement 'parameters'")
+        raise NotImplementedError(
+            f"model '{type(self).__name__}' must implement 'dataLikelihood'")
 
 
     @altar.export
@@ -131,6 +137,36 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         Check whether the samples in {step.theta} are consistent with the model requirements and
         return a vector with zeroes for valid samples and ones for the invalid ones
         """
+        # i don't know what to do, so...
+        raise NotImplementedError(
+            f"model '{type(self).__name__}' must implement 'verify'")
+
+
+    # implementation details
+    def restrict(self, step):
+        """
+        Return the portion of the {sample} matrix in {step} that reflect the sate maintained by me
+        """
+        # find out how many samples in the set
+        samples = step.samples
+        # get my parameter count
+        parameters = self.parameters
+        # get my offset in the samples
+        offset = self.offset
+
+        # find where my samples live within the overall sample matrix:
+        start = 0, self.offset
+        # form the shape of the sample matrix that's mine
+        shape = step.samples, self.parameters
+
+        # grab the portion of the sample that's mine: i own data in all sample rows, starting
+        # in the column indicated by my {offset}, and the width of my block is determined by my
+        # parameter count
+        θ = step.theta.view(start=(0,offset), shape=(samples,parameters))
+
+        # return it
+        return θ
+
 
     # public data
     # job parameters
