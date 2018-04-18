@@ -52,7 +52,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # chain up
         super().initialize(application=application)
         # get the random number generator from my controller
-        rng = self.controller.rng
+        rng = self.rng
         # build my prior pdf
         self.priorPDF = altar.pdf.uniform(support=self.support, rng=rng.rng)
         # all done

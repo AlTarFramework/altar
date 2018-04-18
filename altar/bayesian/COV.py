@@ -51,12 +51,12 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
 
     # protocol obligations
     @altar.export
-    def initialize(self, controller, model):
+    def initialize(self, model):
         """
         Initialize me and my parts given a {controller} and a {model}
         """
         # get the rng wrapper
-        rng = controller.rng.rng
+        rng = model.rng.rng
         # instantiate my COV calculator; {beta.cov} needs the {rng} capsule
         self.minimizer = altar.libaltar.cov(rng.rng, self.maxiter, self.tolerance, self.target)
         # set up the distribution for building the sample multiplicities
