@@ -23,6 +23,9 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     # user configurable state
+    rng = altar.simulations.rng()
+    rng.doc = "the random number generator"
+
     controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
@@ -45,7 +48,8 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         self.debug = application.debug
         self.firewall = application.firewall
 
-        # initialize my controller
+        # initialize my parts
+        self.rng.initialize()
         self.controller.initialize(model=self)
 
         # all done

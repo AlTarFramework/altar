@@ -44,12 +44,12 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
     # protocol obligations
     @altar.export
-    def initialize(self, controller, model):
+    def initialize(self, model):
         """
         Initialize me and my parts given a {model}
         """
         # get the capsule of the random number generator
-        rng = controller.rng.rng
+        rng = model.rng.rng
         # set up the distribution for building the sample multiplicities
         self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
         # set up the distribution for the random walk displacement vectors

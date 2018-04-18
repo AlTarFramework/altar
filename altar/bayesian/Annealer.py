@@ -23,9 +23,6 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
 
     # user configurable state
-    rng = altar.simulations.rng()
-    rng.doc = "the random number generator"
-
     sampler = altar.bayesian.sampler()
     sampler.doc = "the sampler of the posterior distribution"
 
@@ -49,9 +46,8 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         self.worker = self.deduceAnnealingMethod(job=model.job)
 
         # initialize my parts
-        self.rng.initialize()
-        self.sampler.initialize(controller=self, model=model)
-        self.scheduler.initialize(controller=self, model=model)
+        self.sampler.initialize(model=model)
+        self.scheduler.initialize(model=model)
         self.monitor.initialize(model=model)
         self.archiver.initialize(model=model)
 
