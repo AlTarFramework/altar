@@ -129,6 +129,8 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # a fake covariance matrix for the candidate steps, just so we don't have to rebuild it
         # every time
         csigma = altar.matrix(shape=(parameters,parameters))
+        # the mask of samples rejected due to model constraint violations
+        rejects = altar.vector(shape=samples)
         # and a vector with random numbers for the Metropolis acceptance
         dice = altar.vector(shape=samples)
 
@@ -144,8 +146,9 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             candidate = self.CoolingStep(beta=β, theta=cθ,
                                          likelihoods=likelihoods, sigma=csigma)
             # the random displacement may have generated candidates that are outside the
-            # support of the model, so we must give it an opportunity to reject them
-            rejects = model.verify(candidate)
+            # support of the model, so we must give it an opportunity to reject them;
+            # reset the mask and ask the model to verify the sample validity
+            rejects = model.verify(step=candidate, mask=rejects.zero())
             # make the candidate a consistent set by replacing the rejected samples with copies
             # of the originals from {θ}
             for index, flag in enumerate(rejects):

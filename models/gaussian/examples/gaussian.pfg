@@ -11,7 +11,7 @@ gaussian:
     ; job
     job.tasks = 1 ; number of tasks per host
     job.gpus = 0  ; number of gpus per task
-    job.chains = 2**10 ; number of chains per task
+    job.chains = 2**2; **10 ; number of chains per task
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
