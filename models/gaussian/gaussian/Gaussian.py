@@ -177,6 +177,9 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # chain up
         super().__init__(**kwds)
 
+        # local names for the math functions
+        log, π, cos, sin = math.log, math.pi, math.cos, math.sin
+
         # the number of model parameters
         dof = self.parameters
 
@@ -186,8 +189,8 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         for index, value in enumerate(self.μ): peak[index] = value
 
         # the trigonometry
-        cos_φ = math.cos(self.φ)
-        sin_φ = math.sin(self.φ)
+        cos_φ = cos(self.φ)
+        sin_φ = sin(self.φ)
         # the eigenvalues
         λ0 = self.λ[0]
         λ1 = self.λ[1]
@@ -202,10 +205,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         σ_inv[0,1] = σ_inv[1,0] = (λ1_inv - λ0_inv) * cos_φ * sin_φ
 
         # compute its determinant and store it
-        σ_lndet = math.log(λ0 * λ1)
-
-        # local names for the math functions
-        log, π = math.log, math.pi
+        σ_lndet = log(λ0 * λ1)
 
         # attach the characteristics of my pdf
         self.peak = peak
