@@ -148,7 +148,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # the random displacement may have generated candidates that are outside the
             # support of the model, so we must give it an opportunity to reject them;
             # reset the mask and ask the model to verify the sample validity
-            rejects = model.verify(step=candidate, mask=rejects.zero())
+            model.verify(step=candidate, mask=rejects.zero())
             # make the candidate a consistent set by replacing the rejected samples with copies
             # of the originals from {θ}
             for index, flag in enumerate(rejects):
