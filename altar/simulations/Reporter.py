@@ -24,9 +24,9 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
 
     # protocol obligations
     @altar.provides
-    def initialize(self, model):
+    def initialize(self, application):
         """
-        Initialize me given a {model}
+        Initialize me given an {application} context
         """
         # all done
         return self

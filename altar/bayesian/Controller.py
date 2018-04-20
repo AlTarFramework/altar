@@ -36,9 +36,9 @@ class Controller(altar.protocol, family="altar.controllers"):
 
 
     @altar.provides
-    def initialize(self, model):
+    def initialize(self, application):
         """
-        Initialize me and my parts given a {model}
+        Initialize me and my parts given an {application} context
         """
 
 
