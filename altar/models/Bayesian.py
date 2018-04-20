@@ -145,7 +145,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
     # implementation details
     def restrict(self, step):
         """
-        Return the portion of the {sample} matrix in {step} that reflect the sate maintained by me
+        Return the portion of the {sample} matrix in {step} that reflect the state maintained by me
         """
         # find out how many samples in the set
         samples = step.samples
