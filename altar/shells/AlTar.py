@@ -28,6 +28,12 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     model = altar.models.model()
     model.doc = "the AlTar model to sample"
 
+    rng = altar.simulations.rng()
+    rng.doc = "the random number generator"
+
+    controller = altar.bayesian.controller()
+    controller.doc = "my simulation controller"
+
 
     # protocol obligations
     @altar.export
@@ -37,8 +43,13 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
         """
         # initialize the job parameters
         self.job.initialize(application=self)
-        # and the model
-        self.model.initialize(application=self)
+        # the random number generator
+        self.rng.initialize()
+        # the controller
+        self.controller.initialize(application=self)
+        # and the model; attach whatever the model initialization returns, just in case the
+        # model selects an implementation strategy based on my context
+        self.model = self.model.initialize(application=self)
         # chain up
         return super().main(*args, **kwds)
 

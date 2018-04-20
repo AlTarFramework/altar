@@ -23,17 +23,16 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     # user configurable state
-    rng = altar.simulations.rng()
-    rng.doc = "the random number generator"
-
-    controller = altar.bayesian.controller()
-    controller.doc = "my simulation controller"
-
     offset = altar.properties.int(default=0)
     offset.doc = "the starting point of my state in the overall controller state"
 
     parameters = altar.properties.int(default=2)
     parameters.doc = "the number of model degrees of freedom"
+
+
+    # public data
+    rng = None
+    controller = None
 
 
     # protocol obligations
@@ -51,9 +50,10 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         self.debug = application.debug
         self.firewall = application.firewall
 
-        # initialize my parts
-        self.rng.initialize()
-        self.controller.initialize(model=self)
+        # save the random number generator
+        self.rng = application.rng
+        # and the controller
+        self.controller = application.controller
 
         # all done
         return self

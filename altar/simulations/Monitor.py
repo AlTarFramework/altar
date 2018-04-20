@@ -21,10 +21,11 @@ class Monitor(altar.protocol, family="altar.simulations.monitors"):
 
     # protocol obligations
     @altar.provides
-    def initialize(self, model):
+    def initialize(self, application):
         """
-        Initialize me given a {model}
+        Initialize me given an {application} context
         """
+
 
     # framework hooks
     @classmethod

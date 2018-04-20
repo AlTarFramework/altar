@@ -19,9 +19,9 @@ class Sampler(altar.protocol, family="altar.samplers"):
 
     # required behavior
     @altar.provides
-    def initialize(self, controller,  model):
+    def initialize(self, application):
         """
-        Initialize me and my parts given a {controller} and a {model}
+        Initialize me and my parts given an {application} context
         """
 
     @altar.provides

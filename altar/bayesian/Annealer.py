@@ -38,25 +38,25 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
     # protocol obligations
     @altar.export
-    def initialize(self, model):
+    def initialize(self, application):
         """
-        Initialize me and my parts given a {model}
+        Initialize me and my parts given an {application} context
         """
         # deduce my annealing method
-        self.worker = self.deduceAnnealingMethod(job=model.job)
+        self.worker = self.deduceAnnealingMethod(job=application.job)
 
         # initialize my parts
-        self.sampler.initialize(model=model)
-        self.scheduler.initialize(model=model)
-        self.monitor.initialize(model=model)
-        self.archiver.initialize(model=model)
+        self.sampler.initialize(application=application)
+        self.scheduler.initialize(application=application)
+        self.monitor.initialize(application=application)
+        self.archiver.initialize(application=application)
 
-        # borrow the canonical journal channels from the model
-        self.info = model.info
-        self.warning = model.warning
-        self.error = model.error
-        self.debug = model.debug
-        self.firewall = model.firewall
+        # borrow the canonical journal channels from the application
+        self.info = application.info
+        self.warning = application.warning
+        self.error = application.error
+        self.debug = application.debug
+        self.firewall = application.firewall
 
         # all done
         return self

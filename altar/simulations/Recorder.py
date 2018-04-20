@@ -24,9 +24,9 @@ class Recorder(altar.component, family="altar.simulations.archivers.recorder", i
 
     # protocol obligations
     @altar.provides
-    def initialize(self, model):
+    def initialize(self, application):
         """
-        Initialize me given a {model}
+        Initialize me given an {application} context
         """
         # all done
         return self
