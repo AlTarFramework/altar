@@ -135,7 +135,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
     def verify(self, step):
         """
         Check whether the samples in {step.theta} are consistent with the model requirements and
-        return a vector with zeroes for valid samples and ones for the invalid ones
+        update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
         # i don't know what to do, so...
         raise NotImplementedError(

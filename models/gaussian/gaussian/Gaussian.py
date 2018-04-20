@@ -84,13 +84,14 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         """
         # cache my prior pdf
         pdf = self.prior
-        # find out how many samples in the set
-        samples = step.samples
 
         # grab the portion of the sample that's mine
         θ = self.restrict(step=step)
         # and the storage for the prior likelihoods
         prior = step.prior
+
+        # find out how many samples in the set
+        samples = θ.rows
 
         # for each sample
         for sample in range(samples):
@@ -110,12 +111,13 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # cache the inverse of {σ}
         σ_inv = self.σ_inv
 
-        # find out how many samples in the set
-        samples = step.samples
         # grab the portion of the sample that's mine
         θ = self.restrict(step=step)
         # and the storage for the data likelihoods
         data = step.data
+
+        # find out how many samples in the set
+        samples = θ.rows
 
         # for each sample in the sample set
         for sample in range(samples):
@@ -136,40 +138,35 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
 
     @altar.export
-    def verify(self, step):
+    def verify(self, step, mask):
         """
-        Check whether the samples in {step.θ} are consistent with the model requirements and
-        return a vector with zeroes for valid samples and ones for the invalid ones
+        Check whether the samples in {step.theta} are consistent with the model requirements and
+        update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
         # unpack my support
         low, high = self.support
-        # build the rejection map
-        rejects = altar.vector(shape=step.samples).zero()
+        # grab the portion of the sample that's mine
+        θ = self.restrict(step=step)
 
         # find out how many samples in the set
-        samples = step.samples
-        # get my parameter count
-        parameters = self.parameters
-        # get my offset in the samples
-        offset = self.offset
-
-        # grab the sample set
-        θ = step.theta.view(start=(0,offset), shape=(samples, parameters))
+        samples = θ.rows
+        # and how many parameters belong to me
+        parameters = θ.columns
 
         # go through the samples in θ
-        for sample in range(θ.rows):
+        for sample in range(samples):
             # and the parameters in this sample
-            for parameter in range(θ.columns):
+            for parameter in range(parameters):
                 # if the parameter lies outside my support
                 if not (low <= θ[sample,parameter] <= high):
                     # the entire sample is invalid
                     # print(" *** INVALID PARAMETER ***")
-                    rejects[sample] = 1
+                    mask[sample] += 1
                     # so skip checking the rest of the parameters
                     break
 
         # all done; return the rejection map
-        return rejects
+        return mask
 
 
     # meta methods
