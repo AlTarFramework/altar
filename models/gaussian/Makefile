@@ -27,7 +27,7 @@ dest.bin := $(prefix)/bin
 # metadata
 gaussian.major := 2
 gaussian.minor := 0
-gaussian.revision = ${strip ${shell $(bzr.revno) || echo 0}}
+gaussian.revision = ${strip ${shell $(git.hash) || echo 0}}
 now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 

@@ -12,7 +12,7 @@
 date = "TODAY"
 major = MAJOR
 minor = MINOR
-revision = REVISION
+revision = "REVISION"
 
 
 # assemble the version tuple

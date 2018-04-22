@@ -55,6 +55,10 @@ date = date
 date.year = $(date) '+%Y'
 date.stamp = $(date) -u
 
+# git
+git = git
+git.hash = $(git) log --format=format:"%h" -n 1
+
 # loader
 ld = ld
 ld.out = $(ld) $(ld.flags.out)

@@ -33,7 +33,7 @@ priors := ${wildcard priors/*}
 # metadata
 altar.major := 2
 altar.minor := 0
-altar.revision = ${strip ${shell $(bzr.revno) || echo 0}}
+altar.revision = ${strip ${shell $(git.hash) || echo 0}}
 now.year = ${strip ${shell $(date.year)}}
 now.date = ${strip ${shell $(date.stamp)}}
 
