@@ -39,6 +39,9 @@ class Application(altar.application, family="altar.shells.application"):
         """
         The main entry point
         """
+        # N.B.: the initialization phase must be respectful if the interdependencies of these
+        # components; e.g., both {controller} and {model} expect an initialized {rng}
+
         # initialize the job parameters
         self.job.initialize(application=self)
         # the random number generator
