@@ -13,7 +13,7 @@ project := altar
 # the source directory
 src := .
 # the destination directory
-prefix := build
+prefix := builds
 
 # the altar libraries
 altar.libraries := libaltar
