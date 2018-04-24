@@ -13,6 +13,19 @@ gaussian:
     job.gpus = 0  ; number of gpus per task
     job.chains = 2**2; **10 ; number of chains per task
 
+    ; model configuration
+    model:
+        init = uniform
+        prior = uniform
+
+    ; initializer pdf configuration
+    model.prep:
+        support = (-1, 1)
+    ; initializer pdf configuration
+    model.prior:
+        support = (-1, 1)
+
+
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
     tasks = 2
