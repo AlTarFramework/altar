@@ -32,6 +32,11 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
     support = altar.properties.array(default=(-1,1))
     support.doc = "the support interval of the prior distribution"
 
+    prep = altar.distributions.distribution()
+    prep.doc = "the distribution used to generate the initial sample"
+
+    prior = altar.distributions.distribution()
+    prior.doc = "the prior distribution"
 
     μ = altar.properties.array(default=(0,0))
     μ.doc = 'the location of the central value of the observation'
@@ -54,10 +59,9 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # get my random number generator
         rng = self.rng
 
-        # build my prior pdf
-        self.prior = altar.pdf.uniform(support=self.support, rng=rng.rng)
-        # my initializer is also a uniform pdf
-        self.initializer = altar.pdf.uniform(support=self.support, rng=rng.rng)
+        # initialize my distributions
+        self.prep.initialize(rng=rng)
+        self.prior.initialize(rng=rng)
 
         # all done
         return self
@@ -71,7 +75,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         # grab the portion of the sample that's mine
         θ = self.restrict(step=step)
         # fill it with random numbers from my initializer
-        θ.random(pdf=self.initializer)
+        self.prep.matrix(matrix=θ)
         # and return
         return self
 
@@ -219,9 +223,6 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
     peak = None # the location of my central value
     σ_inv = None # the inverse of my data covariance
     normalization = 1 # the normalization factor for my prior distribution
-
-    prior = None # my prior pdf; set in {initialize}
-    initializer = None # the pdf that is used to create the initial sample; set in {initialize}
 
 
 # end of file
