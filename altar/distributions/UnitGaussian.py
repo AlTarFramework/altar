@@ -18,15 +18,10 @@ from .Base import Base as base
 
 
 # the declaration
-class Uniform(base, family="altar.distributions.uniform"):
+class UnitGaussian(base, family="altar.distributions.ugaussian"):
     """
-    The uniform probability distribution
+    Special case of the Gaussian probability distribution with σ = 1
     """
-
-
-    # user configurable state
-    support = altar.properties.array(default=(0,1))
-    support.doc = "the support interval of the prior distribution"
 
 
     # protocol obligations
@@ -36,7 +31,7 @@ class Uniform(base, family="altar.distributions.uniform"):
         Initialize with the given runtime {context}
         """
         # set up my pdf
-        self.pdf = altar.pdf.uniform(rng=rng.rng, support=self.support)
+        self.pdf = altar.pdf.ugaussian(rng=rng.rng)
         # all done
         return self
 
