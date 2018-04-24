@@ -11,20 +11,26 @@
 # get the package
 import altar
 
+# get the protocol
+from . import distribution
 
-# the protocol
-class Distribution(altar.protocol, family="altar.distributions"):
+
+# the declaration
+class Base(altar.component, implements=distribution):
     """
-    The protocol that all AlTar probability distributions must satisfy
+    The base class for probability distributions
     """
 
 
-    # requirements
+    # protocol obligations
     @altar.provides
-    def initialize(self, **kwds):
+    def initialize(self, rng):
         """
         Initialize with the given runtime {context}
         """
+        # being abstract, i don't know what to do here
+        raise NotImplementedError(
+            f"class '{type(self).__name__}' must implement 'initialize'")
 
 
     @altar.provides
@@ -32,6 +38,8 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
         Sample the distribution using a random number generator
         """
+        # ask my pdf
+        return self.pdf.sample()
 
 
     @altar.provides
@@ -39,6 +47,8 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
         Compute the probability density of the distribution at {x}
         """
+        # ask my pdf
+        return self.pdf.density(x)
 
 
     @altar.provides
@@ -46,6 +56,8 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
         Fill {vector} with random values
         """
+        # ask my pdf
+        return self.pdf.vector(vector)
 
 
     @altar.provides
@@ -53,18 +65,12 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
         Fill {matrix} with random values
         """
+        # ask my pdf
+        return self.pdf.matrix(matrix)
 
 
-    # framework hooks
-    @classmethod
-    def pyre_default(cls):
-        """
-        Supply a default implementation
-        """
-        # use the uniform distribution
-        from .Uniform import Uniform as default
-        # and return it
-        return default
+    # private data
+    pdf = None # the pdf implementation
 
 
 # end of file

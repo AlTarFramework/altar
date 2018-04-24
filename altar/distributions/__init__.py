@@ -28,4 +28,24 @@ def uniform():
     return uniform
 
 
+@altar.foundry(implements=distribution, tip="the gaussian probability distribution")
+def gaussian():
+    # grab the factory
+    from .Gaussian import Gaussian as gaussian
+    # attach its docstring
+    __doc__ = gaussian.__doc__
+    # and return it
+    return gaussian
+
+
+@altar.foundry(implements=distribution, tip="the unit gaussian probability distribution")
+def ugaussian():
+    # grab the factory
+    from .UnitGaussian import UnitGaussian as ugaussian
+    # attach its docstring
+    __doc__ = ugaussian.__doc__
+    # and return it
+    return ugaussian
+
+
 # end of file
