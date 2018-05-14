@@ -25,7 +25,7 @@ class UnitGaussian(base, family="altar.distributions.ugaussian"):
 
 
     # protocol obligations
-    @altar.provides
+    @altar.export
     def initialize(self, rng):
         """
         Initialize with the given runtime {context}

@@ -143,29 +143,26 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     # implementation details
-    def restrict(self, step):
+    def restrict(self, theta):
         """
-        Return the portion of the {sample} matrix in {step} that reflect the state maintained by me
+        Return my portion of the sample matrix {theta}
         """
         # find out how many samples in the set
-        samples = step.samples
+        samples = theta.rows
         # get my parameter count
         parameters = self.parameters
         # get my offset in the samples
         offset = self.offset
 
         # find where my samples live within the overall sample matrix:
-        start = 0, self.offset
+        start = 0, offset
         # form the shape of the sample matrix that's mine
-        shape = step.samples, self.parameters
+        shape = samples, parameters
 
-        # grab the portion of the sample that's mine: i own data in all sample rows, starting
-        # in the column indicated by my {offset}, and the width of my block is determined by my
-        # parameter count
-        θ = step.theta.view(start=(0,offset), shape=(samples,parameters))
-
-        # return it
-        return θ
+        # return a view to the portion of the sample that's mine: i own data in all sample
+        # rows, starting in the column indicated by my {offset}, and the width of my block is
+        # determined by my parameter count
+        return theta.view(start=start, shape=shape)
 
 
     # public data

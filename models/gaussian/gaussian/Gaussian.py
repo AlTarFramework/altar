@@ -73,9 +73,9 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         Fill {step.θ} with an initial random sample from my prior distribution.
         """
         # grab the portion of the sample that's mine
-        θ = self.restrict(step=step)
+        θ = self.restrict(theta=step.theta)
         # fill it with random numbers from my initializer
-        self.prep.matrix(matrix=θ)
+        self.prep.initializeSample(theta=θ)
         # and return
         return self
 
@@ -86,21 +86,15 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
-        # cache my prior pdf
+        # grab my prior pdf
         pdf = self.prior
-
         # grab the portion of the sample that's mine
-        θ = self.restrict(step=step)
+        θ = self.restrict(theta=step.theta)
         # and the storage for the prior likelihoods
-        prior = step.prior
+        likelihood = step.prior
 
-        # find out how many samples in the set
-        samples = θ.rows
-
-        # for each sample
-        for sample in range(samples):
-            # fill the vector with the log likelihoods in the prior
-            prior[sample] += sum(math.log(pdf.density(parameter)) for parameter in θ.getRow(sample))
+        # delegate
+        pdf.priorLikelihood(theta=θ, likelihood=likelihood)
 
         # all done
         return self
@@ -116,7 +110,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         σ_inv = self.σ_inv
 
         # grab the portion of the sample that's mine
-        θ = self.restrict(step=step)
+        θ = self.restrict(theta=step.theta)
         # and the storage for the data likelihoods
         data = step.data
 
@@ -147,28 +141,12 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
         Check whether the samples in {step.theta} are consistent with the model requirements and
         update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
-        # unpack my support
-        low, high = self.support
         # grab the portion of the sample that's mine
-        θ = self.restrict(step=step)
-
-        # find out how many samples in the set
-        samples = θ.rows
-        # and how many parameters belong to me
-        parameters = θ.columns
-
-        # go through the samples in θ
-        for sample in range(samples):
-            # and the parameters in this sample
-            for parameter in range(parameters):
-                # if the parameter lies outside my support
-                if not (low <= θ[sample,parameter] <= high):
-                    # the entire sample is invalid
-                    # print(" *** INVALID PARAMETER ***")
-                    mask[sample] += 1
-                    # so skip checking the rest of the parameters
-                    break
-
+        θ = self.restrict(theta=step.theta)
+        # grab my prior
+        pdf = self.prior
+        # ask it to verify my samples
+        pdf.verify(theta=θ, mask=mask)
         # all done; return the rejection map
         return mask
 
