@@ -30,7 +30,7 @@ class Uniform(base, family="altar.distributions.uniform"):
 
 
     # protocol obligations
-    @altar.provides
+    @altar.export
     def initialize(self, rng):
         """
         Initialize with the given runtime {context}
@@ -39,6 +39,37 @@ class Uniform(base, family="altar.distributions.uniform"):
         self.pdf = altar.pdf.uniform(rng=rng.rng, support=self.support)
         # all done
         return self
+
+
+    @altar.export
+    def verify(self, theta, mask):
+        """
+        Check whether my portion of the samples in {theta} are consistent with my constraints, and
+        update {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+        # unpack my support
+        low, high = self.support
+        # grab the portion of the sample that's mine
+        θ = self.restrict(theta=theta)
+
+        # find out how many samples in the set
+        samples = θ.rows
+        # and how many parameters belong to me
+        parameters = θ.columns
+
+        # go through the samples in θ
+        for sample in range(samples):
+            # and the parameters in this sample
+            for parameter in range(parameters):
+                # if the parameter lies outside my support
+                if not (low <= θ[sample,parameter] <= high):
+                    # mark the entire sample as invalid
+                    mask[sample] += 1
+                    # and skip checking the rest of the parameters
+                    break
+
+        # all done; return the rejection map
+        return mask
 
 
 # end of file

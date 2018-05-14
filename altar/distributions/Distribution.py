@@ -20,6 +20,15 @@ class Distribution(altar.protocol, family="altar.distributions"):
 
 
     # requirements
+    # user configurable state
+    parameters = altar.properties.int()
+    parameters.doc = "the number of model parameters that i take care of"
+
+    offset = altar.properties.int(default=0)
+    offset.doc = "the starting point of my parameters in the overall model state"
+
+
+    # configuration
     @altar.provides
     def initialize(self, **kwds):
         """
@@ -27,12 +36,32 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
 
 
+    # model support
+    @altar.provides
+    def initializeSample(self, theta):
+        """
+        Fill my portion of {theta} with initial random values from my distribution.
+        """
+
+    @altar.provides
+    def priorLikelihood(self, theta, prior):
+        """
+        Fill my portion of {prior} with the likelihoods of the samples in {theta}
+        """
+
+    @altar.provides
+    def verify(self, theta, mask):
+        """
+        Check whether my portion of the samples in {theta} are consistent with my constraints, and
+        update {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+
+    # wrappers over the interface of the underlying support
     @altar.provides
     def sample(self):
         """
         Sample the distribution using a random number generator
         """
-
 
     @altar.provides
     def density(self, x):
@@ -40,20 +69,17 @@ class Distribution(altar.protocol, family="altar.distributions"):
         Compute the probability density of the distribution at {x}
         """
 
-
     @altar.provides
     def vector(self, vector):
         """
         Fill {vector} with random values
         """
 
-
     @altar.provides
     def matrix(self, matrix):
         """
         Fill {matrix} with random values
         """
-
 
     # framework hooks
     @classmethod
