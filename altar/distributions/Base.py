@@ -27,7 +27,7 @@ class Base(altar.component, implements=distribution):
     # protocol obligations
     # user configurable state
     parameters = altar.properties.int()
-    parameters.doc = "the number of model parameters that i take care of"
+    parameters.doc = "the number of model parameters that belong to me"
 
     offset = altar.properties.int(default=0)
     offset.doc = "the starting point of my parameters in the overall model state"
