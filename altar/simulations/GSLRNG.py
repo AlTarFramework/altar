@@ -22,7 +22,7 @@ class GSLRNG(altar.component, family="altar.simulations.rng.gsl", implements=rng
 
 
     # user configurable state
-    seed = altar.properties.int(default=0)
+    seed = altar.properties.float(default=0)
     seed.doc = 'the number with which to seed the generator'
 
     algorithm = altar.properties.str(default='ranlxs2')
