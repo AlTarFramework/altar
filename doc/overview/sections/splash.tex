@@ -1,0 +1,27 @@
+% -*- LaTeX -*-
+% -*- coding: utf-8 -*-
+%
+% michael a.g. aïvázis <michael.aivazis@para-sim.com>
+% (c) 2003-2018 all rights reserved
+%
+
+% title slide
+\begin{frame}[plain]
+  % the logo
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=south east, xshift=-1em, yshift=1em] at (current page.south east) {%
+      \includegraphics[scale=0.25]{figures/pyre-logo.pdf}};
+  \end{tikzpicture}
+  % make the title page
+  \maketitle
+\end{frame}
+
+%-----------------------------------
+% splash slide
+\begin{frame}[c,plain]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{pyre-logo}
+  \end{center}
+\end{frame}
+
+% end of file
