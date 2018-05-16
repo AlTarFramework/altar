@@ -1,0 +1,329 @@
+% -*- LaTeX -*-
+% -*- coding: utf-8 -*-
+%
+% michael a.g. aïvázis <michael.aivazis@para-sim.com>
+% (c) 2003-2018 all rights reserved
+%
+
+% adjustments
+\makeatletter
+% where things are
+\providecommand*{\input@path}{}
+\edef\input@path{{sections/}{config/}\input@path}
+% reset
+\makeatother
+
+% language
+\usepackage[english]{babel}
+
+% beamer configuration
+\usepackage{pyre}
+
+% dimensions
+\usepackage{fancyhdr}
+
+% fonts
+\usepackage[utf8x]{inputenc}
+\usepackage{relsize}
+\usepackage{amsfonts}
+%\usepackage{times}
+%\usepackage{lmodern}
+\usepackage{fourier}
+\renewcommand*\familydefault{\sfdefault}
+
+% figures
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{tikz}
+
+% pyre colors
+\definecolor{pyre@pipe}{rgb}{0.675, .694, .251}
+\definecolor{pyre@green}{rgb}{0.557, .765, .286}
+\definecolor{pyre@blue}{rgb}{0.173, .678, .878}
+\definecolor{pyre@orange}{rgb}{0.961, .569, .180}
+
+\definecolor{pyre@darkblue}{RGB}{68,96,160}
+\definecolor{pyre@gray}{RGB}{128,128,128}
+\definecolor{pyre@lightblue}{RGB}{128,158,168}
+\definecolor{pyre@gold}{RGB}{230,150,16}
+
+\definecolor{pyre@cream}{rgb}{0.96, .95, .89}
+\definecolor{pyre@sand}{rgb}{0.86, .85, .77}
+\definecolor{pyre@stone}{rgb}{0.55, .54, .46}
+\definecolor{pyre@leather}{rgb}{0.48, .47, .38}
+\definecolor{pyre@olive}{rgb}{0.28, .29, .25}
+\definecolor{pyre@lava}{rgb}{0.25, .23, .22}
+\definecolor{pyre@shale}{rgb}{0.38, .38, .38}
+\definecolor{pyre@brick}{rgb}{0.95, .50, .30}
+
+\definecolor{commentcolor}{gray}{0.75}
+\definecolor{identifiercolor}{rgb}{0.5, 0.25, 0.75}
+\definecolor{keywordcolor}{rgb}{0.25,0.25,1.0}
+\definecolor{linenumbercolor}{gray}{0.75}
+\definecolor{listingbgcolor}{gray}{1.0}
+\definecolor{stringcolor}{rgb}{0.5, 0.25, 0.75}
+
+% pML
+\definecolor{pml@basictypecolor}{rgb}{0.94, 0.5, 0.10}
+\definecolor{pml@componentcolor}{rgb}{0.0, 0.2, 0.4}
+\definecolor{pml@defaultvaluecolor}{rgb}{0.48, 0.47, 0.38}
+\definecolor{pml@protocolcolor}{rgb}{0.1367, 0.4766, 0.7031}
+\definecolor{pml@pyrebuiltincolor}{rgb}{0.50, 0.50, 0.19}
+\definecolor{pml@schemacolor}{rgb}{0.50, 0.50, 0.19}
+\definecolor{pml@traitcolor}{rgb}{0.1367, 0.4766, 0.7031}
+
+% listings and their configurations
+\usepackage[slide,algoruled,linesnumbered,noend]{algorithm2e}
+\SetKwComment{tnm}{\#}{}
+\SetKw{In}{in}
+\SetKw{Is}{is}
+\SetKw{KwAnd}{and}
+\SetKw{KwSend}{send}
+\SetKw{KwRecv}{recv}
+\SetKw{KwFrom}{from}
+\SetKw{KwBcast}{broadcast}
+
+\usepackage{subfigure}
+\usepackage{textcomp}
+\usepackage{siunitx}
+
+\usepackage{listings}
+\lstloadlanguages{C,C++,python,bash}
+
+\lstset{
+  columns=flexible,
+  upquote=true,
+  %
+  aboveskip=\medskipamount,
+  belowskip=\medskipamount,
+  % abovecaptionskip=\medskipamount,
+  % belowcaptionskip=\medskipamount,
+  %
+  numbers=left,
+  numberstyle=\color{linenumbercolor}\tiny,
+  firstnumber=auto,
+  stepnumber=1,
+  numbersep=5pt,
+  numberblanklines=true,
+  %
+  basicstyle=\tt\scriptsize,
+  keywordstyle=\color{keywordcolor},
+  commentstyle=\color{commentcolor}\slshape,
+  stringstyle=\color{stringcolor}\slshape,
+  showstringspaces=false,
+  %
+  %frame=tb,
+  captionpos=t,
+  backgroundcolor=\color{listingbgcolor},
+  xleftmargin=0em,
+  xrightmargin=0em,
+  %
+  literate=
+      {μ}{{$\mu$}}1 {π}{{$\pi$}}1 {σ}{{$\sigma$}}1 {ω}{{$\omega$}}1
+      {ö}{{\"o}}1
+}
+
+\def\python#1#2{
+  \lstinputlisting[%
+  language=python,
+  morekeywords={as,self,yield,False,True,None},
+  escapeinside={\#@}{@},#1]
+  {#2}}
+
+\def\Cpp#1#2{
+  \lstinputlisting[%
+    language=C++,
+    escapeinside={/*}{*/},#1]
+  {#2}}
+
+\lstnewenvironment{iC}[2][]{
+  \lstset{
+    language=C,
+    #1
+  }}{#2}
+
+\lstnewenvironment{iCpp}[2][]{
+  \lstset{
+    language=C++,
+    #1
+  }}{#2}
+
+\lstnewenvironment{ipython}[2][]{
+  \lstset{
+    language=python,
+    morekeywords={as,self,yield,False,True,None},
+    escapeinside={\#@}{@},
+    #1
+  }}{#2}
+
+\lstnewenvironment{ish}[2][]{
+  \lstset{
+    language=sh,
+    #1
+  }}{#2}
+
+\lstdefinelanguage{pfg}
+{
+  sensitive=true,
+  morecomment=[l]{;},
+  alsoletter={\{,\}},
+  keywords={ \{, \} },
+}
+\lstnewenvironment{ipfg}[2][]{
+  \lstset{
+    language=pfg,
+    #1
+  }}{#2}
+
+\def\pfg#1#2{
+  \lstinputlisting[%
+  language=pfg,
+  escapeinside={\;@}{@},#1]
+  {#2}}
+
+\lstdefinelanguage{cfg}
+{
+  sensitive=true,
+  morecomment=[l]{;},
+  alsoletter={[,]},
+  keywords={\],\[},
+}
+
+\lstnewenvironment{icfg}[2][]{
+  \lstset{
+    language=cfg,
+    #1
+  }}{#2}
+
+\def\cfg#1#2{
+  \lstinputlisting[%
+  language=cfg,
+  escapeinside={\;@}{@},#1]
+  {#2}}
+
+\lstdefinelanguage{pml}
+{
+  sensitive=true,
+  morecomment=[s]{<?}{?>},%
+  morecomment=[s]{<!--}{-->},%
+  morekeywords={encoding,name,family,property},%
+}
+\lstnewenvironment{ipml}[2][]{%
+  \lstset{%
+    language=pml,%
+    #1%
+  }}{#2}
+
+\def\pml#1#2{
+  \lstinputlisting[
+    language=pml,
+    #1]{#2}}
+
+% references
+\usepackage[numbers]{natbib}
+\bibliographystyle{unsrtnat}
+\renewcommand\bibsection{}
+\def\newblock{\small}
+
+% misc
+\usepackage{url}
+
+% shortcuts
+\def\slideref#1{{Slide~\ref{slide:#1}}}
+\def\algref#1{{Alg.~\ref{alg:#1}}}
+\def\alglineref#1{{line~\ref{line:#1}}}
+\def\eqref#1{{Eq.~\ref{eq:#1}}}
+\def\figref#1{{Fig.~\ref{fig:#1}}}
+\def\frameref#1{{p.~\ref{frame:#1}}}
+\def\framesref#1#2{{pp.~\ref{frame:#1}--\ref{frame:#2}}}
+\def\lstref#1{{Listing~\ref{lst:#1}}}
+\def\lstlineref#1{{line~\ref{line:#1}}}
+\def\secref#1{{Sec.~\ref{sec:#1}}}
+\def\tabref#1{{Table~\ref{tab:#1}}}
+
+\def\supercite#1{\mbox{\scriptsize\raise 1.0ex\hbox{\cite{#1}}}}
+
+% macros
+\def\href#1{{\footnotesize\bfseries\url{#1}}}
+\def\defeq{\mathrel{\mathop:}=}
+\def\GNU{\mbox{\tt\small GNU}}
+\def\GSL{\mbox{\tt\small GSL}}
+\def\RANLUX{\mbox{\tt\small RANLUX}}
+\def\NULL{\mbox{\tt\small NULL}}
+
+\def\extremum#1{\stackrel[#1]{}{\mbox{\rm ext}}\,}
+\def\maximum#1{\stackrel[#1]{}{\mbox{\rm max}}\,}
+\def\minimum#1{\stackrel[#1]{}{\mbox{\rm min}}\,}
+\def\optimum#1{\stackrel[#1]{}{\mbox{\rm opt}}\,}
+
+\def\cc{\mbox{\tt\small C}}
+\def\cpp{\mbox{\tt\small C++}}
+%\def\cpp{\mbox{\tt C\raise.1ex\hbox{++}}}
+\def\fortran{{\tt\small FORTRAN}}
+\def\f90{{\tt\small FORTRAN90}}
+\def\mpi{{\tt MPI}}
+\def\sql{{\tt SQL}}
+\def\html{{\tt html}}
+\def\th#1{\mbox{$#1^{\rm th}$}}
+
+% small caps
+\def\dem{{\small DEM}}
+\def\srtm{{\small SRTM}}
+\def\uml{{\small UML}}
+
+\def\bydef{\mathrel{\mathop:}=}
+
+\def\pyre{{\color{pyre@pipe}\tt pyre}}
+\def\isce{{\color{pyre@pipe}\tt isce}}
+
+\def\order#1{\mbox{$\mathcal{O}(#1)$}}
+
+\def\action#1{\mbox{\tt #1}}
+\def\basictype#1{\mbox{\color{pml@basictypecolor}\tt #1}}
+\def\class#1{\mbox{\tt #1}}
+\def\constraint#1{\mbox{\tt #1}}
+\def\component#1{\mbox{\color{pml@componentcolor}\tt #1}}
+\def\defaultvalue#1{\mbox{\color{pml@defaultvaluecolor}\tt #1}}
+\def\decorator#1{\mbox{\tt #1}}
+\def\function#1{\mbox{\tt #1}}
+\def\identifier#1{\mbox{\tt #1}}
+\def\instance#1{\mbox{\tt #1}}
+\def\keyword#1{\mbox{\tt #1}}
+\def\literal#1{\mbox{\tt #1}}
+\def\method#1{\mbox{\tt #1}}
+\def\operator#1{\mbox{\tt #1}}
+\def\package#1{\mbox{\tt #1}}
+\def\protocol#1{\mbox{\color{pml@protocolcolor}\tt #1}}
+\def\pyrebuiltin#1{\mbox{\color{pml@pyrebuiltincolor}\tt #1}}
+\def\schema#1{\mbox{\color{pml@schemacolor}\tt #1}}
+\def\srcfile#1{\mbox{\tt #1}}
+\def\trait#1{\mbox{\color{pml@traitcolor}\tt #1}}
+
+\def\TODO#1{{%
+  \frameinlbffalse%
+  \begin{frame}[allowframebreaks]%
+    \frametitle{Still to do}%
+    \begin{itemize}#1\end{itemize}%
+  \end{frame}}}
+
+% set up the PDF options
+\hypersetup{
+    pdftitle={pyre 1.0},
+    pdfauthor={Michael A.G. A\"iv\'azis},
+    pdfsubject={pyre 1.0 overview},
+    pdfkeywords=,           % list of keywords
+%
+    bookmarks=true,         % show bookmarks bar?
+    unicode=false,          % non-Latin characters in Acrobat's bookmarks
+    pdftoolbar=true,        % show Acrobat's toolbar?
+    pdfmenubar=true,        % show Acrobat's menu?
+    pdffitwindow=true,      % page fit to window when opened
+    pdfnewwindow=true,      % links in new window
+    colorlinks=true,        % false: boxed links; true: colored links
+    linkcolor=pyre@leather, % color of internal links
+    citecolor=pyre@stone,   % color of links to bibliography
+    filecolor=pyre@sand,    % color of file links
+    urlcolor=pyre@stone     % color of external links
+}
+
+% end of file
