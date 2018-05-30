@@ -44,8 +44,10 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         """
         # deduce my annealing method
         self.worker = self.deduceAnnealingMethod(job=application.job)
+        # and initialize it
+        self.worker.initialize(application=application)
 
-        # initialize my parts
+        # initialize my other parts
         self.sampler.initialize(application=application)
         self.scheduler.initialize(application=application)
         self.monitor.initialize(application=application)
