@@ -35,6 +35,14 @@ class AnnealingMethod:
 
 
     # interface
+    def initialize(self, application):
+        """
+        Initialize me and my parts given an {application} context
+        """
+        # by default, nothing to do
+        return self
+
+
     def start(self, annealer):
         """
         Start the annealing process from scratch
@@ -57,6 +65,12 @@ class AnnealingMethod:
         """
         Notification that we are at the beginning of an update
         """
+        # ask my step to render itself
+        self.step.print(channel=annealer.info)
+        # all done
+        return self
+
+
         # all done
         return self
 
@@ -110,8 +124,10 @@ class AnnealingMethod:
 
     def finish(self, annealer):
         """
-        The annealing process is complete
+        Notification that the simulation is over
         """
+        # ask my step to render itself
+        self.step.print(channel=annealer.info)
         # all done
         return self
 
