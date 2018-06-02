@@ -6,13 +6,14 @@
 
 gaussian:
     ; shell
-    ; shell = mpi.shells.mpirun ; for running with mpi
+    shell = mpi.shells.mpirun ; for running with mpi
+    shell.tasks = 2 ; for running with mpi
 
     ; job layout
     job:
-        tasks = 1 ; number of tasks per host
+        tasks = {gaussian.shell.tasks} ; number of tasks per host
         gpus = 0  ; number of gpus per task
-        chains = 2**2; **10 ; number of chains per task
+        chains = 2**10 ; number of chains per task
 
     ; model configuration
     model:
@@ -31,7 +32,7 @@ gaussian:
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
-    tasks = 2
+    ; extra flags to openmpi
     extra = -mca btl self,tcp
 
 ; end of file
