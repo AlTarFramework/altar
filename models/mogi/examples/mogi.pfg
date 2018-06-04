@@ -1,0 +1,35 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+gaussian:
+    ; shell
+    ; shell = mpi.shells.mpirun ; for running with mpi
+
+    ; job layout
+    job:
+        tasks = 1 ; number of tasks per host
+        gpus = 0  ; number of gpus per task
+        chains = 2**2
+
+    ; model configuration
+    model:
+        init = uniform
+        prior = uniform
+
+    ; initializer pdf configuration
+    model.prep:
+        parameters = 2
+    ; initializer pdf configuration
+    model.prior:
+        parameters = 2
+
+
+; for parallel runs
+mpi.shells.mpirun # altar.plexus.shell:
+    tasks = 2
+    extra = -mca btl self,tcp
+
+; end of file
