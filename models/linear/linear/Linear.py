@@ -26,9 +26,11 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
     observations = altar.properties.int(default=None)
     observations.doc = "the number of data samples"
 
-    patch = altar.properties.path(default="patch-9")
-    patch.doc = "the directory with the input files"
+    # the name of the test case
+    case = altar.properties.path(default="patch-9")
+    case.doc = "the directory with the input files"
 
+    # the file based inputs
     green = altar.properties.path(default="green.txt")
     green.doc = "the name of the file with the Green functions"
 
@@ -54,18 +56,24 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         self.G, self.d, self.Cd = self.loadInputs()
 
         # grab a channel
-        channel = self.info
+        channel = self.debug
         channel.line("run info:")
         # show me the model
         channel.line(f" -- model: {self}")
+        # and the test case name
+        channel.line(f" -- case: {self.case}")
         # the contents of the data filesystem
-        channel.line(f" -- contents of '{self.patch}':")
+        channel.line(f" -- contents of '{self.case}':")
         channel.line("\n".join(self.ifs.dump(indent=2)))
         # the loaded data
         channel.line(f" -- inputs in memory:")
         channel.line(f"    green functions: {self.G.shape}")
-        channel.line(f"       observations: {self.d.shape}")
+        channel.line(f"    observations: {self.d.shape}")
         channel.line(f"    data covariance: {self.Cd.shape}")
+        # model state
+        channel.line(f" -- model state:")
+        channel.line(f"    parameters: {self.parameters}")
+        channel.line(f"    observations: {self.observations}")
         # flush
         channel.log()
 
@@ -88,8 +96,13 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
-        print("Linear.priorLikelihood")
-        step.print(channel=self.info)
+        # make a channel
+        channel = self.debug
+        # sign in
+        channel.log("Linear.priorLikelihood")
+        # show me the state of the calculation
+        step.print(channel=self.debug)
+        # bail, for now
         raise SystemExit(0)
         # all done
         return self
@@ -101,7 +114,11 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
-        print("Linear.dataLikelihood")
+        # make a channel
+        channel = self.debug
+        # sign in
+        channel.log("Linear.dataLikelihood")
+        # bail, for now
         raise SystemExit(0)
         # all done
         return self
@@ -113,6 +130,12 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Check whether the samples in {step.theta} are consistent with the model requirements and
         update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
+        # make a channel
+        channel = self.debug
+        # sign in
+        channel.log("Linear.verify")
+        # bail, for now
+        raise SystemExit(0)
         # all done; return the rejection map
         return mask
 
@@ -125,13 +148,13 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # attempt to
         try:
             # mount the directory with my input data
-            ifs = altar.filesystem.local(root=self.patch)
+            ifs = altar.filesystem.local(root=self.case)
         # if it fails
         except altar.filesystem.MountPointError as error:
             # grab my error channel
             channel = self.error
             # complain
-            channel.log(f"bad patch name: '{self.patch}'")
+            channel.log(f"bad case name: '{self.case}'")
             channel.log(str(error))
             # and bail
             raise SystemExit(1)
@@ -158,7 +181,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
             # grab my error channel
             channel = self.error
             # complain
-            channel.log(f"missing Green functions: no '{self.green}' in '{self.patch}'")
+            channel.log(f"missing Green functions: no '{self.green}' in '{self.case}'")
             # and raise the exception again
             raise
         # if all goes well
@@ -177,7 +200,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
             # grab my error channel
             channel = self.error
             # complain
-            channel.log(f"missing observations: no '{self.data}' in '{self.patch}'")
+            channel.log(f"missing observations: no '{self.data}' in '{self.case}'")
             # and raise the exception again
             raise
         # if all goes well
@@ -196,7 +219,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
             # grab my error channel
             channel = self.error
             # complain
-            channel.log(f"missing data covariance matrix: no '{self.cd}' in '{self.patch}'")
+            channel.log(f"missing data covariance matrix: no '{self.cd}' in '{self.case}'")
             # and raise the exception again
             raise
         # if all goes well
