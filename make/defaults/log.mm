@@ -41,9 +41,14 @@ log.action = \
     $(palette.blue)"  [$(1)]"$(palette.normal) \
     $(2)
 
-log.action.attn = \
+log.asset = \
     $(log) \
     $(palette.purple)"  [$(1)]"$(palette.normal) \
+    $(2)
+
+log.info = \
+    $(log) \
+    $(palette.cyan)"  [$(1)]"$(palette.normal) \
     $(2)
 
 # terminals that support the ansi color commands

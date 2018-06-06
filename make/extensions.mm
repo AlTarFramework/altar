@@ -47,7 +47,11 @@ extension.targets = \
     ${foreach lib,$($(project).libraries),$($(lib).archive)} \
     $($($(1).library).archive) } \
  \
-  ${eval $(1): $(1).archive $(1).extension } \
+  ${eval \
+    $(1): $(1).archive $(1).extension \
+    ; \
+      ${call log.asset,$(1)} \
+  } \
  \
   ${eval $(1).archive: $($(1).library).archive} \
  \

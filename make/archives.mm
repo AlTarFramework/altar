@@ -53,7 +53,11 @@ library.api = \
     } \
   } \
  \
-  ${eval $(1): $(1).api $(1).archive} \
+  ${eval \
+    $(1): $(1).api $(1).archive \
+    ; \
+      ${call log.asset,$(1)} \
+  } \
  \
   ${eval $(1).api: $($(1).inc) $($(1).api.dirs) $($(1).api)} \
  \
