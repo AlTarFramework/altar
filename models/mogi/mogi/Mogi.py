@@ -118,7 +118,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             # how likely is it given my observations
             raise NotImplementedError("NYI: compare with observations")
 
-            data[sample] = log likelihood of this (predicted, expected) pair
+            # data[sample] = log likelihood of this (predicted, expected) pair
 
         # all done
         return self
