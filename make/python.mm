@@ -46,6 +46,7 @@ python.prod.meta = ${if $(python.src.meta.raw),$(python.dest.py)/$(python.src.me
 
 # the main recipe
 $(project).package: $(python.prod.pyc) $(python.prod.meta) $(python.prod.drivers)
+	${call log.asset,$(project).package}
 
 
 # the directories

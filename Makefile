@@ -45,7 +45,7 @@ altar: altar.package altar.libraries altar.extensions
 
 # recipes for building priors and models
 $(priors) $(models) : altar
-	${call log.action.attn,recurse,$@}
+	${call log.info,recurse,$@}
 	$(MAKE) -C $@ -I ${realpath .} prefix=${realpath $(prefix)}
 
 # mark targets that are directories as phony
