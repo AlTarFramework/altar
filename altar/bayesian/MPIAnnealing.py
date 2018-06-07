@@ -189,13 +189,16 @@ class MPIAnnealing(AnnealingMethod):
         posterior = altar.vector.collect(
             vector=step.posterior, communicator=communicator, destination=manager)
 
-        # if I am not the manager task, just return the local state
-        if self.rank != self.manager: return step
+        # if I am not the manager task
+        if self.rank != self.manager:
+            # just return the local state
+            return step
 
-        # everybody has the same covariance matrix
-        Σ = step.sigma
-        # otherwise, pack the state of the problem and return it
-        return self.CoolingStep(beta=β, theta=θ, likelihoods=(prior,data,posterior), sigma=Σ)
+        # the manager packs the state of the problem and returns it; everybody has the same
+        # covariance matrix, so the local copy is good enough
+        return self.CoolingStep(
+            beta=β, theta=θ,
+            likelihoods=(prior,data,posterior), sigma=step.sigma)
 
 
     def partition(self):
