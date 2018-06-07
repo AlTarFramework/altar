@@ -37,7 +37,7 @@ class Base(altar.component, implements=distribution):
     @altar.export
     def initialize(self, rng):
         """
-        Initialize with the given runtime {context}
+        Initialize with the given random number generator
         """
         # being abstract, i don't know what to do here
         raise NotImplementedError(
@@ -88,8 +88,6 @@ class Base(altar.component, implements=distribution):
         # being abstract, i don't know what to do here
         raise NotImplementedError(
             f"class '{type(self).__name__}' must implement 'verify'")
-
-
 
 
     # the forwarding interface

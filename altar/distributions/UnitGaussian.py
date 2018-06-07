@@ -28,12 +28,22 @@ class UnitGaussian(base, family="altar.distributions.ugaussian"):
     @altar.export
     def initialize(self, rng):
         """
-        Initialize with the given runtime {context}
+        Initialize with the given random number generator
         """
         # set up my pdf
         self.pdf = altar.pdf.ugaussian(rng=rng.rng)
         # all done
         return self
+
+
+    @altar.export
+    def verify(self, theta, mask):
+        """
+        Check whether my portion of the samples in {theta} are consistent with my constraints, and
+        update {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+        # all samples are valid, so there is nothing to do
+        return mask
 
 
 # end of file

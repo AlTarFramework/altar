@@ -26,6 +26,15 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
     observations = altar.properties.int(default=None)
     observations.doc = "the number of data samples"
 
+    # my distributions
+    prep = altar.distributions.distribution()
+    prep.default = altar.distributions.gaussian()
+    prep.doc = "the distribution used to generate the initial sample"
+
+    prior = altar.distributions.distribution()
+    prior.default = altar.distributions.gaussian()
+    prior.doc = "the prior distribution"
+
     # the name of the test case
     case = altar.properties.path(default="patch-9")
     case.doc = "the directory with the input files"
@@ -50,30 +59,42 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # chain up
         super().initialize(application=application)
 
+        # get the random number generator
+        rng = self.rng
+        # and initialize my distributions
+        self.prep.initialize(rng=rng)
+        self.prior.initialize(rng=rng)
+
         # mount my input data space
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # convert the input filenames into data
         self.G, self.d, self.Cd = self.loadInputs()
+        # prepare the residuals matrix
+        self.residuals = self.initializeResiduals(data=self.d)
 
         # grab a channel
         channel = self.debug
         channel.line("run info:")
         # show me the model
         channel.line(f" -- model: {self}")
-        # and the test case name
+        # the model state
+        channel.line(f" -- model state:")
+        channel.line(f"    parameters: {self.parameters}")
+        channel.line(f"    observations: {self.observations}")
+        # the test case name
         channel.line(f" -- case: {self.case}")
         # the contents of the data filesystem
         channel.line(f" -- contents of '{self.case}':")
         channel.line("\n".join(self.ifs.dump(indent=2)))
         # the loaded data
         channel.line(f" -- inputs in memory:")
-        channel.line(f"    green functions: {self.G.shape}")
-        channel.line(f"    observations: {self.d.shape}")
-        channel.line(f"    data covariance: {self.Cd.shape}")
-        # model state
-        channel.line(f" -- model state:")
-        channel.line(f"    parameters: {self.parameters}")
-        channel.line(f"    observations: {self.observations}")
+        channel.line(f"    green functions: shape={self.G.shape}")
+        channel.line(f"    observations: shape={self.d.shape}")
+        channel.line(f"    data covariance: shape={self.Cd.shape}")
+        # distributions
+        channel.line(f" -- distributions:")
+        channel.line(f"    prior: {self.prior}")
+        channel.line(f"    initializer: {self.prep}")
         # flush
         channel.log()
 
@@ -86,6 +107,10 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         """
         Fill {step.θ} with an initial random sample from my prior distribution.
         """
+        # grab the portion of the sample that's mine
+        θ = self.restrict(theta=step.theta)
+        # fill it with random numbers from my initializer
+        self.prep.initializeSample(theta=θ)
         # and return
         return self
 
@@ -96,14 +121,16 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
-        # make a channel
-        channel = self.debug
-        # sign in
-        channel.log("Linear.priorLikelihood")
-        # show me the state of the calculation
-        step.print(channel=self.debug)
-        # bail, for now
-        raise SystemExit(0)
+        # grab my prior pdf
+        pdf = self.prior
+        # grab the portion of the sample that's mine
+        θ = self.restrict(theta=step.theta)
+        # and the storage for the prior likelihoods
+        likelihood = step.prior
+
+        # fill my portion of the prior likelihood vector
+        pdf.priorLikelihood(theta=θ, likelihood=likelihood)
+
         # all done
         return self
 
@@ -114,12 +141,18 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
-        # make a channel
-        channel = self.debug
-        # sign in
-        channel.log("Linear.dataLikelihood")
-        # bail, for now
-        raise SystemExit(0)
+        # grab the portion of the sample that's mine
+        θ = self.restrict(theta=step.theta)
+        # and the storage for the data likelihoods
+        data = step.data
+
+        # find out how many samples in the set
+        samples = θ.rows
+        # get the number of parameters
+        parameters = self.parameters
+        # and the number of observations
+        observations = self.observations
+
         # all done
         return self
 
@@ -130,12 +163,14 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         Check whether the samples in {step.theta} are consistent with the model requirements and
         update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
-        # make a channel
-        channel = self.debug
-        # sign in
-        channel.log("Linear.verify")
-        # bail, for now
-        raise SystemExit(0)
+        # grab the portion of the sample that's mine
+        θ = self.restrict(theta=step.theta)
+        # grab my prior
+        pdf = self.prior
+
+        # ask it to verify my samples
+        pdf.verify(theta=θ, mask=mask)
+
         # all done; return the rejection map
         return mask
 
@@ -233,11 +268,26 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         return green, data, cd
 
 
+    def initializeResiduals(self, data):
+        """
+        Prime the matrix that will hold the residuals (G θ - d) for each sample by duplicating the
+        observation vector as many times as there are samples
+        """
+        #
+        # declare
+        r = altar.matrix(shape=())
+        # all done
+        return r
+
+
     # private data
-    ifs = None
+    ifs = None # the filesystem with the input fies
+
     G = None # the Green functions
     d = None # the vector with the observations
     Cd = None # the data covariance matrix
+
+    residuals = None # matrix that holds (G θ - d) for each sample
 
 
 # end of file

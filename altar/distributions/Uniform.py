@@ -33,7 +33,7 @@ class Uniform(base, family="altar.distributions.uniform"):
     @altar.export
     def initialize(self, rng):
         """
-        Initialize with the given runtime {context}
+        Initialize with the given random number generator
         """
         # set up my pdf
         self.pdf = altar.pdf.uniform(rng=rng.rng, support=self.support)

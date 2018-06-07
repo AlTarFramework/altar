@@ -26,19 +26,29 @@ class Gaussian(base, family="altar.distributions.gaussian"):
 
     # user configurable state
     sigma = altar.properties.float(default=1)
-    sigma.doc = "the support interval of the prior distribution"
+    sigma.doc = "the standard deviation of the distribution"
 
 
     # protocol obligations
     @altar.export
     def initialize(self, rng):
         """
-        Initialize with the given runtime {context}
+        Initialize with the given random number generator
         """
         # set up my pdf
         self.pdf = altar.pdf.gaussian(rng=rng.rng, sigma=self.sigma)
         # all done
         return self
+
+
+    @altar.export
+    def verify(self, theta, mask):
+        """
+        Check whether my portion of the samples in {theta} are consistent with my constraints, and
+        update {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+        # all samples are valid, so there is nothing to do
+        return mask
 
 
 # end of file
