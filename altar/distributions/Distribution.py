@@ -32,7 +32,7 @@ class Distribution(altar.protocol, family="altar.distributions"):
     @altar.provides
     def initialize(self, **kwds):
         """
-        Initialize with the given runtime {context}
+        Initialize with the given random number generator
         """
 
 

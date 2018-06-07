@@ -71,10 +71,6 @@ class AnnealingMethod:
         return self
 
 
-        # all done
-        return self
-
-
     def cool(self, annealer):
         """
         Push my state forward along the cooling schedule
