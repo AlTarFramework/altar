@@ -69,6 +69,8 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # convert the input filenames into data
         self.G, self.d, self.Cd = self.loadInputs()
+        # prepare the residuals matrix
+        self.residuals = self.initializeResiduals(data=self.d)
 
         # grab a channel
         channel = self.debug
@@ -266,11 +268,26 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         return green, data, cd
 
 
+    def initializeResiduals(self, data):
+        """
+        Prime the matrix that will hold the residuals (G θ - d) for each sample by duplicating the
+        observation vector as many times as there are samples
+        """
+        #
+        # declare
+        r = altar.matrix(shape=())
+        # all done
+        return r
+
+
     # private data
-    ifs = None
+    ifs = None # the filesystem with the input fies
+
     G = None # the Green functions
     d = None # the vector with the observations
     Cd = None # the data covariance matrix
+
+    residuals = None # matrix that holds (G θ - d) for each sample
 
 
 # end of file
