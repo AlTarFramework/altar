@@ -35,6 +35,11 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
     prior.default = altar.distributions.gaussian()
     prior.doc = "the prior distribution"
 
+    # the norm to use for computing the data log likelihood
+    norm = altar.norms.norm()
+    norm.default = altar.norms.l2()
+    norm.doc = "the norm to use when computing the data log likelihood"
+
     # the name of the test case
     case = altar.properties.path(default="patch-9")
     case.doc = "the directory with the input files"
@@ -59,7 +64,11 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # chain up
         super().initialize(application=application)
 
-        # get the random number generator
+        # find out how many samples I will be working with; this equal to the number of chains
+        samples = application.job.chains
+
+        # get the random number generator; it gets attached to me by the {initialize} method of
+        # my superclass
         rng = self.rng
         # and initialize my distributions
         self.prep.initialize(rng=rng)
@@ -69,8 +78,12 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # convert the input filenames into data
         self.G, self.d, self.Cd = self.loadInputs()
+        # compute the normalization
+        self.normalization = self.computeNormalization(observations=self.d.shape, cd=self.Cd)
+        # compute the inverse of {Cd}
+        self.Cd_inv = self.computeCovarianceInverse(self.Cd)
         # prepare the residuals matrix
-        self.residuals = self.initializeResiduals(data=self.d)
+        self.residuals = self.initializeResiduals(samples=samples, data=self.d)
 
         # grab a channel
         channel = self.debug
@@ -143,15 +156,30 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         """
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
+        # the green functions
+        G = self.G
+        # the observations
+        d = self.d
+        # the inverse of the data covariance
+        Cd_inv = self.Cd_inv
+        # the normalization
+        normalization = self.normalization
         # and the storage for the data likelihoods
-        data = step.data
+        dataLLK = step.data
 
-        # find out how many samples in the set
-        samples = θ.rows
-        # get the number of parameters
-        parameters = self.parameters
-        # and the number of observations
-        observations = self.observations
+        # clone the residuals since the operations that follow write in-place
+        residuals = self.residuals.clone()
+        # compute G * transpose(θ) - d
+        # we must transpose θ because its shape is (samples x parameters)
+        # while the shape of G is (observations x parameters)
+        residuals = altar.blas.dgemm(G.opNoTrans, θ.opTrans, 1.0, G, θ, -1.0, residuals)
+        # compute the L2 norm
+        norm = self.norm.eval(vectors=residuals, c_inv=Cd_inv)
+
+        # go through each sample
+        for idx in range(dataLLK.shape):
+            # decorate the data log likelihood
+            dataLLK[idx] = normalization - norm[idx] /2
 
         # all done
         return self
@@ -268,26 +296,65 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         return green, data, cd
 
 
-    def initializeResiduals(self, data):
+    def computeCovarianceInverse(self, cd):
+        """
+        Compute the inverse of the data covariance matrix
+        """
+        # make a copy so we don't destroy the original
+        cd = cd.clone()
+        # perform the LU decomposition
+        lu = altar.lapack.LU_decomposition(cd)
+        # invert; this creates a new matrix
+        inv = altar.lapack.LU_invert(*lu)
+        # compute the Cholesky decomposition
+        inv = altar.lapack.cholesky_decomposition(inv)
+        # and return it
+        return inv
+
+
+    def computeNormalization(self, observations, cd):
+        """
+        Compute the normalization of the L2 norm
+        """
+        # support
+        from math import log, pi as π
+        # make a copy of cd
+        cd = cd.clone()
+        # compute its LU decomposition
+        decomposition = altar.lapack.LU_decomposition(cd)
+        # use it to compute the log of its determinant
+        logdet = altar.lapack.LU_lndet(*decomposition)
+        # all done
+        return -1.0 * (observations/2 * log(2*π) + logdet/2);
+
+
+    def initializeResiduals(self, samples, data):
         """
         Prime the matrix that will hold the residuals (G θ - d) for each sample by duplicating the
         observation vector as many times as there are samples
         """
-        #
-        # declare
-        r = altar.matrix(shape=())
+        # allocate the residual matrix
+        r = altar.matrix(shape=(data.shape, samples))
+        # for each sample
+        for sample in range(samples):
+            # make the corresponding column a copy of the data vector
+            r.setColumn(sample, data)
         # all done
         return r
 
 
     # private data
-    ifs = None # the filesystem with the input fies
+    ifs = None # the filesystem with the input files
 
+    # inputs
     G = None # the Green functions
     d = None # the vector with the observations
     Cd = None # the data covariance matrix
 
+    # computed
+    Cd_inv = None # the inverse of the data covariance matrix
     residuals = None # matrix that holds (G θ - d) for each sample
+    normalization = 1 # the normalization of the L2 norm
 
 
 # end of file
