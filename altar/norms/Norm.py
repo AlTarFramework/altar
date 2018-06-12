@@ -19,6 +19,14 @@ class Norm(altar.protocol, family="altar.norms"):
     """
 
 
+    # interface
+    @altar.provides
+    def eval(self, vectors, **kwds):
+        """
+        Compute the L2 norm of the given vectors
+        """
+
+
     # framework hooks
     @classmethod
     def pyre_default(cls, **kwds):
