@@ -173,13 +173,13 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # we must transpose θ because its shape is (samples x parameters)
         # while the shape of G is (observations x parameters)
         residuals = altar.blas.dgemm(G.opNoTrans, θ.opTrans, 1.0, G, θ, -1.0, residuals)
-        # compute the L2 norm
-        norm = self.norm.eval(vectors=residuals, c_inv=Cd_inv)
 
-        # go through each sample
-        for idx in range(dataLLK.shape):
-            # decorate the data log likelihood
-            dataLLK[idx] = normalization - norm[idx] /2
+        # go through the residual of each sample
+        for idx in range(residuals.columns):
+            # extract it
+            residual = residuals.getColumn(idx)
+            # compute its norm, normalize, and store it as the data log likelihood
+            dataLLK[idx] = normalization - self.norm.eval(v=residual, sigma_inv=Cd_inv)/2
 
         # all done
         return self
@@ -325,7 +325,7 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # use it to compute the log of its determinant
         logdet = altar.lapack.LU_lndet(*decomposition)
         # all done
-        return -1.0 * (observations/2 * log(2*π) + logdet/2);
+        return - (log(2*π)*observations + logdet) / 2;
 
 
     def initializeResiduals(self, samples, data):
