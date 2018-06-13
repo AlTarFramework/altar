@@ -68,7 +68,7 @@ $(python.prod.pyc): $(python.dest.py)/%.pyc: %.py | $(python.prod.dirs)
 	$(mv) $(<:.py=.pyc) $@
 
 # package meta-data
-$(python.prod.meta): $(python.src.meta.raw) | ${dir $(python.prod.meta)}
+$(python.prod.meta): | ${dir $(python.prod.meta)}
 	${call log.action,sed,$(python.src.meta.raw)}
 	$(sed) \
           -e "s:PROJECT:$(project):g" \
@@ -77,11 +77,14 @@ $(python.prod.meta): $(python.src.meta.raw) | ${dir $(python.prod.meta)}
           -e "s:REVISION:$($(project).revision):g" \
           -e "s|YEAR|$(now.year)|g" \
           -e "s|TODAY|$(now.date)|g" \
-          $< > $<.py
+          $(python.src.meta.raw) > $(python.src.meta)
 	${call log.action,python,$(python.src.meta)}
 	$(python) -m compileall -b -q ${abspath $(python.src.meta)}
-	$(mv) $(python.src.meta:.py=.pyc) $@
+	$(mv) $(python.src.meta:.py=.pyc) $(python.prod.meta)
 	$(rm) $(python.src.meta)
+
+# always rebuild the meta file since it really depends on the git hash more than anything else
+.PHONY: $(python.prod.meta)
 
 # debug targets
 python.src:
