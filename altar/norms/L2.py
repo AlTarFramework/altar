@@ -15,7 +15,7 @@ from .Norm import Norm
 
 
 # declaration
-class L2(altar.component, familt="altar.norms.l2", implements=Norm):
+class L2(altar.component, family="altar.norms.l2", implements=Norm):
     """
     The L2 norm
     """
