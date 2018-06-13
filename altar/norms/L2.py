@@ -38,16 +38,18 @@ class L2(altar.component, familt="altar.norms.l2", implements=Norm):
     # implementation details
     def withCovariance(self, v, sigma_inv):
         """
-        Compute the L2 norm of the given vector with a given covariance matrix
+        Compute the L2 norm of the given vector using the given Cholesky decomposed inverse
+        covariance matrix
         """
-        # make a copy of the input vector
-        vT = v.clone()
-        # pre-multiply {v} by Cd^{-1}: use the upper triangle, no transpose, non-unit diagonal
+        # we assume {sigma_inv} is Cholesky decomposed, so we can pre-multiply the vector by
+        # the lower triangle, and then just take the norm
+
+        # use the lower triangle, no transpose, non-unit diagonal
         v = altar.blas.dtrmv(
-            sigma_inv.upperTriangular, sigma_inv.opNoTrans, sigma_inv.nonUnitDiagonal,
+            sigma_inv.lowerTriangular, sigma_inv.opNoTrans, sigma_inv.nonUnitDiagonal,
             sigma_inv, v)
         # compute the dot product and return it
-        return altar.blas.ddot(vT, v)
+        return altar.blas.dnrm2(v)
 
 
 # end of file
