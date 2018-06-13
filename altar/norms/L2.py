@@ -23,27 +23,31 @@ class L2(altar.component, familt="altar.norms.l2", implements=Norm):
 
     # interface
     @altar.export
-    def eval(self, vectors, c_inv=None):
+    def eval(self, v, sigma_inv=None):
         """
-        Compute the L2 norm of the given vectors
+        Compute the L2 norm of the given vector, with or without a covariance matrix
         """
-        # allocate a vector for the result
-        norm = altar.vector(shape=vectors.columns)
-        # each column in {vectors} corresponds to a vector whose norm we are to compute
-        for column in range(vectors.columns):
-            # extract the vector
-            v = vectors.getColumn(column)
-            # and make a copy
-            vT = v.clone()
-            # pre-multiply by Cd^{-1}: use the upper triangle, no transpose, non-unit diagonal
-            v = altar.blas.dtrmv(
-                c_inv.upperTriangular, c_inv.opNoTrans, c_inv.nonUnitDiagonal,
-                c_inv, v)
-            # compute the dot product
-            norm[column] = altar.blas.ddot(vT, v)
-        # all done
-        return norm
+        # if we have a covariance matrix
+        if sigma_inv is not None:
+            # use the specialized implementation
+            return self.withCovariance(v=v, sigma_inv=sigma_inv)
+        # otherwise, compute the norm and return it
+        return altar.blas.dnrm2(v)
 
+
+    # implementation details
+    def withCovariance(self, v, sigma_inv):
+        """
+        Compute the L2 norm of the given vector with a given covariance matrix
+        """
+        # make a copy of the input vector
+        vT = v.clone()
+        # pre-multiply {v} by Cd^{-1}: use the upper triangle, no transpose, non-unit diagonal
+        v = altar.blas.dtrmv(
+            sigma_inv.upperTriangular, sigma_inv.opNoTrans, sigma_inv.nonUnitDiagonal,
+            sigma_inv, v)
+        # compute the dot product and return it
+        return altar.blas.ddot(vT, v)
 
 
 # end of file

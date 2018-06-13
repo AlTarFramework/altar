@@ -21,9 +21,9 @@ class Norm(altar.protocol, family="altar.norms"):
 
     # interface
     @altar.provides
-    def eval(self, vectors, **kwds):
+    def eval(self, v, **kwds):
         """
-        Compute the L2 norm of the given vectors
+        Compute the L2 norm of the given vector
         """
 
 
