@@ -22,7 +22,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
     The surface displacement calculation for a point pressure source in an elastic half space.
 
-    This is a four parameter model: x,y,depth to locate the point source, and the volume change
+    Currently, {mogi} is implemented as a four parameter model: x,y,depth locate the point
+    source, and {dV} provides the point source strength as the volume change. It can easily
+    become a five parameter model by including the Poisson ratio of the elastic material to the
+    list of free parameters.
     """
 
 
@@ -196,10 +199,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         locations
         """
         # unpack the parameters
-        x_source = parameters[0]
-        y_source = parameters[1]
-        d_source = parameters[2]
-        dV = parameters[3]
+        x_src, y_src, d_src, dV = parameters
         # the material properties
         nu = self.nu
 
@@ -211,18 +211,21 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # go through each observation location
         for index, (x_obs,y_obs) in enumerate(locations):
             # compute displacements
-            x = x_source - x_obs
-            y = y_source - y_obs
+            x = x_src - x_obs
+            y = y_src - y_obs
+            d = d_src
             # compute the distance to the point source
             x2 = x**2
             y2 = y**2
-            d2 = (d_source)**2
+            d2 = d**2
             # intermediate values
-            C = (nu-1)*dV/π
-            R = sqrt(x2+y2+d2)
-            R3 = C*R**-3
-            # store the expected displacement
-            u[3*index+0], u[3*index+1], u[3*index+2] = x*R3, y*R3, -d_source*R3
+            C = (nu-1) * dV/π
+            R = sqrt(x2 + y2 + d2)
+            CR3 = C * R**-3
+            # pack the expected displacement into the result vector; the packing is done
+            # old-style: by multiplying the {location} index by three to make room for the
+            # three displacement components
+            u[3*index+0], u[3*index+1], u[3*index+2] = x*CR3, y*CR3, -d*CR3
 
         # all done
         return u
