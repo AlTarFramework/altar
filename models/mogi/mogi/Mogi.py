@@ -10,7 +10,7 @@
 
 
 # externals
-from math import sqrt, π
+from math import sqrt, pi as π
 # the package
 import altar
 
@@ -30,6 +30,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     parameters = altar.properties.int(default=4)
     parameters.doc = "the number of model degrees of freedom"
 
+    observations = altar.properties.int(default=3*11*11)
+    observations.doc = "the number of model degrees of freedom"
+
+    # distributions
     prep = altar.distributions.distribution()
     prep.doc = "the distribution used to generate the initial sample"
 
@@ -40,9 +44,20 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     depth = altar.properties.array(default=[0, 60000]) # in SI
     depth.doc = "the allowed range for the depth parameter"
 
-    # observations
-    stations = altar.properties.istream(default="stations.csv")
+    # the name of the test case
+    case = altar.properties.path(default="synthetic")
+    case.doc = "the directory with the input files"
+
+    # the file based inputs
+    displacements = altar.properties.path(default="displacements.txt")
+    displacements.doc = "the name of the file with the displacements"
+
+    stations = altar.properties.path(default="stations.txt")
     stations.doc = "the name of the file with the locations of the observation points"
+
+    # the material properties
+    nu = altar.properties.float(default=.25)
+    nu.doc = "the Poisson ratio"
 
 
     # protocol obligations
@@ -56,9 +71,41 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # get my random number generator
         rng = self.rng
 
+        #  adjust the number of parameters of my distributions
+        self.prep.parameters = self.parameters
+        self.prior.parameters = self.parameters
+
         # initialize my distributions
         self.prep.initialize(rng=rng)
         self.prior.initialize(rng=rng)
+
+        # mount my input data space
+        self.ifs = self.mountInputDataspace(pfs=application.pfs)
+        # convert the input filenames into data
+        self.points, self.d = self.loadInputs()
+
+        # make a channel
+        channel = self.info
+        # show me
+        channel.line("run info:")
+        # show me the model
+        channel.line(f" -- model: {self}")
+        # the model state
+        channel.line(f" -- model state:")
+        channel.line(f"    parameters: {self.parameters}")
+        channel.line(f"    observations: {self.observations}")
+        # the test case name
+        channel.line(f" -- case: {self.case}")
+        # the contents of the data filesystem
+        channel.line(f" -- contents of '{self.case}':")
+        channel.line("\n".join(self.ifs.dump(indent=2)))
+        # the loaded data
+        # the loaded data
+        channel.line(f" -- inputs in memory:")
+        channel.line(f"    stations: {len(self.points)} locations")
+        channel.line(f"    observations: {len(self.d)} displacements")
+        # flush
+        channel.log()
 
         # all done
         return self
@@ -113,8 +160,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # for each sample in the sample set
         for sample in range(samples):
+            # extract the parameter vector
+            parameters = θ.getRow(sample)
             # compute the expected displacement
-            u = self.mogi(parameters=θ[sample])
+            u = self.mogi(parameters=parameters)
             # how likely is it given my observations
             raise NotImplementedError("NYI: compare with observations")
 
@@ -140,14 +189,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         return mask
 
 
-    # meta methods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # all done
-        return
-
-
     # implementation details
     def mogi(self, parameters):
         """
@@ -159,15 +200,17 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         y_source = parameters[1]
         d_source = parameters[2]
         dV = parameters[3]
+        # the material properties
+        nu = self.nu
 
         # get the list of locations of interest
-        locations = self.locations
+        locations = self.points
 
         # allocate space for the result
-        u = altar.matrix(shape=(len(locations), 3))
+        u = altar.vector(shape=3*len(locations))
         # go through each observation location
-        for index, (x_obs,y_obs) in enumerate(self.locations):
-            #
+        for index, (x_obs,y_obs) in enumerate(locations):
+            # compute displacements
             x = x_source - x_obs
             y = y_source - y_obs
             # compute the distance to the point source
@@ -179,9 +222,96 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             R = sqrt(x2+y2+d2)
             R3 = C*R**-3
             # store the expected displacement
-            u[index,0], u[index,1], u[index,2] = x*R3, y*R3, -d_source*R3
+            u[3*index+0], u[3*index+1], u[3*index+2] = x*R3, y*R3, -d_source*R3
 
         # all done
         return u
+
+
+    def mountInputDataspace(self, pfs):
+        """
+        Mount the directory with my input files
+        """
+        # attempt to
+        try:
+            # mount the directory with my input data
+            ifs = altar.filesystem.local(root=self.case)
+        # if it fails
+        except altar.filesystem.MountPointError as error:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"bad case name: '{self.case}'")
+            channel.log(str(error))
+            # and bail
+            raise SystemExit(1)
+
+        # if all goes well, explore it and mount it
+        pfs["inputs"] = ifs.discover()
+        # all done
+        return ifs
+
+
+    def loadInputs(self):
+        """
+        Load the data in the input files into memory
+        """
+        # grab the input dataspace
+        ifs = self.ifs
+
+        # first the stations
+        try:
+            # get the path to the file
+            gf = ifs[self.stations]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing station locations: no '{self.stations}' in '{self.case}'")
+            # and raise the exception again
+            raise
+        # if all goes well
+        else:
+            # prime the locations pile
+            points = []
+            # open the file
+            with gf.open() as stream:
+                # grab each line
+                for line in stream:
+                    # unpack
+                    x, y = map(float, line.strip().split(','))
+                    # and store
+                    points.append((x,y))
+
+        # next, the displacements
+        try:
+            # get the path to the file
+            df = ifs[self.displacements]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing displacements: no '{self.displacements}' in '{self.case}'")
+            # and raise the exception again
+            raise
+        # if all goes well
+        else:
+            # allocate the vector
+            data = altar.vector(shape=self.observations)
+            # and load the file contents into memory
+            data.load(df.uri)
+
+        # all done
+        return points, data
+
+
+    # private data
+    ifs = None # filesystem with the input data
+
+    # input
+    points = None # the list of observation points
+    d = None # the matrix of displacements for each control point
 
 # end of file
