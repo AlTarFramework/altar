@@ -43,6 +43,11 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     prior = altar.distributions.distribution()
     prior.doc = "the prior distribution"
 
+    # the norm to use for computing the data log likelihood
+    norm = altar.norms.norm()
+    norm.default = altar.norms.l2()
+    norm.doc = "the norm to use when computing the data log likelihood"
+
     # model specific parameters
     depth = altar.properties.array(default=[0, 60000]) # in SI
     depth.doc = "the allowed range for the depth parameter"
@@ -86,6 +91,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # convert the input filenames into data
         self.points, self.d = self.loadInputs()
+        # compute the normalization
+        self.normalization = self.computeNormalization(observations=self.d.shape)
 
         # make a channel
         channel = self.info
@@ -97,6 +104,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         channel.line(f" -- model state:")
         channel.line(f"    parameters: {self.parameters}")
         channel.line(f"    observations: {self.observations}")
+        # the distributions
+        channel.line(f" -- distributions")
+        channel.line(f"    prep: {self.prep}")
+        channel.line(f"        support: {self.prep.support}")
+        channel.line(f"    prior: {self.prior}")
+        channel.line(f"        support: {self.prior.support}")
         # the test case name
         channel.line(f" -- case: {self.case}")
         # the contents of the data filesystem
@@ -153,10 +166,16 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
+        # get my norm
+        norm = self.norm
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
+        # the observed displacements
+        displacements = self.d
+        # the normalization
+        normalization = self.normalization
         # and the storage for the data likelihoods
-        data = step.data
+        dataLLK = step.data
 
         # find out how many samples in the set
         samples = θ.rows
@@ -167,10 +186,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             parameters = θ.getRow(sample)
             # compute the expected displacement
             u = self.mogi(parameters=parameters)
-            # how likely is it given my observations
-            raise NotImplementedError("NYI: compare with observations")
-
-            # data[sample] = log likelihood of this (predicted, expected) pair
+            # subtract the observed displacements
+            u -= displacements
+            # compute its norm, normalize, and store it as the data log likelihood
+            dataLLK[sample] = normalization - self.norm.eval(v=u)/2
 
         # all done
         return self
@@ -308,6 +327,16 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # all done
         return points, data
+
+
+    def computeNormalization(self, observations):
+        """
+        Compute the normalization of the L2 norm
+        """
+        # support
+        from math import log, pi as π
+        # compute and return
+        return - log(2*π)*observations / 2;
 
 
     # private data
