@@ -19,13 +19,6 @@ gaussian:
         init = uniform
         prior = uniform
 
-    ; initializer pdf configuration
-    model.prep:
-        parameters = 2
-    ; initializer pdf configuration
-    model.prior:
-        parameters = 2
-
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
