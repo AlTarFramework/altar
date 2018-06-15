@@ -4,7 +4,7 @@
 ; (c) 1998-2018 all rights reserved
 ;
 
-gaussian:
+mogi:
     ; shell
     ; shell = mpi.shells.mpirun ; for running with mpi
 
@@ -12,12 +12,20 @@ gaussian:
     job:
         tasks = 1 ; number of tasks per host
         gpus = 0  ; number of gpus per task
-        chains = 2**2
+        chains = 2**10
 
     ; model configuration
     model:
-        init = uniform
+        prep = uniform
         prior = uniform
+
+        ; configuration of the initializer
+        prep:
+            support = (-5000, 5000)
+
+        ; configuration of the initializer
+        prior:
+            support = (-5000, 5000)
 
 
 ; for parallel runs
