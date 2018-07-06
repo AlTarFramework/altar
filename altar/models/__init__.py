@@ -13,9 +13,12 @@
 import altar
 
 
-# the protocol
+# the protocols
 from .Model import Model as model
-# the base class
+from .ParameterSet import ParameterSet as parameters
+
+
+# the model base class
 from .Bayesian import Bayesian as bayesian
 
 
@@ -26,7 +29,7 @@ def null():
     from .Null import Null as null
     # attach its docstring
     __doc__ = null.__doc__
-    # and return it
+    # and publish it
     return null
 
 
@@ -36,8 +39,18 @@ def ensemble():
     from .Ensemble import Ensemble as ensemble
     # attach its docstring
     __doc__ = ensemble.__doc__
-    # and return it
+    # and publish it
     return ensemble
+
+
+@altar.foundry(implements=parameters, tip="a contiguous parameter set")
+def contiguous():
+    # grab the factory
+    from .Contiguous import Contiguous as contiguous
+    # attach its docstring
+    __doc__ = contiguous.__doc__
+    # and publish it
+    return contiguous
 
 
 # end of file
