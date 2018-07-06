@@ -12,20 +12,39 @@ mogi:
     job:
         tasks = 1 ; number of tasks per host
         gpus = 0  ; number of gpus per task
-        chains = 2**10
+        chains = 2**12
 
     ; model configuration
     model:
-        prep = uniform
-        prior = uniform
+        psets:
+            location = contiguous
+            depth = contiguous
+            source = contiguous
 
-        ; configuration of the initializer
-        prep:
-            support = (-5000, 5000)
-
-        ; configuration of the initializer
-        prior:
-            support = (-5000, 5000)
+            location:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-5000, 5000)
+                prior:
+                    support = (-5000, 5000)
+            depth:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 3000)
+                prior:
+                    support = (0, 3000)
+            source:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (10**5, 10**7)
+                prior:
+                    support = (10**5, 10**7)
 
 
 ; for parallel runs
