@@ -31,4 +31,31 @@ class ParameterSet(altar.protocol, family="altar.models.parameters"):
     prep.doc = "the distribution to use to initialize this parameter set"
 
 
+    # required behavior
+    @altar.provides
+    def initialize(self, model, offset):
+        """
+        Initialize the parameter set given the {model} that owns it
+        """
+
+    @altar.provides
+    def initializeSample(self, theta):
+        """
+        Fill {theta} with an initial random sample from my prior distribution.
+        """
+
+    @altar.provides
+    def priorLikelihood(self, theta, priorLLK):
+        """
+        Fill {priorLLK} with the likelihoods of the samples in {theta} in my prior distribution
+        """
+
+    @altar.provides
+    def verify(self, theta, mask):
+        """
+        Check whether the samples in {theta} are consistent with the model requirements and update
+        the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+
+
 # end of file
