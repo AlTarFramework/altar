@@ -22,27 +22,30 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
     The surface displacement calculation for a point pressure source in an elastic half space.
 
-    This is a four parameter model: x,y,depth to locate the point source, and the volume change
+    Currently, {mogi} is implemented as a four parameter model: x,y,depth locate the point
+    source, and {dV} provides the point source strength as the volume change. It can easily
+    become a five parameter model by including the Poisson ratio of the elastic material to the
+    list of free parameters.
     """
 
 
     # user configurable state
-    parameters = altar.properties.int(default=4)
-    parameters.doc = "the number of model degrees of freedom"
+    # parameters
+    psets = altar.properties.dict(schema=altar.models.parameters())
+    psets.doc = "the model parameter meta-data"
 
-    observations = altar.properties.int(default=3*11*11)
+    # data
+    observations = altar.properties.int(default=3*(11*11))
     observations.doc = "the number of model degrees of freedom"
 
-    # distributions
-    prep = altar.distributions.distribution()
-    prep.doc = "the distribution used to generate the initial sample"
+    # the norm to use for computing the data log likelihood
+    norm = altar.norms.norm()
+    norm.default = altar.norms.l2()
+    norm.doc = "the norm to use when computing the data log likelihood"
 
-    prior = altar.distributions.distribution()
-    prior.doc = "the prior distribution"
-
-    # model specific parameters
-    depth = altar.properties.array(default=[0, 60000]) # in SI
-    depth.doc = "the allowed range for the depth parameter"
+    # the name of the test case
+    case = altar.properties.path(default="synthetic")
+    case.doc = "the directory with the input files"
 
     # the name of the test case
     case = altar.properties.path(default="synthetic")
@@ -59,6 +62,9 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     nu = altar.properties.float(default=.25)
     nu.doc = "the Poisson ratio"
 
+    # public data
+    parameters = 0 # adjusted during model initialization
+
 
     # protocol obligations
     @altar.export
@@ -71,13 +77,24 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # get my random number generator
         rng = self.rng
 
-        #  adjust the number of parameters of my distributions
-        self.prep.parameters = self.parameters
-        self.prior.parameters = self.parameters
+        # mount the directory with my input data
+        self.ifs = self.mountInputDataspace(pfs=application.pfs)
+        # load the data from the inputs into memory
+        self.points, self.d = self.loadInputs()
+        # compute the normalization
+        self.normalization = self.computeNormalization(observations=self.d.shape)
 
-        # initialize my distributions
-        self.prep.initialize(rng=rng)
-        self.prior.initialize(rng=rng)
+        # compile the parameter layout
+        offset = 0
+        # go through my parameter sets
+        for name, pset in self.psets.items():
+            # initialize the parameter set
+            offset += pset.initialize(model=self, offset=offset)
+        # now we know the parameter count, so set it
+        self.parameters = offset
+
+        # show me
+        self.show(job=application.job, channel=self.info)
 
         # mount my input data space
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
@@ -118,8 +135,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         """
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
-        # fill it with random numbers from my initializer
-        self.prep.initializeSample(theta=θ)
+        # go through each parameter set
+        for pset in self.psets.values():
+            # and ask each one to {prep} the sample
+            pset.initializeSample(theta=θ)
         # and return
         return self
 
@@ -130,16 +149,14 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
         distribution
         """
-        # grab my prior pdf
-        pdf = self.prior
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
         # and the storage for the prior likelihoods
         likelihood = step.prior
-
-        # delegate
-        pdf.priorLikelihood(theta=θ, likelihood=likelihood)
-
+        # go through each parameter set
+        for pset in self.psets.values():
+            # and ask each one to {prep} the sample
+            pset.priorLikelihood(theta=θ, priorLLK=likelihood)
         # all done
         return self
 
@@ -150,10 +167,16 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
+        # get my norm
+        norm = self.norm
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
+        # the observed displacements
+        displacements = self.d
+        # the normalization
+        normalization = self.normalization
         # and the storage for the data likelihoods
-        data = step.data
+        dataLLK = step.data
 
         # find out how many samples in the set
         samples = θ.rows
@@ -164,10 +187,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             parameters = θ.getRow(sample)
             # compute the expected displacement
             u = self.mogi(parameters=parameters)
-            # how likely is it given my observations
-            raise NotImplementedError("NYI: compare with observations")
-
-            # data[sample] = log likelihood of this (predicted, expected) pair
+            # subtract the observed displacements
+            u -= displacements
+            # compute the norm
+            norm = self.norm.eval(v=u)
+            # compute its norm, normalize, and store it as the data log likelihood
+            dataLLK[sample] = normalization - norm/2
 
         # all done
         return self
@@ -181,10 +206,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         """
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
-        # grab my prior
-        pdf = self.prior
-        # ask it to verify my samples
-        pdf.verify(theta=θ, mask=mask)
+        # go through each parameter set
+        for pset in self.psets.values():
+            # and ask each one to verify the sample
+            pset.verify(theta=θ, mask=mask)
         # all done; return the rejection map
         return mask
 
@@ -196,10 +221,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         locations
         """
         # unpack the parameters
-        x_source = parameters[0]
-        y_source = parameters[1]
-        d_source = parameters[2]
-        dV = parameters[3]
+        x_src, y_src, d_src, dV = parameters
         # the material properties
         nu = self.nu
 
@@ -211,18 +233,21 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # go through each observation location
         for index, (x_obs,y_obs) in enumerate(locations):
             # compute displacements
-            x = x_source - x_obs
-            y = y_source - y_obs
+            x = x_src - x_obs
+            y = y_src - y_obs
+            d = d_src
             # compute the distance to the point source
             x2 = x**2
             y2 = y**2
-            d2 = (d_source)**2
+            d2 = d**2
             # intermediate values
-            C = (nu-1)*dV/π
-            R = sqrt(x2+y2+d2)
-            R3 = C*R**-3
-            # store the expected displacement
-            u[3*index+0], u[3*index+1], u[3*index+2] = x*R3, y*R3, -d_source*R3
+            C = (nu-1) * dV/π
+            R = sqrt(x2 + y2 + d2)
+            CR3 = C * R**-3
+            # pack the expected displacement into the result vector; the packing is done
+            # old-style: by multiplying the {location} index by three to make room for the
+            # three displacement components
+            u[3*index+0], u[3*index+1], u[3*index+2] = x*CR3, y*CR3, -d*CR3
 
         # all done
         return u
@@ -305,6 +330,61 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # all done
         return points, data
+
+
+    def computeNormalization(self, observations):
+        """
+        Compute the normalization of the L2 norm
+        """
+        # support
+        from math import log, pi as π
+        # compute and return
+        return - log(2*π)*observations / 2;
+
+
+    def show(self, job, channel):
+        """
+        Place model information in the supplied {channel}
+        """
+        # show me
+        channel.line("run info:")
+        # job
+        channel.line(f" -- job: {job}")
+        channel.line(f"    hosts: {job.hosts}")
+        channel.line(f"    tasks: {job.tasks}")
+        channel.line(f"    gpus: {job.gpus}")
+        channel.line(f"    chains: {job.chains}")
+        # show me the model
+        channel.line(f" -- model: {self}")
+        # the model state
+        channel.line(f"    observations: {self.observations}")
+        # the parameter sets
+        channel.line(f"    parameters: {self.parameters} total, in {len(self.psets)} sets")
+
+        # go through the parameter sets
+        for name, pset in self.psets.items():
+            # and show me what we know about them
+            channel.line(f"      {name}:")
+            channel.line(f"        offset: {pset.offset}:")
+            channel.line(f"         count: {pset.count}:")
+            channel.line(f"         prior: {pset.prior}:")
+            channel.line(f"          prep: {pset.prep}:")
+
+        # the test case name
+        channel.line(f" -- case: {self.case}")
+        # the contents of the data filesystem
+        channel.line(f" -- contents of '{self.case}':")
+        channel.line("\n".join(self.ifs.dump(indent=2)))
+        # the loaded data
+        # the loaded data
+        channel.line(f" -- inputs in memory:")
+        channel.line(f"    stations: {len(self.points)} locations")
+        channel.line(f"    observations: {len(self.d)} displacements")
+        # flush
+        channel.log()
+
+        # all done
+        return self
 
 
     # private data
