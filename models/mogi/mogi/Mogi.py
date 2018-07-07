@@ -47,10 +47,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     case = altar.properties.path(default="synthetic")
     case.doc = "the directory with the input files"
 
-    # the name of the test case
-    case = altar.properties.path(default="synthetic")
-    case.doc = "the directory with the input files"
-
     # the file based inputs
     displacements = altar.properties.path(default="displacements.txt")
     displacements.doc = "the name of the file with the displacements"
@@ -74,8 +70,15 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         """
         # chain up
         super().initialize(application=application)
-        # get my random number generator
-        rng = self.rng
+
+        # compile the parameter layout
+        offset = 0
+        # go through my parameter sets
+        for name, pset in self.psets.items():
+            # initialize the parameter set
+            offset += pset.initialize(model=self, offset=offset)
+        # the total number of parameters is now known, so record it
+        self.parameters = offset
 
         # mount the directory with my input data
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
@@ -84,45 +87,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # compute the normalization
         self.normalization = self.computeNormalization(observations=self.d.shape)
 
-        # compile the parameter layout
-        offset = 0
-        # go through my parameter sets
-        for name, pset in self.psets.items():
-            # initialize the parameter set
-            offset += pset.initialize(model=self, offset=offset)
-        # now we know the parameter count, so set it
-        self.parameters = offset
-
         # show me
         self.show(job=application.job, channel=self.info)
-
-        # mount my input data space
-        self.ifs = self.mountInputDataspace(pfs=application.pfs)
-        # convert the input filenames into data
-        self.points, self.d = self.loadInputs()
-
-        # make a channel
-        channel = self.info
-        # show me
-        channel.line("run info:")
-        # show me the model
-        channel.line(f" -- model: {self}")
-        # the model state
-        channel.line(f" -- model state:")
-        channel.line(f"    parameters: {self.parameters}")
-        channel.line(f"    observations: {self.observations}")
-        # the test case name
-        channel.line(f" -- case: {self.case}")
-        # the contents of the data filesystem
-        channel.line(f" -- contents of '{self.case}':")
-        channel.line("\n".join(self.ifs.dump(indent=2)))
-        # the loaded data
-        # the loaded data
-        channel.line(f" -- inputs in memory:")
-        channel.line(f"    stations: {len(self.points)} locations")
-        channel.line(f"    observations: {len(self.d)} displacements")
-        # flush
-        channel.log()
 
         # all done
         return self
