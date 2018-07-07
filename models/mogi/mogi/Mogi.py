@@ -72,13 +72,22 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         super().initialize(application=application)
 
         # compile the parameter layout
+        # get the parameter sets
+        psets = self.psets
+        # initialize the offset
         offset = 0
         # go through my parameter sets
-        for name, pset in self.psets.items():
+        for name, pset in psets.items():
             # initialize the parameter set
             offset += pset.initialize(model=self, offset=offset)
         # the total number of parameters is now known, so record it
         self.parameters = offset
+
+        # record the layout of the sample vector
+        self.xIdx = psets["location"].offset
+        self.yIdx = self.xIdx + 1
+        self.dIdx = psets["depth"].offset
+        self.sIdx = psets["source"].offset
 
         # mount the directory with my input data
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
@@ -146,13 +155,29 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # find out how many samples in the set
         samples = θ.rows
+        # get the parameter sets
+        psets = self.psets
+
+        # get the offsets of the various parameter sets
+        xIdx = self.xIdx
+        yIdx = self.yIdx
+        dIdx = self.dIdx
+        sIdx = self.sIdx
 
         # for each sample in the sample set
         for sample in range(samples):
-            # extract the parameter vector
+            # extract the parameters
             parameters = θ.getRow(sample)
+            # get the location of the source
+            x = parameters[xIdx]
+            y = parameters[yIdx]
+            # its depth
+            d = parameters[dIdx]
+            # and its strength
+            dV = parameters[sIdx]
+
             # compute the expected displacement
-            u = self.mogi(parameters=parameters)
+            u = self.mogi(x_src=x, y_src=y, d_src=d, dV=dV)
             # subtract the observed displacements
             u -= displacements
             # compute the norm
@@ -181,14 +206,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
 
     # implementation details
-    def mogi(self, parameters):
+    def mogi(self, x_src, y_src, d_src, dV):
         """
         Compute the expected displacements from a point pressure source at the set of observation
         locations
         """
-        # unpack the parameters
-        x_src, y_src, d_src, dV = parameters
-        # the material properties
+        # grab the material properties
         nu = self.nu
 
         # get the list of locations of interest
@@ -359,5 +382,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     # input
     points = None # the list of observation points
     d = None # the matrix of displacements for each control point
+
+    # the sample layout; patched during {initialize}
+    xIdx = 0
+    yIdx = 0
+    dIdx = 0
+    sIdx = 0
+
 
 # end of file
