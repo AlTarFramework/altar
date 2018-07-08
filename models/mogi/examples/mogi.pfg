@@ -34,9 +34,9 @@ mogi:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (0, 3000)
+                    support = (2000, 4000)
                 prior:
-                    support = (0, 3000)
+                    support = (2000, 4000)
             source:
                 count = 1
                 prep = uniform
