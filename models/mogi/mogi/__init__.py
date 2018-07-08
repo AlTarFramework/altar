@@ -12,6 +12,10 @@
 import altar
 
 
+# access to the Mogi source
+from .Source import Source as source
+
+
 # implementations
 @altar.foundry(implements=altar.models.model, tip="a multi-parameter Mogi model")
 def mogi():
