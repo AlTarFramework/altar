@@ -14,6 +14,8 @@
 from math import sqrt, pi as π
 # package
 import altar
+# get the source
+from altar.models.mogi import source as mogi
 
 
 # app
@@ -78,40 +80,11 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         Synthesize displacements for a grid of stations given a specific source location and
         strength
         """
-        # place the source
-        x_src = self.x
-        y_src = self.y
-        d_src = self.d
-        # get the strength
-        dV = self.dV
-        # and the material properties
-        nu = self.nu
-
-        # get the list of locations of interest
-        stations = self.stations
-
-        # allocate space for the result
-        u = altar.matrix(shape=(len(stations), 3))
-        # go through each observation location
-        for index, (x_obs,y_obs) in enumerate(stations):
-            # compute displacements
-            x = x_src - x_obs
-            y = y_src - y_obs
-            d = d_src
-            # compute the distance to the point source
-            x2 = x**2
-            y2 = y**2
-            d2 = d**2
-            # intermediate values
-            C = (nu-1) * dV/π
-            R = sqrt(x2 + y2 + d2)
-            CR3 = C * R**-3
-            # pack the expected displacement into the result vector; the packing is done
-            # old-style: by multiplying the {location} index by three to make room for the
-            # three displacement components
-            u[index,0], u[index,1], u[index,2] = x*CR3, y*CR3, -d*CR3
-
-        # all done
+        # make a source
+        source = mogi(x=self.x, y=self.y, d=self.d, dV=self.dV, nu=self.nu)
+        # compute the displacements
+        u = source.displacements(locations=self.stations)
+        # and return them
         return u
 
 

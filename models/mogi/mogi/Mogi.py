@@ -13,6 +13,8 @@
 from math import sqrt, pi as π
 # the package
 import altar
+# the analytic implementation of the Mogi source
+from .Source import Source as source
 
 
 # declaration
@@ -164,6 +166,9 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         dIdx = self.dIdx
         sIdx = self.sIdx
 
+        # get the locations of the observation points
+        locations = self.points
+
         # for each sample in the sample set
         for sample in range(samples):
             # extract the parameters
@@ -176,8 +181,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             # and its strength
             dV = parameters[sIdx]
 
+            # make a source using the sample parameters
+            mogi = source(x=x, y=y, d=d, dV=dV)
             # compute the expected displacement
-            u = self.mogi(x_src=x, y_src=y, d_src=d, dV=dV)
+            u = mogi.displacements(locations=locations)
             # subtract the observed displacements
             u -= displacements
             # compute the norm
@@ -206,42 +213,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
 
     # implementation details
-    def mogi(self, x_src, y_src, d_src, dV):
-        """
-        Compute the expected displacements from a point pressure source at the set of observation
-        locations
-        """
-        # grab the material properties
-        nu = self.nu
-
-        # get the list of locations of interest
-        locations = self.points
-
-        # allocate space for the result
-        u = altar.vector(shape=3*len(locations))
-        # go through each observation location
-        for index, (x_obs,y_obs) in enumerate(locations):
-            # compute displacements
-            x = x_src - x_obs
-            y = y_src - y_obs
-            d = d_src
-            # compute the distance to the point source
-            x2 = x**2
-            y2 = y**2
-            d2 = d**2
-            # intermediate values
-            C = (nu-1) * dV/π
-            R = sqrt(x2 + y2 + d2)
-            CR3 = C * R**-3
-            # pack the expected displacement into the result vector; the packing is done
-            # old-style: by multiplying the {location} index by three to make room for the
-            # three displacement components
-            u[3*index+0], u[3*index+1], u[3*index+2] = x*CR3, y*CR3, -d*CR3
-
-        # all done
-        return u
-
-
     def mountInputDataspace(self, pfs):
         """
         Mount the directory with my input files
