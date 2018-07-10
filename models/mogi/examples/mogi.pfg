@@ -42,14 +42,13 @@ mogi:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (10**5, 10**7)
+                    support = (5, 7)
                 prior:
-                    support = (10**5, 10**7)
+                    support = (5, 7)
 
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
-    tasks = 2
     extra = -mca btl self,tcp
 
 ; end of file
