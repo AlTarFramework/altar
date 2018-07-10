@@ -178,8 +178,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             y = parameters[yIdx]
             # its depth
             d = parameters[dIdx]
-            # and its strength
-            dV = parameters[sIdx]
+            # and its strength; we model the logarithm of this one, so we have to exponentiate
+            dV = 10**parameters[sIdx]
 
             # make a source using the sample parameters
             mogi = source(x=x, y=y, d=d, dV=dV)
