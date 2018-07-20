@@ -57,5 +57,16 @@ class ParameterSet(altar.protocol, family="altar.models.parameters"):
         the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
 
+    # framework hooks
+    @classmethod
+    def pyre_default(cls, **kwds):
+        """
+        Supply a default implementation
+        """
+        # there is currently only one option...
+        from .Contiguous import Contiguous as contiguous
+        # so publish it
+        return contiguous
+
 
 # end of file
