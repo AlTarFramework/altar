@@ -14,7 +14,7 @@ mm.compilers =
 
 # contributions to the build
 # only {incpath} and {libpath} seem to be useful
-mm.incpath ?= ${realpath .}/make/include
+mm.incpath ?= ${realpath .}/config/include
 mm.libpath ?=
 
 # influence the build

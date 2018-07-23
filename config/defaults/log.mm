@@ -56,9 +56,9 @@ terminals.ansi = ansi vt100 vt102 xterm xterm-color xterm-256color
 
 # colors
 ifeq ($(TERM),${findstring $(TERM),$(terminals.ansi)})
-include make/defaults/ansi.mm
+include config/defaults/ansi.mm
 else
-include make/defaults/dumb.mm
+include config/defaults/dumb.mm
 endif
 
 # end of file
