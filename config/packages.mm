@@ -12,7 +12,7 @@ packages ?=
 include $(mm.home)/config.mm
 
 # a pattern for loading package configuration files
-%.config : make/packages/%/config.mm
+%.config : config/packages/%/config.mm
 	${call show.action,include,$^}
 	${eval include $^}
 
@@ -26,7 +26,7 @@ package.config = \
             ${strip $(pkg)}, \
             ${value $(pkg).dir}, \
             ${realpath $($(pkg).dir)}, \
-            ${realpath make/packages/$(pkg)/config.mm} \
+            ${realpath config/packages/$(pkg)/config.mm} \
         } \
     }
 

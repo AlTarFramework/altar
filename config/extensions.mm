@@ -38,7 +38,7 @@ extension.lib = \
 # accommodate the external dependencies
 extension.packages = \
   ${eval $(1).packages ?=} \
-  ${eval include $($(1).packages:%=make/packages/%/config.mm)} \
+  ${eval include $($(1).packages:%=config/packages/%/config.mm)} \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
 
 extension.targets = \

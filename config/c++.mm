@@ -11,7 +11,7 @@
 c++ ?= g++
 
 # include support for the c++ copiler
-include make/compilers/$(c++).mm
+include config/compilers/$(c++).mm
 
 # command line options fall into two borad categories
 c++.compile.categories = flags defines incpath

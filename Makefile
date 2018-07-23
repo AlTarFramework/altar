@@ -52,6 +52,6 @@ $(priors) $(models) : altar
 .PHONY: altar $(priors) $(models)
 
 # get the master makefile
-include make/master.mm
+include config/master.mm
 
 # end of file

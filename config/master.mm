@@ -8,24 +8,24 @@
 #
 
 # defaults
-include make/defaults/defaults.mm
+include config/defaults/defaults.mm
 # variables and recipes for building the destination directories
-include make/dest.mm
+include config/dest.mm
 # build system
-include make/mm.mm
+include config/mm.mm
 # external packages
-include make/packages.mm
+include config/packages.mm
 # c++ compilations
-include make/c++.mm
+include config/c++.mm
 # python packages
-include make/python.mm
+include config/python.mm
 # archives
-include make/archives.mm
+include config/archives.mm
 # extensions
-include make/extensions.mm
+include config/extensions.mm
 # stadard targets
-include make/recipes.mm
+include config/recipes.mm
 # pull it all together
-include make/project.mm
+include config/project.mm
 
 # end of file

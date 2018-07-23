@@ -33,7 +33,7 @@ library.assets = \
 # accommodate the external dependencies
 library.packages = \
   ${eval $(1).packages ?=} \
-  ${eval include ${realpath $($(1).packages:%=make/packages/%/config.mm)}} \
+  ${eval include ${realpath $($(1).packages:%=config/packages/%/config.mm)}} \
   ${eval $(1).packages: $($(1).packages:%=%.config) }
 
 # publish the library public headers

@@ -16,10 +16,10 @@
 
 # initialize the various categories of variables
 # tokens
-include make/defaults/tokens.mm
+include config/defaults/tokens.mm
 # tools
-include make/defaults/tools.mm
+include config/defaults/tools.mm
 # help
-include make/defaults/log.mm
+include config/defaults/log.mm
 
 # end of file
