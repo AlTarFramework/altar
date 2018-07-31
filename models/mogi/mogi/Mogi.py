@@ -53,9 +53,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     displacements = altar.properties.path(default="displacements.txt")
     displacements.doc = "the name of the file with the displacements"
 
-    stations = altar.properties.path(default="stations.txt")
-    stations.doc = "the name of the file with the locations of the observation points"
-
     # the material properties
     nu = altar.properties.float(default=.25)
     nu.doc = "the Poisson ratio"
@@ -90,11 +87,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         self.yIdx = self.xIdx + 1
         self.dIdx = psets["depth"].offset
         self.sIdx = psets["source"].offset
+        self.offsetIdx = psets["offsets"].offset
 
         # mount the directory with my input data
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
         # load the data from the inputs into memory
-        self.points, self.d = self.loadInputs()
+        self.d = self.loadInputs()
         # compute the normalization
         self.normalization = self.computeNormalization(observations=self.d.shape)
 
@@ -166,8 +164,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         dIdx = self.dIdx
         sIdx = self.sIdx
 
-        # get the locations of the observation points
-        locations = self.points
+        # get the observations
+        data = self.displacements
 
         # for each sample in the sample set
         for sample in range(samples):
@@ -180,6 +178,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             d = parameters[dIdx]
             # and its strength; we model the logarithm of this one, so we have to exponentiate
             dV = 10**parameters[sIdx]
+            # pull the offsets
+            offsets = parameters[offsetIdx]
 
             # make a source using the sample parameters
             mogi = source(x=x, y=y, d=d, dV=dV)
@@ -244,32 +244,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # grab the input dataspace
         ifs = self.ifs
 
-        # first the stations
-        try:
-            # get the path to the file
-            gf = ifs[self.stations]
-        # if the file doesn't exist
-        except ifs.NotFoundError:
-            # grab my error channel
-            channel = self.error
-            # complain
-            channel.log(f"missing station locations: no '{self.stations}' in '{self.case}'")
-            # and raise the exception again
-            raise
-        # if all goes well
-        else:
-            # prime the locations pile
-            points = []
-            # open the file
-            with gf.open() as stream:
-                # grab each line
-                for line in stream:
-                    # unpack
-                    x, y = map(float, line.strip().split(','))
-                    # and store
-                    points.append((x,y))
-
-        # next, the displacements
+        # get the data
         try:
             # get the path to the file
             df = ifs[self.displacements]
@@ -289,7 +264,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             data.load(df.uri)
 
         # all done
-        return points, data
+        return data
 
 
     def computeNormalization(self, observations):
@@ -338,7 +313,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # the loaded data
         # the loaded data
         channel.line(f" -- inputs in memory:")
-        channel.line(f"    stations: {len(self.points)} locations")
         channel.line(f"    observations: {len(self.d)} displacements")
         # flush
         channel.log()
@@ -359,6 +333,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     yIdx = 0
     dIdx = 0
     sIdx = 0
+    offsetIdx = 0
 
 
 # end of file
