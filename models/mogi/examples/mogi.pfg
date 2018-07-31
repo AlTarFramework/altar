@@ -20,6 +20,7 @@ mogi:
             location = contiguous
             depth = contiguous
             source = contiguous
+            offsets = contiguous
 
             location:
                 count = 2
@@ -45,6 +46,14 @@ mogi:
                     support = (5, 7)
                 prior:
                     support = (5, 7)
+            offsets:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-0.1, 0.1)
+                prior:
+                    support = (-0.1, 0.1)
 
 
 ; for parallel runs
