@@ -11,11 +11,12 @@
 
 
 # externals
-from math import sqrt, pi as π
-# package
+import csv
+from math import sin, cos
+# the framework
 import altar
-# get the source
-from altar.models.mogi import source as mogi
+# my model
+import altar.models.mogi
 
 
 # app
@@ -48,18 +49,15 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         The main entry point
         """
         # compute the displacements
-        u = self.mogi()
-        # and save them into a file
-        u.save(filename=altar.primitives.path("displacements.txt"), format="+16.9e")
-
-        # generate the stations file
-        # open the file
-        with open("stations.txt", "w") as stations:
-            # unpack the coordinates
-            for x,y in self.stations:
-                # write them to the file
-                stations.write(f"{x},{y}\n")
-
+        data = self.mogi()
+        # open a file
+        with open("displacements.txt", "w", newline="") as csvfile:
+            # create a writer
+            writer = csv.writer(csvfile)
+            # go through the data
+            for record in data:
+                # and save them into a file
+                writer.writerow(record)
         # all done
         return 0
 
@@ -80,12 +78,40 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         Synthesize displacements for a grid of stations given a specific source location and
         strength
         """
+        # get the stations
+        stations = self.stations
         # make a source
-        source = mogi(x=self.x, y=self.y, d=self.d, dV=self.dV, nu=self.nu)
+        source = altar.models.mogi.source(x=self.x, y=self.y, d=self.d, dV=self.dV, nu=self.nu)
         # compute the displacements
-        u = source.displacements(locations=self.stations)
-        # and return them
-        return u
+        u = source.displacements(locations=stations)
+        # prepare the dataset
+        # rows: one for each location
+        # columns: observation id, u.s, x, y, theta, phi
+        # observation id simulates data that come from different sources and therefore require
+        # a different offset
+        data = altar.models.mogi.data(name="displacements")
+
+        # go through the observation locations
+        for idx, (x,y) in enumerate(stations):
+            # make up a observation id
+            oid = 0
+            # western stations
+            if x < 0:
+                # get a different id
+                oid = 1
+            # observe from directly overhead for now
+            theta = 0
+            phi = 0
+            # build the projection vector
+            s = sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)
+            # project the displacement
+            d = u[idx,0]*s[0] + u[idx,1]*s[1] + u[idx,2]*s[2]
+
+            # store the data
+            data.pyre_append( (oid, d, x, y, theta, phi) )
+
+        # all done
+        return data
 
 
     def makeStations(self):
@@ -97,7 +123,7 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         # build a set of points on a grid
         stations = itertools.product(range(-5,6), range(-5,6))
         # and return it
-        return list((x*1000, y*1000) for x,y in stations)
+        return tuple((x*1000, y*1000) for x,y in stations)
 
 
 # bootstrap
