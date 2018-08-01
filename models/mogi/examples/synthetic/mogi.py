@@ -11,8 +11,7 @@
 
 
 # externals
-import csv
-from math import sin, cos
+from math import sin, cos, pi as π
 # the framework
 import altar
 # my model
@@ -50,14 +49,8 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         """
         # compute the displacements
         data = self.mogi()
-        # open a file
-        with open("displacements.txt", "w", newline="") as csvfile:
-            # create a writer
-            writer = csv.writer(csvfile)
-            # go through the data
-            for record in data:
-                # and save them into a file
-                writer.writerow(record)
+        # dump the displacements in a CSV file
+        data.write(uri="displacements.csv")
         # all done
         return 0
 
@@ -80,10 +73,29 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         """
         # get the stations
         stations = self.stations
+        # dedcue the number of observations
+        observations = len(stations)
         # make a source
         source = altar.models.mogi.source(x=self.x, y=self.y, d=self.d, dV=self.dV, nu=self.nu)
+
+        # observe all displacements from the same angle for now
+        theta = π/4 # the azimuthal angle
+        phi = π     # the polar angle
+        # build the common projection vector
+        s = sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)
+
+        # allocate a matrix to hold the projections
+        los = altar.matrix(shape=(observations,3))
+        # go through the observations
+        for obs in range(observations):
+            # store the LOS vector
+            los[obs, 0] = s[0]
+            los[obs, 1] = s[1]
+            los[obs, 2] = s[2]
+
         # compute the displacements
-        u = source.displacements(locations=stations)
+        u = source.displacements(locations=stations, los=los)
+
         # prepare the dataset
         # rows: one for each location
         # columns: observation id, u.s, x, y, theta, phi
@@ -93,22 +105,26 @@ class Mogi(altar.application, family="altar.applications.mogi"):
 
         # go through the observation locations
         for idx, (x,y) in enumerate(stations):
-            # make up a observation id
-            oid = 0
+            # make a new entry in the data sheet
+            observation = data.pyre_new()
             # western stations
             if x < 0:
-                # get a different id
-                oid = 1
-            # observe from directly overhead for now
-            theta = 0
-            phi = 0
-            # build the projection vector
-            s = sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)
-            # project the displacement
-            d = u[idx,0]*s[0] + u[idx,1]*s[1] + u[idx,2]*s[2]
+                # come from a different data set
+                observation.oid = 1
+            # than
+            else:
+                # eastern stations
+                observation.oid = 0
 
-            # store the data
-            data.pyre_append( (oid, d, x, y, theta, phi) )
+            # record the location of this observation
+            observation.x = x
+            observation.y = y
+
+            # project the displacement
+            observation.d = u[idx]
+            # save the direction of the projection vector
+            observation.theta = theta
+            observation.phi = phi
 
         # all done
         return data
