@@ -9,12 +9,12 @@
 #
 
 
-# externals
-from math import sqrt, pi as π
 # the package
 import altar
 # the analytic implementation of the Mogi source
 from .Source import Source as source
+# the encapsulation of the layout of the data in a file
+from .Data import Data as datasheet
 
 
 # declaration
@@ -37,7 +37,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     psets.doc = "the model parameter meta-data"
 
     # data
-    observations = altar.properties.int(default=3*(11*11))
+    observations = altar.properties.int()
     observations.doc = "the number of model degrees of freedom"
 
     # the norm to use for computing the data log likelihood
@@ -50,7 +50,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     case.doc = "the directory with the input files"
 
     # the file based inputs
-    displacements = altar.properties.path(default="displacements.txt")
+    displacements = altar.properties.path(default="displacements.csv")
     displacements.doc = "the name of the file with the displacements"
 
     # the material properties
@@ -67,6 +67,9 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         """
         Initialize the state of the model given a {problem} specification
         """
+        # externals
+        from math import sin, cos
+
         # chain up
         super().initialize(application=application)
 
@@ -91,10 +94,35 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # mount the directory with my input data
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
+
         # load the data from the inputs into memory
-        self.d = self.loadInputs()
+        sheet = self.loadInputs()
+        # adjust the number of observations
+        self.observations = len(sheet)
+
         # compute the normalization
-        self.normalization = self.computeNormalization(observations=self.d.shape)
+        self.normalization = self.computeNormalization()
+
+        # build the local representations
+        self.points = []
+        self.d = altar.vector(shape=self.observations)
+        self.los = altar.matrix(shape=(self.observations,3))
+        self.oid = []
+        # populate them
+        for obs, record in enumerate(sheet):
+            # extract the observation id
+            self.oid.append( record.oid )
+            # extract the (x,y) coordinate of the observation point
+            self.points.append( (record.x, record.y) )
+            # extract the observed displacement
+            self.d[obs] = record.d
+            # get the LOS angles
+            theta = record.theta
+            phi = record.phi
+            # form the projection vectors and store them
+            self.los[obs, 0] = sin(theta) * cos(phi)
+            self.los[obs, 1] = sin(theta) * sin(phi)
+            self.los[obs, 2] = cos(theta)
 
         # show me
         self.show(job=application.job, channel=self.info)
@@ -163,9 +191,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         yIdx = self.yIdx
         dIdx = self.dIdx
         sIdx = self.sIdx
+        offsetIdx = self.offsetIdx
 
         # get the observations
-        data = self.displacements
+        d = self.d
+        los = self.los
+        oid = self.oid
 
         # for each sample in the sample set
         for sample in range(samples):
@@ -178,15 +209,19 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             d = parameters[dIdx]
             # and its strength; we model the logarithm of this one, so we have to exponentiate
             dV = 10**parameters[sIdx]
-            # pull the offsets
-            offsets = parameters[offsetIdx]
 
             # make a source using the sample parameters
             mogi = source(x=x, y=y, d=d, dV=dV)
             # compute the expected displacement
-            u = mogi.displacements(locations=locations)
+            u = mogi.displacements(locations=self.points, los=los)
+
             # subtract the observed displacements
             u -= displacements
+            # adjust using the offset
+            for obs in range(self.observations):
+                # appropriate for the corresponding dataset
+                u[obs] -= parameters[offsetIdx + oid[obs]]
+
             # compute the norm
             norm = self.norm.eval(v=u)
             # compute its norm, normalize, and store it as the data log likelihood
@@ -256,25 +291,24 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             channel.log(f"missing displacements: no '{self.displacements}' in '{self.case}'")
             # and raise the exception again
             raise
-        # if all goes well
-        else:
-            # allocate the vector
-            data = altar.vector(shape=self.observations)
-            # and load the file contents into memory
-            data.load(df.uri)
+
+        # if all goes well, create a data sheet
+        data = datasheet(name="displacements")
+        # and populate it
+        data.read(uri=df.uri)
 
         # all done
         return data
 
 
-    def computeNormalization(self, observations):
+    def computeNormalization(self):
         """
         Compute the normalization of the L2 norm
         """
         # support
         from math import log, pi as π
         # compute and return
-        return - log(2*π)*observations / 2;
+        return - log(2*π)*self.observations / 2;
 
 
     def show(self, job, channel):
@@ -325,8 +359,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     ifs = None # filesystem with the input data
 
     # input
+    d = None # the vector of displacements for each control point
+    los = None # the list of LOS vectors for each observation
+    oid = None # dataset id that each observation belongs to; tied to the {offset} parameter set
     points = None # the list of observation points
-    d = None # the matrix of displacements for each control point
 
     # the sample layout; patched during {initialize}
     xIdx = 0
