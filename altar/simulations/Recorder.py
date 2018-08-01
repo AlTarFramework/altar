@@ -22,12 +22,38 @@ class Recorder(altar.component, family="altar.simulations.archivers.recorder", i
     """
 
 
+    # user configurable state
+    theta = altar.properties.path(default="theta.txt")
+    theta.doc = "the path to the file with the final posterior sample"
+
+    sigma = altar.properties.path(default="sigma.txt")
+    sigma.doc = "the path to the file with the final parameter correlation matrix"
+
+    llk = altar.properties.path(default="llk.txt")
+    llk.doc = "the path to the file with the final posterior log likelihood"
+
+
     # protocol obligations
-    @altar.provides
+    @altar.export
     def initialize(self, application):
         """
         Initialize me given an {application} context
         """
+        # all done
+        return self
+
+
+    @altar.export
+    def record(self, step, **kwds):
+        """
+        Record the final state of the calculation
+        """
+        # record the samples
+        step.theta.save(filename=self.theta)
+        # the covariance matrix
+        step.sigma.save(filename=self.sigma)
+        # and the posterior log likelihood
+        step.posterior.save(filename=self.llk)
         # all done
         return self
 
