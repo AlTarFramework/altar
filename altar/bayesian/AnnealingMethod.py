@@ -122,8 +122,12 @@ class AnnealingMethod:
         """
         Notification that the simulation is over
         """
-        # ask my step to render itself
-        self.step.print(channel=annealer.info)
+        # get the state of the solution
+        step = self.step
+        # ask it to render itself to the screen
+        step.print(channel=annealer.info)
+        # ask the recorder to record it
+        annealer.archiver.record(step=step)
         # all done
         return self
 
