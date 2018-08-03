@@ -50,9 +50,9 @@ mogi:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (5, 7)
+                    support = (11, 13)
                 prior:
-                    support = (5, 7)
+                    support = (11, 13)
             offsets:
                 count = 2
                 prep = uniform
