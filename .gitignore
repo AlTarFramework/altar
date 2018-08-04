@@ -2,6 +2,8 @@
 
 # junk
 *~
+__pycache__
+.DS_Store
 
 # the default build locations
 /builds
