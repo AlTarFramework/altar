@@ -34,10 +34,11 @@ header = banner + """
 authors:
     Michael Aïvázis     <michael.aivazis@para-sim.com>
     Zacharie Duputel    <zacharie.duputel@unistra.fr>
-    Junle Jiang
+    Junle Jiang         <junle@ucsd.edu>
     Romain Jolivet      <jolivetr@biotite.ens.fr>
     Sarah Minson        <sminson@usgs.gov>
     Bryan Riel          <bryan.v.riel@jpl.nasa.gov>
+    Mark Simons         <simons@caltech.edu>
     Leif Strand
     Hailiang Zhang
     Lijun Zhu           <ljzhu@caltech.edu>

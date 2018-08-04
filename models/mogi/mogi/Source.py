@@ -36,7 +36,7 @@ class Source:
 
 
     # interface
-    def displacements(self, locations):
+    def displacements(self, locations, los):
         """
         Compute the expected displacements from a point pressure source at a set of observation
         locations
@@ -51,7 +51,7 @@ class Source:
         nu = self.nu
 
         # allocate space for the result
-        u = altar.vector(shape=3*len(locations))
+        u = altar.vector(shape=len(locations))
         # go through each observation location
         for index, (x_obs,y_obs) in enumerate(locations):
             # compute displacements
@@ -66,10 +66,8 @@ class Source:
             C = (nu-1) * dV/π
             R = sqrt(x2 + y2 + d2)
             CR3 = C * R**-3
-            # pack the expected displacement into the result vector; the packing is done
-            # old-style: by multiplying the {location} index by three to make room for the
-            # three displacement components
-            u[3*index+0], u[3*index+1], u[3*index+2] = x*CR3, y*CR3, -d*CR3
+            # store the expected displacement
+            u[index] = x*CR3 * los[index, 0] + y*CR3 * los[index, 1] - d*CR3 * los[index,2]
 
         # all done
         return u
