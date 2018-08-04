@@ -26,6 +26,12 @@ class Archiver(altar.protocol, family="altar.simulations.archivers"):
         Initialize me given an {application} context
         """
 
+    @altar.provides
+    def record(self, step):
+        """
+        Record the final state of the simulation
+        """
+
     # framework hooks
     @classmethod
     def pyre_default(cls, **kwds):

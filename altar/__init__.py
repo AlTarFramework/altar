@@ -27,7 +27,7 @@ from pyre import (
     # support for accessing virtual and local filesystems
     filesystem,
     # miscellaneous packages
-    patterns, primitives, timers, tracking, units,
+    patterns, primitives, records, tabular, timers, tracking, units,
     # support for asynchrony
     nexus,
     # plexus support

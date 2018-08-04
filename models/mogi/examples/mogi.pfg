@@ -8,6 +8,13 @@ mogi:
     ; shell
     ; shell = mpi.shells.mpirun ; for running with mpi
 
+    controller:
+        ; saving the results of the calculation
+        archiver:
+            theta = theta.asc
+            sigma = sigma.asc
+            llk = posterior.asc
+
     ; job layout
     job:
         tasks = 1 ; number of tasks per host
@@ -20,6 +27,7 @@ mogi:
             location = contiguous
             depth = contiguous
             source = contiguous
+            offsets = contiguous
 
             location:
                 count = 2
@@ -42,9 +50,17 @@ mogi:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (5, 7)
+                    support = (11, 13)
                 prior:
-                    support = (5, 7)
+                    support = (11, 13)
+            offsets:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-0.1, 0.1)
+                prior:
+                    support = (-0.1, 0.1)
 
 
 ; for parallel runs
