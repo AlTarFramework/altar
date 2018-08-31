@@ -9,6 +9,9 @@
 mogi.major := 1
 mogi.minor := 0
 
+# use the altar area for build temporaries
+mogi.tmpdir = $(altar.tmpdir)/models/mogi/
+
 # mogi consists of a python package
 mogi.packages := mogi.pkg
 
