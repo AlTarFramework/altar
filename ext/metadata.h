@@ -8,7 +8,7 @@
 //
 
 #if !defined(altar_extensions_metadata_h)
-#define altar_extension_metadata_h
+#define altar_extensions_metadata_h
 
 
 // place everything in my private namespace
