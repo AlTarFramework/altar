@@ -26,7 +26,7 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
     offset = altar.properties.int(default=0)
     offset.doc = "the starting point of my state in the overall controller state"
 
-    parameters = altar.properties.int(default=2)
+    parameters = altar.properties.int(default=1)
     parameters.doc = "the number of model degrees of freedom"
 
 
