@@ -40,6 +40,8 @@ altar.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
 # the altar test suite
 altar.pkg.tests.stem := altar
 altar.pkg.tests.prerequisites := altar.pkg altar.ext
-
+# individual test cases
+tests.altar.application_run.clean = \
+    ${addprefix $(altar.pkg.tests.prefix),llk.txt sigma.txt theta.txt}
 
 # end of file
