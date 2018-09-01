@@ -9,6 +9,8 @@
 #
 
 
+# externals
+import csv
 # the package
 import altar
 # the analytic implementation of the Mogi source
@@ -124,6 +126,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             self.los[obs, 1] = sin(theta) * sin(phi)
             self.los[obs, 2] = cos(theta)
 
+        # save the parameter meta data
+        self.meta()
         # show me
         self.show(job=application.job, channel=self.info)
 
@@ -309,6 +313,31 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         from math import log, pi as π
         # compute and return
         return - log(2*π)*self.observations / 2;
+
+
+    def meta(self):
+        """
+        Persist the sample layout by recording the parameter set metadata
+        """
+        # open the output file
+        with open("parameters.csv", mode="w", newline='') as stream:
+            # make a csv writer
+            writer = csv.writer(stream)
+
+            # the headers
+            headers = ["name", "count", "offset"]
+            # save them
+            writer.writerow(headers)
+
+            # go through the parameter sets
+            for name, pset in self.psets.items():
+                # unpack
+                meta = name, pset.count, pset.offset
+                # record
+                writer.writerow(meta)
+
+        # all done
+        return self
 
 
     def show(self, job, channel):
