@@ -30,7 +30,7 @@ class Data(altar.tabular.sheet):
     y.doc = "the NS coordinate of the location of the source"
 
     d = altar.tabular.float()
-    d.doc = "the depth of the source"
+    d.doc = "the displacement projected along the line of sight (LOS)"
 
     theta = altar.tabular.float()
     theta.doc = "the azimuthal angle of the LOS vector to the observing craft"
