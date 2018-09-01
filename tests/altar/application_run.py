@@ -14,6 +14,12 @@ if __name__ == "__main__":
     from altar.shells import application
     # instantiate
     app = application(name="catmip")
+
+    # grab the journal
+    import journal
+    # silence the info channel off
+    journal.info("altar").deactivate()
+
     # run it
     status = app.run()
     # and share the exit code
