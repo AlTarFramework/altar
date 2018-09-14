@@ -39,7 +39,14 @@ class AnnealingMethod:
         """
         Initialize me and my parts given an {application} context
         """
-        # by default, nothing to do
+        # borrow the canonical journal channels from the application
+        self.info = application.info
+        self.warning = application.warning
+        self.error = application.error
+        self.debug = application.debug
+        self.firewall = application.firewall
+
+        # all done
         return self
 
 
