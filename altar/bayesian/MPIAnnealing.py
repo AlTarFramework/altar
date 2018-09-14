@@ -30,6 +30,9 @@ class MPIAnnealing(AnnealingMethod):
         """
         Initialize me and my parts given an {application} context
         """
+        # chain up
+        super().initialize(application=application)
+
         # ask the application context for the rng component
         rng = application.rng
         # make a rank dependent seed
@@ -37,8 +40,13 @@ class MPIAnnealing(AnnealingMethod):
         # seed the rng
         rng.rng.seed(seed=seed)
 
-        # chain up
-        return super().initialize(application=application)
+        # grab a channel
+        channel = self.debug
+        # show me
+        channel.log(f"initializing worker {mpi.world.rank} of {mpi.world.size}")
+
+        # all done
+        return self
 
 
     def start(self, annealer):
@@ -155,9 +163,6 @@ class MPIAnnealing(AnnealingMethod):
         workers = comm.sum(destination=self.manager, item=worker.workers)
         # the result is meaningful only on the manager task
         self.workers = int(workers) if self.rank == self.manager else None
-
-        # make a channel
-        self.info = journal.info("altar.mpi")
 
         # all done
         return
