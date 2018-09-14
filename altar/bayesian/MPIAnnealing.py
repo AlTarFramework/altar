@@ -67,9 +67,9 @@ class MPIAnnealing(AnnealingMethod):
 
     def top(self, annealer):
         """
-        Notification that we are at the beginning of an update
+        Notification that we are at the beginning of a β update
         """
-        # if i am the manager task
+        # if i am the manager
         if self.rank == self.manager:
             # chain up
             return super().top(annealer=annealer)
@@ -81,7 +81,7 @@ class MPIAnnealing(AnnealingMethod):
         """
         Push my state forward along the cooling schedule
         """
-        # am I the boss?
+        # if I am the manager
         if self.rank == self.manager:
             # i have the global state; cool it
             super().cool(annealer=annealer)
@@ -127,11 +127,23 @@ class MPIAnnealing(AnnealingMethod):
         return self
 
 
+    def bottom(self, annealer):
+        """
+        Notification that we are at the end of a β update
+        """
+        # if i am the manager
+        if self.rank == self.manager:
+            # chain up
+            return super().bottom(annealer=annealer)
+        # otherwise, do nothing
+        return self
+
+
     def finish(self, annealer):
         """
         Shut down the annealing process
         """
-        # if i am the manager task
+        # if i am the manager
         if self.rank == self.manager:
             # chain up
             return super().finish(annealer=annealer)
