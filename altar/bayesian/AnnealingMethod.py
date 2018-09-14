@@ -72,6 +72,8 @@ class AnnealingMethod:
         """
         Notification that we are at the beginning of an update
         """
+        # notify the model
+        annealer.model.top(step=self.step)
         # ask my step to render itself
         self.step.print(channel=annealer.info)
         # all done
@@ -121,6 +123,8 @@ class AnnealingMethod:
         """
         Notification that we are at the bottom of an update
         """
+        # notify the model
+        annealer.model.bottom(step=self.step)
         # all done
         return self
 
