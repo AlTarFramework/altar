@@ -61,62 +61,57 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
         Adjust the machine parameters based on the {application} context and the runtime
         environment
         """
-        # grab my shell
-        shell = application.shell
-        # set the programming model
-        self.mode = shell.model
-        # if it is mpi aware
-        if shell.model == 'mpi':
-            # transfer the host count
-            self.hosts = shell.hosts
-            # check {tasks} for consistency
-            if self.tasks != shell.tasks:
-                # be civilized
-                myLbl = "task" if self.tasks == 1 else "tasks"
-                shLbl = "task" if shell.tasks == 1 else "tasks"
-                # pick a channel
-                channel = application.warning
-                # complain
-                channel.line("inconsistency in the number of tasks per host:")
-                channel.line(f" -- from the MPI runtime: {shell.tasks} {shLbl} per host")
-                channel.line(f" -- from the job specification: {self.tasks} {myLbl} per host")
-                channel.log(f" -- setting the number of tasks per host to {shell.tasks}")
-                # and adjust the value
-                self.tasks = shell.tasks
-
         # get the host info
         host = self.pyre_executive.host
+        # and my shell
+        shell = application.shell
 
-        # the hosts and tasks settings are vetted by the shell; let's figure out the GPU
-        # situation; get what the user asked for
+        # set the programming model
+        self.mode = shell.model
+
+        # if the user specified more than one host, we had better be running with mpi
+        if self.hosts > 1 and self.mode != 'mpi':
+            # otherwise, grab a channel
+            channel = application.error
+            # complain
+            channel.line(f"an MPI runtime is required to run on {self.hosts} hosts")
+            channel.line(f" -- please launch using an MPI compatible shell")
+            channel.line(f" -- e.g., use '--shell=mpi.mpirun' on the command line")
+            channel.log()
+            # and exit
+            raise SystemExit(1)
+
+        # let's figure out the GPU situation; get the number of GPUs per task the user asked for
         gpus = self.gpus
-        # attempt to
+        # if the user doesn't want GPU support
+        if gpus == 0:
+            # we are done
+            return self
+        # otherwise, attempt to
         try:
             # get support for cuda
             import cuda
         # if this fails
         except ImportError:
-            # if the user asked for GPUs
-            if gpus:
-                # pick a channel
-                channel = application.warning
-                # complain
-                channel.line(f"no runtime support for CUDA on '{host.hostname}'")
-                channel.log(f" -- setting the number of GPUs per task to 0")
+            # pick a channel
+            channel = application.warning
+            # complain
+            channel.line(f"no runtime support for CUDA on '{host.hostname}'")
+            channel.log(f" -- setting the number of GPUs per task to 0")
             # no GPUs
             self.gpus = 0
         # if it succeeds
         else:
-            # unpack the requested resources
+            # get the number of tasks per host
             tasks = self.tasks
-            # get the requested number
+            # compute the requested number of devices
             requested = tasks * gpus
             # get the total GPU count on this node
             available = cuda.manager.count
             # if the user asked for more than we have
             if requested > available:
                 # be civilized
-                avlLabel = "GPU" if requested == 1 else "GPUs"
+                avlLabel = "GPU" if available == 1 else "GPUs"
                 reqLabel = "GPU" if requested == 1 else "GPUs"
                 gpuLabel = "GPU" if gpus == 1 else "GPUs"
                 taskLabel = "task" if tasks == 1 else "tasks"
@@ -131,18 +126,6 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
                 channel.log()
                 # and exit
                 raise SystemExit(1)
-
-        # if the user specified more than one host, we had better be running with mpi
-        if self.hosts > 1 and self.mode != 'mpi':
-            # otherwise, grab a channel
-            channel = application.error
-            # complain
-            channel.line(f"an MPI runtime is required to run on {self.hosts} hosts")
-            channel.line(f" -- please launch using an MPI compatible shell")
-            channel.line(f" -- e.g., use '--shell=mpi.mpirun' on the command line")
-            channel.log()
-            # and exit
-            raise SystemExit(1)
 
         # all done
         return self
