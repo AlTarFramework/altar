@@ -92,9 +92,9 @@ class AnnealingMethod:
         return self
 
 
-    def resample(self, annealer):
+    def walk(self, annealer):
         """
-        Re-sample the posterior distribution
+        Explore configuration space by walking the Markov chains
         """
         # get the sampler
         sampler = annealer.sampler
@@ -104,7 +104,7 @@ class AnnealingMethod:
         return stats
 
 
-    def equilibrate(self, annealer, statistics):
+    def resample(self, annealer, statistics):
         """
         Analyze the acceptance statistics and take the problem state to the end of the
         annealing step
@@ -112,7 +112,7 @@ class AnnealingMethod:
         # get the sampler
         sampler = annealer.sampler
         # ask it to adjust the sample statistics
-        sampler.equilibrate(annealer=annealer, statistics=statistics)
+        sampler.resample(annealer=annealer, statistics=statistics)
         # all done
         return self
 

@@ -89,21 +89,21 @@ class MPIAnnealing(AnnealingMethod):
         return self
 
 
-    def resample(self, annealer):
+    def walk(self, annealer):
         """
-        Re-sample the posterior pdf
+        Explore configuration space by walking the Markov chains
         """
         # partition and synchronize my state
         self.partition()
-        # everybody resamples the posterior
-        stats = self.worker.resample(annealer=annealer)
+        # all workers walk their chains
+        stats = self.worker.walk(annealer=annealer)
         # collect my state
         self.step = self.collect()
         # return the statistics
         return stats
 
 
-    def equilibrate(self, annealer, statistics):
+    def resample(self, annealer, statistics):
         """
         Analyze the acceptance statistics and take the problem state to the end of the
         annealing step
@@ -121,7 +121,7 @@ class MPIAnnealing(AnnealingMethod):
         # if I am the boss
         if self.rank == manager:
             # chain up
-            super().equilibrate(annealer=annealer, statistics=(accepted,rejected,unlikely))
+            super().resample(annealer=annealer, statistics=(accepted,rejected,unlikely))
 
         # all done
         return self

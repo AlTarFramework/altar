@@ -73,7 +73,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     @altar.provides
-    def equilibrate(self, annealer, statistics):
+    def resample(self, annealer, statistics):
         """
         Update my statistics based on the results of walking my Markov chains
         """

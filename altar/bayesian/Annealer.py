@@ -86,9 +86,9 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
             # compute a new temperature
             worker.cool(annealer=self)
             # walk the chains
-            statistics = worker.resample(annealer=self)
-            # equilibrate
-            worker.equilibrate(annealer=self, statistics=statistics)
+            statistics = worker.walk(annealer=self)
+            # resample
+            worker.resample(annealer=self, statistics=statistics)
             # notify the worker we are at the bottom of the current step
             worker.bottom(annealer=self)
 
