@@ -75,6 +75,19 @@ class Model(altar.protocol, family="altar.models"):
         update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
         """
 
+    # notifications
+    @altar.provides
+    def top(self, step):
+        """
+        Notification that a β step is about to start
+        """
+
+    @altar.provides
+    def bottom(self, step):
+        """
+        Notification that a β step just ended
+        """
+
 
     # framework hooks
     @classmethod
