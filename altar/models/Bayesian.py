@@ -142,6 +142,25 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
             f"model '{type(self).__name__}' must implement 'verify'")
 
 
+    # notifications
+    @altar.export
+    def top(self, step):
+        """
+        Notification that a β step is about to start
+        """
+        # nothing to do
+        return self
+
+
+    @altar.export
+    def bottom(self, step):
+        """
+        Notification that a β step just ended
+        """
+        # nothing to do
+        return self
+
+
     # implementation details
     def restrict(self, theta):
         """
