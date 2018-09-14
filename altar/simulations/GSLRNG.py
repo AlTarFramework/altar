@@ -39,16 +39,7 @@ class GSLRNG(altar.component, family="altar.simulations.rng.gsl", implements=rng
         """
         Initialize the random number generator
         """
-        # get the journal
-        import journal
-        # make a channel
-        channel = journal.debug("altar.init")
-        # show me
-        channel.line(f"{self.pyre_name}:")
-        channel.line(f"       seed: {self.seed}")
-        channel.line(f"  algorithm: {self.algorithm}")
-        channel.log()
-        # all done
+        # nothing to do
         return self
 
 
@@ -62,6 +53,24 @@ class GSLRNG(altar.component, family="altar.simulations.rng.gsl", implements=rng
         self.rng.seed(seed=self.seed)
         # all done
         return
+
+
+    # implementation details
+    def show(self):
+        """
+        Display some information about me
+        """
+        # get the journal
+        import journal
+        # make a channel
+        channel = journal.debug("altar.init")
+        # show me
+        channel.line(f"{self.pyre_name}:")
+        channel.line(f"       seed: {self.seed}")
+        channel.line(f"  algorithm: {self.algorithm}")
+        channel.log()
+        # all done
+        return self
 
 
 # end of file
