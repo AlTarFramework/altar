@@ -55,6 +55,9 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     displacements = altar.properties.path(default="displacements.csv")
     displacements.doc = "the name of the file with the displacements"
 
+    covariance = altar.properties.path(default="cd.txt")
+    covariance.doc = "the name of the file with the data covariance"
+
     # the material properties
     nu = altar.properties.float(default=.25)
     nu.doc = "the Poisson ratio"
@@ -75,35 +78,18 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # chain up
         super().initialize(application=application)
 
-        # compile the parameter layout
-        # get the parameter sets
-        psets = self.psets
-        # initialize the offset
-        offset = 0
-        # go through my parameter sets
-        for name, pset in psets.items():
-            # initialize the parameter set
-            offset += pset.initialize(model=self, offset=offset)
-        # the total number of parameters is now known, so record it
-        self.parameters = offset
-
-        # record the layout of the sample vector
-        self.xIdx = psets["location"].offset
-        self.yIdx = self.xIdx + 1
-        self.dIdx = psets["depth"].offset
-        self.sIdx = psets["source"].offset
-        self.offsetIdx = psets["offsets"].offset
-
+        # initialize my parameter sets
+        self.initializeParameterSets()
         # mount the directory with my input data
         self.ifs = self.mountInputDataspace(pfs=application.pfs)
 
         # load the data from the inputs into memory
-        sheet = self.loadInputs()
-        # adjust the number of observations
-        self.observations = len(sheet)
+        displacements, self.cd = self.loadInputs()
 
         # compute the normalization
         self.normalization = self.computeNormalization()
+        # compute the inverse of the covariance matrix
+        self.cd_inv = self.computeCovarianceInverse()
 
         # build the local representations
         self.points = []
@@ -111,7 +97,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         self.los = altar.matrix(shape=(self.observations,3))
         self.oid = []
         # populate them
-        for obs, record in enumerate(sheet):
+        for obs, record in enumerate(displacements):
             # extract the observation id
             self.oid.append( record.oid )
             # extract the (x,y) coordinate of the observation point
@@ -129,7 +115,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # save the parameter meta data
         self.meta()
         # show me
-        self.show(job=application.job, channel=self.info)
+        # self.show(job=application.job, channel=self.info)
 
         # all done
         return self
@@ -180,6 +166,8 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         θ = self.restrict(theta=step.theta)
         # the observed displacements
         displacements = self.d
+        # the inverse of the data covariance matrix
+        cd_inv = self.cd_inv
         # the normalization
         normalization = self.normalization
         # and the storage for the data likelihoods
@@ -227,7 +215,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
                 u[obs] -= parameters[offsetIdx + oid[obs]]
 
             # compute the norm
-            norm = self.norm.eval(v=u)
+            norm = self.norm.eval(v=u, sigma_inv=cd_inv)
             # compute its norm, normalize, and store it as the data log likelihood
             dataLLK[sample] = normalization - norm/2
 
@@ -252,6 +240,33 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
 
     # implementation details
+    def initializeParameterSets(self):
+        """
+        Initialize my parameter sets
+        """
+        # compile the parameter layout
+        # get the parameter sets
+        psets = self.psets
+        # initialize the offset
+        offset = 0
+        # go through my parameter sets
+        for name, pset in psets.items():
+            # initialize the parameter set
+            offset += pset.initialize(model=self, offset=offset)
+        # the total number of parameters is now known, so record it
+        self.parameters = offset
+
+        # record the layout of the sample vector
+        self.xIdx = psets["location"].offset
+        self.yIdx = self.xIdx + 1
+        self.dIdx = psets["depth"].offset
+        self.sIdx = psets["source"].offset
+        self.offsetIdx = psets["offsets"].offset
+
+        # all done
+        return
+
+
     def mountInputDataspace(self, pfs):
         """
         Mount the directory with my input files
@@ -283,7 +298,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # grab the input dataspace
         ifs = self.ifs
 
-        # get the data
+        # get the displacement data
         try:
             # get the path to the file
             df = ifs[self.displacements]
@@ -301,8 +316,30 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # and populate it
         data.read(uri=df.uri)
 
+        # adjust the number of observations
+        self.observations = len(data)
+
+        # finally, try to
+        try:
+            # get the file node with the data covariance
+            node = ifs[self.covariance]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            # grab my error channel
+            channel = self.error
+            # complain
+            channel.log(f"missing data covariance matrix: no '{self.covariance}' in '{self.case}'")
+            # and re-raise the exception
+            raise
+        # if all goes well
+        else:
+            # allocate the matrix
+            covariance = altar.matrix(shape=[self.observations]*2)
+            # and load the contents into memory
+            covariance.load(node.uri)
+
         # all done
-        return data
+        return data, covariance
 
 
     def computeNormalization(self):
@@ -311,8 +348,31 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         """
         # support
         from math import log, pi as π
+        # make a copy of my data covariance
+        cd = self.cd.clone()
+        # perform an LU decomposition
+        lu = altar.lapack.LU_decomposition(cd)
+        # use it to compute the log of its determinant
+        lndet = altar.lapack.LU_lndet(*lu)
+        print(f" ************* lndet = {lndet}")
         # compute and return
-        return - log(2*π)*self.observations / 2;
+        return - 0.5 * (log(2*π)*self.observations + lndet);
+
+
+    def computeCovarianceInverse(self):
+        """
+        Compute the inverse of my data covariance
+        """
+        # make a copy of the covariance matrix
+        cd = self.cd.clone()
+        # perform an LU decomposition
+        lu = altar.lapack.LU_decomposition(cd)
+        # invert it
+        inverse = altar.lapack.LU_invert(*lu)
+        # and compute the Cholesky decomposition of the inverse
+        chol = altar.lapack.cholesky_decomposition(inverse)
+        # all done
+        return chol
 
 
     def meta(self):
@@ -377,6 +437,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # the loaded data
         channel.line(f" -- inputs in memory:")
         channel.line(f"    observations: {len(self.d)} displacements")
+        channel.line(f"    covariance: {self.cd.shape}")
         # flush
         channel.log()
 
@@ -392,6 +453,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     los = None # the list of LOS vectors for each observation
     oid = None # dataset id that each observation belongs to; tied to the {offset} parameter set
     points = None # the list of observation points
+    cd = None # the data covariance matrix
 
     # the sample layout; patched during {initialize}
     xIdx = 0
@@ -399,6 +461,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     dIdx = 0
     sIdx = 0
     offsetIdx = 0
+
+    # computed
+    cd_inv = None # the inverse of my data covariance matrix
+    normalization = 1 # the normalization of the L2 norm
 
 
 # end of file
