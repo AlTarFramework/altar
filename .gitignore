@@ -11,6 +11,7 @@ __pycache__
 
 # the synthetic data from the mogi model
 /models/mogi/examples/synthetic/*.txt
+/models/mogi/examples/synthetic/*.csv
 
 # auctex lint
 /doc/**/auto
