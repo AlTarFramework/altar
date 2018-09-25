@@ -34,7 +34,7 @@ class Mogi(altar.application, family="altar.applications.mogi"):
     d = altar.properties.float(default=3000)
     d.doc = "the depth of the Mogi source"
 
-    dV = altar.properties.float(default=10e12)
+    dV = altar.properties.float(default=10e6)
     dV.doc = "the strength of the Mogi source"
 
     nu = altar.properties.float(default=.25)
@@ -48,9 +48,11 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         The main entry point
         """
         # compute the displacements
-        data = self.mogi()
+        data, covariance = self.mogi()
         # dump the displacements in a CSV file
         data.write(uri="displacements.csv")
+        # and the covariance in an ascii file
+        covariance.save(filename=altar.primitives.path("cd.txt"))
         # all done
         return 0
 
@@ -126,8 +128,18 @@ class Mogi(altar.application, family="altar.applications.mogi"):
             observation.theta = theta
             observation.phi = phi
 
+        # the length of the data sheet is the number of observations
+        observations = len(data)
+        # allocate a matrix for the data correlation
+        correlation = altar.matrix(shape=[observations]*2).zero()
+
+        # go through the observations
+        for idx, observation in enumerate(data):
+            # set the covariance to a fraction of the "observed" displacement
+            correlation[idx,idx] = .01 * observation.d
+
         # all done
-        return data
+        return data, correlation
 
 
     def makeStations(self):
