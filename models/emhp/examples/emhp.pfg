@@ -1,0 +1,49 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+emhp:
+    controller:
+        ; saving the results of the calculation
+        archiver:
+            theta = theta.asc
+            sigma = sigma.asc
+            llk = posterior.asc
+
+    ; job layout
+    job:
+        tasks = 1 ; number of tasks per host
+        gpus = 0  ; number of gpus per task
+        chains = 2**12
+
+    ; model configuration
+    model:
+        psets:
+            location = contiguous
+            velocity = contiguous
+
+            location:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-1000, 1000)
+                prior:
+                    support = (-1000, 1000)
+            velocity:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-10, 10)
+                prior:
+                    support = (-10, 10)
+
+
+; for parallel runs
+mpi.shells.mpirun # altar.plexus.shell:
+    extra = -mca btl self,tcp
+
+; end of file
