@@ -38,4 +38,5 @@ class Monitor(altar.protocol, family="altar.simulations.monitors"):
         # and return it
         return default
 
+
 # end of file
