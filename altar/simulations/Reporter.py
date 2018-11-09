@@ -23,13 +23,38 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
 
 
     # protocol obligations
-    @altar.provides
+    @altar.export
     def initialize(self, application):
         """
         Initialize me given an {application} context
         """
-        # all done
+        # nothing to do
         return self
+
+
+    # implementation details
+    def start(self, controller, **kwds):
+        """
+        Handler invoked when the simulation is about to start
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: start")
+        # all done
+        return
+
+
+    def finish(self, controller, **kwds):
+        """
+        Handler invoked when the simulation is about to finish
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: finish")
+        # all done
+        return
 
 
 # end of file
