@@ -34,6 +34,9 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
+    monitors = altar.properties.dict(schema=altar.simulations.monitor())
+    monitors.doc = "a collection of event handlers"
+
 
     # protocol obligations
     @altar.export

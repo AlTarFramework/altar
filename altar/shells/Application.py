@@ -32,6 +32,9 @@ class Application(altar.application, family="altar.shells.application"):
     controller = altar.bayesian.controller()
     controller.doc = "my simulation controller"
 
+    monitors = altar.properties.dict(schema=altar.simulations.monitor())
+    monitors.doc = "a collection of event handlers"
+
 
     # protocol obligations
     @altar.export
