@@ -20,8 +20,8 @@ class Controller(altar.protocol, family="altar.controllers"):
 
 
     # required user configurable state
-    monitor = altar.simulations.monitor()
-    monitor.doc = "the handler of simulation notifications"
+    dispatcher = altar.simulations.dispatcher(default=Notifier)
+    dispatcher.doc = "the event dispatcher that activates the registered handlers"
 
     archiver = altar.simulations.archiver()
     archiver.doc = "the archiver of simulation state"
