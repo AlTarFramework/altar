@@ -166,5 +166,4 @@ class CoolingStep:
         return channel
 
 
-
 # end of file
