@@ -13,6 +13,7 @@ import altar
 
 # the protocols
 from .Archiver import Archiver as archiver
+from .Dispatcher import Dispatcher as dispatcher
 from .Monitor import Monitor as monitor
 from .Run import Run as run
 from .RNG import RNG as rng
