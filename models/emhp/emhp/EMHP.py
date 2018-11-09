@@ -26,12 +26,50 @@ class EMHP(altar.models.bayesian, family="altar.models.emhp"):
         """
         Initialize the state of the model given a {problem} specification
         """
-        # make a channel
-        channel = application.info
-        # sign on
-        channel.log("initializing emhp")
-        # and bail
-        raise SystemExit(0)
+        # chain up
+        super().initialize(application=application)
+        # all done
+        return self
+
+
+    # services
+    @altar.export
+    def initializeSample(self, step):
+        """
+        File {step.theta} with an initial random sample form my prior distribution
+        """
+        # all done
+        return self
+
+
+    @altar.export
+    def priorLikelihood(self, step):
+        """
+        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        distribution
+        """
+        # all done
+        return self
+
+
+    @altar.export
+    def dataLikelihood(self, step):
+        """
+        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        data. This is what is usually referred to as the "forward model"
+        """
+        # all done
+        return self
+
+
+    @altar.export
+    def verify(self, step, mask):
+        """
+        Check whether the samples in {step.theta} are consistent with the model requirements and
+        update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+        # all done; return the rejection map
+        return mask
 
 
 # end of file
