@@ -72,10 +72,12 @@ class AnnealingMethod:
         """
         Notification that we are at the beginning of an update
         """
+        # get the state of the solution
+        step = self.step
         # notify the model
-        annealer.model.top(step=self.step)
+        annealer.model.top(step=step)
         # ask my step to render itself
-        self.step.print(channel=annealer.info)
+        step.print(channel=annealer.info)
         # all done
         return self
 
