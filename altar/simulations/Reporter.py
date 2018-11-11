@@ -45,6 +45,126 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         return
 
 
+    def samplePosteriorStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of sampling the posterior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: samplePosteriorStart")
+        # all done
+        return
+
+
+    def prepareSamplingPDFStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of the preparation of the sampling PDF
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: prepareSamplingPDFStart")
+        # all done
+        return
+
+
+    def prepareSamplingPDFFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of the preparation of the sampling PDF
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: prepareSamplingPDFFinish")
+        # all done
+        return
+
+
+    def walkChainsStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of the chain walk
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: walkChainsStart")
+        # all done
+        return
+
+
+    def chainAdvanceStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of a single step of chain walking
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: chainAdvanceStart")
+        # all done
+        return
+
+
+    def chainAdvanceFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of a single step of chain walking
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: chainAdvanceFinish")
+        # all done
+        return
+
+
+    def acceptStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of sample accept/reject
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: acceptStart")
+        # all done
+        return
+
+
+    def acceptFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of sample accept/reject
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: acceptFinish")
+        # all done
+        return
+
+
+    def walkChainsFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of the chain walk
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: walkChainsFinish")
+        # all done
+        return
+
+
+    def samplePosteriorFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of sampling the posterior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: samplePosteriorFinish")
+        # all done
+        return
+
+
     def finish(self, controller, **kwds):
         """
         Handler invoked when the simulation is about to finish
