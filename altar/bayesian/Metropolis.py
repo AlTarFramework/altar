@@ -64,10 +64,16 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         """
         Sample the posterior distribution
         """
+        # grab the dispatcher
+        dispatcher = annealer.dispatcher
+        # notify we have started sampling the posterior
+        dispatcher.notify(event=dispatcher.samplePosteriorStart, controller=annealer)
         # prepare the sampling pdf
-        self.prepareSamplingPDF(step=step)
+        self.prepareSamplingPDF(annealer=annealer, step=step)
         # walk the chains
-        statistics = self.walkChains(model=annealer.model, step=step)
+        statistics = self.walkChains(annealer=annealer, step=step)
+        # notify we are done sampling the posterior
+        dispatcher.notify(event=dispatcher.samplePosteriorFinish, controller=annealer)
         # all done
         return statistics
 
@@ -84,25 +90,39 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     # implementation details
-    def prepareSamplingPDF(self, step):
+    def prepareSamplingPDF(self, annealer, step):
         """
         Re-scale and decompose the parameter covariance matrix, in preparation for the
         Metropolis update
         """
+        # get the dispatcher
+        dispatcher = annealer.dispatcher
+        # notify we have started preparing the sampling PDF
+        dispatcher.notify(event=dispatcher.prepareSamplingPDFStart, controller=annealer)
         # unpack what i need
         Σ = step.sigma.clone()
         # scale it
         Σ *= self.scaling**2
         # compute its Cholesky decomposition
         self.sigma_chol = altar.lapack.cholesky_decomposition(Σ)
+        # notify we are done preparing the sampling PDF
+        dispatcher.notify(event=dispatcher.prepareSamplingPDFFinish, controller=annealer)
         # all done
         return
 
 
-    def walkChains(self, model, step):
+    def walkChains(self, annealer, step):
         """
         Run the Metropolis algorithm on the Markov chains
         """
+        # get the model
+        model = annealer.model
+        # and the event dispatcher
+        dispatcher = annealer.dispatcher
+
+        # notify we are about to walk the chains
+        dispatcher.notify(event=dispatcher.walkChainsStart, controller=annealer)
+
         # unpack what i need from the cooling step
         β = step.beta
         θ = step.theta
@@ -136,6 +156,9 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
         # step all chains together
         for step in range(self.steps):
+            # notify we are advancing the chains
+            dispatcher.notify(event=dispatcher.chainAdvanceStart, controller=annealer)
+
             # initialize the candidate sample by randomly displacing the current one
             cθ = self.displace(sample=θ)
             # initialize the likelihoods
@@ -167,6 +190,9 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # randomize the Metropolis acceptance vector
             dice.random(self.uniform)
 
+            # notify we are starting accepting samples
+            dispatcher.notify(event=dispatcher.acceptStart, controller=annealer)
+
             # accept/reject: go through all the samples
             for sample in range(samples):
                 # a candidate is rejected if the model considered it invalid
@@ -193,6 +219,15 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
                 prior[sample] = cprior[sample]
                 data[sample] = cdata[sample]
                 posterior[sample] = cpost[sample]
+
+            # notify we are done accepting samples
+            dispatcher.notify(event=dispatcher.acceptFinish, controller=annealer)
+
+            # notify we are done advancing the chains
+            dispatcher.notify(event=dispatcher.chainAdvanceFinish, controller=annealer)
+
+        # notify we are done walking the chains
+        dispatcher.notify(event=dispatcher.walkChainsFinish, controller=annealer)
 
         # all done
         return accepted, rejected, unlikely
@@ -246,10 +281,12 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         return self
 
 
-    # public data
-    uniform = None
-    uninormal = None
-    sigma_chol = None
+    # private data
+    uniform = None     # the distribution of the sample multiplicities
+    uninormal = None   # the distribution of random walk displacement vectors
+    sigma_chol = None  # placeholder for the scaled and decomposed parameter covariance matrix
+
+    dispatcher = None  # a reference to the event dispatcher
 
 
 # end of file

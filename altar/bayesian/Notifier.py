@@ -23,8 +23,20 @@ class Notifier(altar.component,
     """
 
 
-    # constants
+    # constants: the event loop identifiers
     start = "start"
+
+    samplePosteriorStart = "samplePosteriorStart"
+    prepareSamplingPDFStart = "prepareSamplingPDFStart"
+    prepareSamplingPDFFinish = "prepareSamplingPDFFinish"
+    walkChainsStart = "walkChainsStart"
+    chainAdvanceStart = "chainAdvanceStart"
+    chainAdvanceFinish = "chainAdvanceFinish"
+    acceptStart = "acceptStart"
+    acceptFinish = "acceptFinish"
+    walkChainsFinish = "walkChainsFinish"
+    samplePosteriorFinish = "samplePosteriorFinish"
+
     finish = "finish"
 
 
@@ -79,6 +91,16 @@ class Notifier(altar.component,
         # establish the table of handled events
         self.events = {
             self.start: altar.patterns.observable(),
+            self.samplePosteriorStart: altar.patterns.observable(),
+            self.prepareSamplingPDFStart: altar.patterns.observable(),
+            self.prepareSamplingPDFFinish: altar.patterns.observable(),
+            self.walkChainsStart: altar.patterns.observable(),
+            self.chainAdvanceStart: altar.patterns.observable(),
+            self.chainAdvanceFinish: altar.patterns.observable(),
+            self.acceptStart: altar.patterns.observable(),
+            self.acceptFinish: altar.patterns.observable(),
+            self.walkChainsFinish: altar.patterns.observable(),
+            self.samplePosteriorFinish: altar.patterns.observable(),
             self.finish: altar.patterns.observable(),
         }
 
