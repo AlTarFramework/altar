@@ -81,6 +81,18 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         return
 
 
+    def betaStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of the beta step
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: betaStart")
+        # all done
+        return
+
+
     def walkChainsStart(self, controller, **kwds):
         """
         Handler invoked at the beginning of the chain walk
@@ -117,6 +129,102 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         return
 
 
+    def verifyStart(self, controller, **kwds):
+        """
+        Handler invoked before we start verifying the generated sample
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: verifyStart")
+        # all done
+        return
+
+
+    def verifyFinish(self, controller, **kwds):
+        """
+        Handler invoked after we are done verifying the generated sample
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: verifyFinish")
+        # all done
+        return
+
+
+    def priorStart(self, controller, **kwds):
+        """
+        Handler invoked before we compute the prior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: priorStart")
+        # all done
+        return
+
+
+    def priorFinish(self, controller, **kwds):
+        """
+        Handler invoked after we compute the prior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: priorFinish")
+        # all done
+        return
+
+
+    def dataStart(self, controller, **kwds):
+        """
+        Handler invoked before we compute the data likelihood
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: dataStart")
+        # all done
+        return
+
+
+    def dataFinish(self, controller, **kwds):
+        """
+        Handler invoked after we compute the data likelihood
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: dataFinish")
+        # all done
+        return
+
+
+    def posteriorStart(self, controller, **kwds):
+        """
+        Handler invoked before we assemble the posterior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: posteriorStart")
+        # all done
+        return
+
+
+    def posteriorFinish(self, controller, **kwds):
+        """
+        Handler invoked after we assemble the posterior
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: posteriorFinish")
+        # all done
+        return
+
+
     def acceptStart(self, controller, **kwds):
         """
         Handler invoked at the beginning of sample accept/reject
@@ -149,6 +257,18 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         channel = controller.info
         # say something
         channel.log(f"{self.pyre_name}: walkChainsFinish")
+        # all done
+        return
+
+
+    def betaFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of the beta step
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: betaFinish")
         # all done
         return
 

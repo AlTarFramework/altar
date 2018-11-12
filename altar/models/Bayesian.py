@@ -116,18 +116,37 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     @altar.export
-    def likelihoods(self, step):
+    def likelihoods(self, annealer, step):
         """
         Convenience function that computes all three likelihoods at once given the current {step}
         of the problem
         """
-        # first the prior
+        # grab the dispatcher
+        dispatcher = annealer.dispatcher
+
+        # notify we are about to compute the prior likelihood
+        dispatcher.notify(event=dispatcher.priorStart, controller=annealer)
+        # compute the prior likelihood
         self.priorLikelihood(step=step)
-        # now the likelihood of the prior given the data
+        # done
+        dispatcher.notify(event=dispatcher.priorFinish, controller=annealer)
+
+
+        # notify we are about to compute the likelihood of the prior given the data
+        dispatcher.notify(event=dispatcher.dataStart, controller=annealer)
+        # compute it
         self.dataLikelihood(step=step)
-        # finally, the posterior at this temperature
+        # done
+        dispatcher.notify(event=dispatcher.dataFinish, controller=annealer)
+
+        # finally, notify we are about to put together the posterior at this temperature
+        dispatcher.notify(event=dispatcher.posteriorStart, controller=annealer)
+        # compute it
         self.posteriorLikelihood(step=step)
-        # bundle them and return them
+        # done
+        dispatcher.notify(event=dispatcher.posteriorFinish, controller=annealer)
+
+        # enable chaining
         return self
 
 

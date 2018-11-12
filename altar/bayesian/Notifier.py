@@ -29,12 +29,22 @@ class Notifier(altar.component,
     samplePosteriorStart = "samplePosteriorStart"
     prepareSamplingPDFStart = "prepareSamplingPDFStart"
     prepareSamplingPDFFinish = "prepareSamplingPDFFinish"
+    betaStart = "betaStart"
     walkChainsStart = "walkChainsStart"
     chainAdvanceStart = "chainAdvanceStart"
-    chainAdvanceFinish = "chainAdvanceFinish"
+    verifyStart = "verifyStart"
+    verifyFinish = "verifyFinish"
+    priorStart = "priorStart"
+    priorFinish = "priorFinish"
+    dataStart = "dataStart"
+    dataFinish = "dataFinish"
+    posteriorStart = "posteriorStart"
+    posteriorFinish = "posteriorFinish"
     acceptStart = "acceptStart"
     acceptFinish = "acceptFinish"
+    chainAdvanceFinish = "chainAdvanceFinish"
     walkChainsFinish = "walkChainsFinish"
+    betaFinish = "betaFinish"
     samplePosteriorFinish = "samplePosteriorFinish"
 
     finish = "finish"
@@ -94,13 +104,23 @@ class Notifier(altar.component,
             self.samplePosteriorStart: altar.patterns.observable(),
             self.prepareSamplingPDFStart: altar.patterns.observable(),
             self.prepareSamplingPDFFinish: altar.patterns.observable(),
+            self.betaStart: altar.patterns.observable(),
             self.walkChainsStart: altar.patterns.observable(),
             self.chainAdvanceStart: altar.patterns.observable(),
-            self.chainAdvanceFinish: altar.patterns.observable(),
+            self.verifyStart: altar.patterns.observable(),
+            self.verifyFinish: altar.patterns.observable(),
+            self.priorStart: altar.patterns.observable(),
+            self.priorFinish: altar.patterns.observable(),
+            self.dataStart: altar.patterns.observable(),
+            self.dataFinish: altar.patterns.observable(),
+            self.posteriorStart: altar.patterns.observable(),
+            self.posteriorFinish: altar.patterns.observable(),
             self.acceptStart: altar.patterns.observable(),
             self.acceptFinish: altar.patterns.observable(),
+            self.chainAdvanceFinish: altar.patterns.observable(),
             self.walkChainsFinish: altar.patterns.observable(),
             self.samplePosteriorFinish: altar.patterns.observable(),
+            self.betaFinish: altar.patterns.observable(),
             self.finish: altar.patterns.observable(),
         }
 

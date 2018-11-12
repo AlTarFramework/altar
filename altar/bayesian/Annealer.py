@@ -96,16 +96,28 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
 
         # iterate until β is sufficiently close to one
         while worker.beta + tolerance < 1:
-            # notify the worker we are at the top of the current step
+            # notify that we are at the top of the current step
+            dispatcher.notify(event=dispatcher.betaStart, controller=self)
+            # let the worker know
             worker.top(annealer=self)
+
             # compute a new temperature
             worker.cool(annealer=self)
+
+            # notify we are about to walk the chains
+            dispatcher.notify(event=dispatcher.walkChainsStart, controller=self)
             # walk the chains
             statistics = worker.walk(annealer=self)
+            # notify we are done walking the chains
+            dispatcher.notify(event=dispatcher.walkChainsFinish, controller=self)
+
             # resample
             worker.resample(annealer=self, statistics=statistics)
+
             # notify the worker we are at the bottom of the current step
             worker.bottom(annealer=self)
+            # and dispatch the matching event
+            dispatcher.notify(event=dispatcher.betaFinish, controller=self)
 
         # and finish up
         worker.finish(annealer=self)
