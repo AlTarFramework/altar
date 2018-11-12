@@ -120,9 +120,6 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # and the event dispatcher
         dispatcher = annealer.dispatcher
 
-        # notify we are about to walk the chains
-        dispatcher.notify(event=dispatcher.walkChainsStart, controller=annealer)
-
         # unpack what i need from the cooling step
         β = step.beta
         θ = step.theta
@@ -168,8 +165,11 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # build a candidate state
             candidate = self.CoolingStep(beta=β, theta=cθ,
                                          likelihoods=likelihoods, sigma=csigma)
+
             # the random displacement may have generated candidates that are outside the
             # support of the model, so we must give it an opportunity to reject them;
+            # notify we are starting the verification process
+            dispatcher.notify(event=dispatcher.verifyStart, controller=annealer)
             # reset the mask and ask the model to verify the sample validity
             model.verify(step=candidate, mask=rejects.zero())
             # make the candidate a consistent set by replacing the rejected samples with copies
@@ -179,9 +179,11 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
                 if flag:
                     # copy the corresponding row from {θ} into {candidate}
                     cθ.setRow(index, θ.getRow(index))
+            # notify that the verification process is finished
+            dispatcher.notify(event=dispatcher.verifyFinish, controller=annealer)
 
             # compute the likelihoods
-            model.likelihoods(candidate)
+            model.likelihoods(annealer=annealer, step=candidate)
 
             # build a vector to hold the difference of the two posterior likelihoods
             diff = cpost.clone()
@@ -226,8 +228,6 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # notify we are done advancing the chains
             dispatcher.notify(event=dispatcher.chainAdvanceFinish, controller=annealer)
 
-        # notify we are done walking the chains
-        dispatcher.notify(event=dispatcher.walkChainsFinish, controller=annealer)
 
         # all done
         return accepted, rejected, unlikely

@@ -51,19 +51,21 @@ class CoolingStep:
 
     # factories
     @classmethod
-    def start(cls, model):
+    def start(cls, annealer):
         """
         Build the first cooling step by asking {model} to produce a sample set from its
         initializing prior, compute the likelihood of this sample given the data, and compute a
         (perhaps trivial) posterior
         """
+        # get the model
+        model = annealer.model
         # build an uninitialized step
         step = cls.alloc(samples=model.job.chains, parameters=model.parameters)
 
         # initialize it
         model.initializeSample(step=step)
         # compute the likelihoods
-        model.likelihoods(step=step)
+        model.likelihoods(annealer=annealer, step=step)
 
         # return the initialized state
         return step

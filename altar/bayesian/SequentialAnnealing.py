@@ -33,7 +33,7 @@ class SequentialAnnealing(AnnealingMethod):
         # chain up
         super().start(annealer=annealer)
         # build a cooling step to hold the state of the problem
-        self.step = self.CoolingStep.start(model=annealer.model)
+        self.step = self.CoolingStep.start(annealer=annealer)
         # all done
         return self
 
