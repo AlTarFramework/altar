@@ -354,7 +354,6 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         lu = altar.lapack.LU_decomposition(cd)
         # use it to compute the log of its determinant
         lndet = altar.lapack.LU_lndet(*lu)
-        print(f" ************* lndet = {lndet}")
         # compute and return
         return - 0.5 * (log(2*π)*self.observations + lndet);
 
