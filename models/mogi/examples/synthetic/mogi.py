@@ -136,7 +136,7 @@ class Mogi(altar.application, family="altar.applications.mogi"):
         # go through the observations
         for idx, observation in enumerate(data):
             # set the covariance to a fraction of the "observed" displacement
-            correlation[idx,idx] = .01 * observation.d
+            correlation[idx,idx] = 1.0 #.01 * observation.d
 
         # all done
         return data, correlation
