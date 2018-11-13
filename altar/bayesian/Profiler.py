@@ -11,12 +11,12 @@
 
 # the package
 import altar
-# my protocol
-from .Monitor import Monitor as monitor
 
 
 # an implementation of the monitor protocol
-class Profiler(altar.component, family="altar.simulations.monitors.profiler", implements=monitor):
+class Profiler(altar.component,
+               family="altar.simulations.monitors.profiler",
+               implements=altar.simulations.monitor):
     """
     Profiler times the various simulation phases
     """
