@@ -111,8 +111,12 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
             # notify we are done walking the chains
             dispatcher.notify(event=dispatcher.walkChainsFinish, controller=self)
 
+            # notify we are about to resample
+            dispatcher.notify(event=dispatcher.resampleStart, controller=self)
             # resample
             worker.resample(annealer=self, statistics=statistics)
+            # notify we are done resampling
+            dispatcher.notify(event=dispatcher.resampleFinish, controller=self)
 
             # notify the worker we are at the bottom of the current step
             worker.bottom(annealer=self)
