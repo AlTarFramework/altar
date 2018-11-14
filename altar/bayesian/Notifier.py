@@ -24,7 +24,7 @@ class Notifier(altar.component,
 
 
     # constants: the event loop identifiers
-    start = "start"
+    start = "simulationStart"
 
     samplePosteriorStart = "samplePosteriorStart"
     prepareSamplingPDFStart = "prepareSamplingPDFStart"
@@ -47,7 +47,7 @@ class Notifier(altar.component,
     betaFinish = "betaFinish"
     samplePosteriorFinish = "samplePosteriorFinish"
 
-    finish = "finish"
+    finish = "simulationFinish"
 
 
     # protocol obligations
