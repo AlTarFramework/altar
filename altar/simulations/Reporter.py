@@ -33,7 +33,7 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
 
 
     # implementation details
-    def start(self, controller, **kwds):
+    def simulationStart(self, controller, **kwds):
         """
         Handler invoked when the simulation is about to start
         """
@@ -285,7 +285,7 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         return
 
 
-    def finish(self, controller, **kwds):
+    def simulationFinish(self, controller, **kwds):
         """
         Handler invoked when the simulation is about to finish
         """
