@@ -28,19 +28,18 @@ class Profiler(altar.component,
         """
         Initialize me given an {application} context
         """
+        self.pfs = application.pfs
         # nothing to do
         return self
 
 
     # implementation details
-    def start(self, controller, **kwds):
+    def simulationStart(self, controller, **kwds):
         """
         Handler invoked when the simulation is about to start
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: start")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.simulation").start()
         # all done
         return
 
@@ -49,10 +48,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of sampling the posterior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: samplePosteriorStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.samplePosterior").start()
         # all done
         return
 
@@ -61,10 +58,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of the preparation of the sampling PDF
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: prepareSamplingPDFStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.prepareSamplingPDF").start()
         # all done
         return
 
@@ -73,10 +68,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of the preparation of the sampling PDF
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: prepareSamplingPDFFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.preparingSamplePDF").stop()
         # all done
         return
 
@@ -85,10 +78,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of the beta step
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: betaStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.beta").start()
         # all done
         return
 
@@ -97,10 +88,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of the chain walk
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: walkChainsStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.walk").start()
         # all done
         return
 
@@ -109,10 +98,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of a single step of chain walking
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: chainAdvanceStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.chainAdvance").start()
         # all done
         return
 
@@ -121,10 +108,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of a single step of chain walking
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: chainAdvanceFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.chainAdvance").stop()
         # all done
         return
 
@@ -133,10 +118,8 @@ class Profiler(altar.component,
         """
         Handler invoked before we start verifying the generated sample
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: verifyStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.verify").start()
         # all done
         return
 
@@ -145,10 +128,8 @@ class Profiler(altar.component,
         """
         Handler invoked after we are done verifying the generated sample
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: verifyFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.verify").stop()
         # all done
         return
 
@@ -157,10 +138,8 @@ class Profiler(altar.component,
         """
         Handler invoked before we compute the prior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: priorStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.prior").start()
         # all done
         return
 
@@ -169,10 +148,8 @@ class Profiler(altar.component,
         """
         Handler invoked after we compute the prior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: priorFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.prior").stop()
         # all done
         return
 
@@ -181,10 +158,8 @@ class Profiler(altar.component,
         """
         Handler invoked before we compute the data likelihood
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: dataStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.data").start()
         # all done
         return
 
@@ -193,10 +168,8 @@ class Profiler(altar.component,
         """
         Handler invoked after we compute the data likelihood
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: dataFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.data").stop()
         # all done
         return
 
@@ -205,10 +178,8 @@ class Profiler(altar.component,
         """
         Handler invoked before we assemble the posterior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: posteriorStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.posterior").start()
         # all done
         return
 
@@ -217,10 +188,8 @@ class Profiler(altar.component,
         """
         Handler invoked after we assemble the posterior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: posteriorFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.posterior").stop()
         # all done
         return
 
@@ -229,10 +198,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the beginning of sample accept/reject
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: acceptStart")
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.accept").start()
         # all done
         return
 
@@ -241,10 +208,28 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of sample accept/reject
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: acceptFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.accept").stop()
+        # all done
+        return
+
+
+    def resampleStart(self, controller, **kwds):
+        """
+        Handler invoked at the beginning of resampling
+        """
+        # start the timer
+        self.pyre_executive.newTimer(name="altar.profiler.resample").start()
+        # all done
+        return
+
+
+    def resampleFinish(self, controller, **kwds):
+        """
+        Handler invoked at the end of resampling
+        """
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.resample").stop()
         # all done
         return
 
@@ -253,10 +238,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of the chain walk
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: walkChainsFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.walk").stop()
         # all done
         return
 
@@ -265,10 +248,8 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of the beta step
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: betaFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.beta").stop()
         # all done
         return
 
@@ -277,24 +258,75 @@ class Profiler(altar.component,
         """
         Handler invoked at the end of sampling the posterior
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: samplePosteriorFinish")
+        # grab the timer and stop it
+        self.pyre_executive.newTimer(name="altar.profiler.samplePosterior").stop()
         # all done
         return
 
 
-    def finish(self, controller, **kwds):
+    def simulationFinish(self, controller, **kwds):
         """
         Handler invoked when the simulation is about to finish
         """
-        # grab a channel
-        channel = controller.info
-        # say something
-        channel.log(f"{self.pyre_name}: finish")
+        # grab the timer and stop it
+        timer = self.pyre_executive.newTimer(name="altar.profiler.simulation")
+        # stop it
+        timer.stop()
+
+        # save the measurements
+        self.save()
+
         # all done
         return
+
+
+    # implementation details
+    def save(self):
+        """
+        Save the times collected by my timers
+        """
+        # grab the csv package
+        import csv
+
+        # make a list of the phases i care about
+        phases = [
+            "simulation",
+            "samplePosterior",
+            "preparingSamplePDF",
+            "beta",
+            "walk",
+            "chainAdvance",
+            "verify",
+            "prior",
+            "data",
+            "posterior",
+            "accept",
+            "resample",
+        ]
+        # convert it into a list of the associated timers
+        timers = [
+            self.pyre_executive.newTimer(name=f"altar.profiler.{phase}")
+            for phase in phases
+        ]
+
+        # open a file for storing the timings
+        with open("prof.csv", "w", newline='') as stream:
+            # make a csv write
+            writer = csv.writer(stream)
+
+            # go through the simulation phases and their timers
+            for phase, timer in zip(phases, timers):
+                # read the timer
+                duration = timer.read()
+                # and save it
+                writer.writerow((phase,duration))
+
+        # all done
+        return
+
+
+    # private data
+    pfs = None # a reference to the application pfs so I can save my timing results
 
 
 # end of file
