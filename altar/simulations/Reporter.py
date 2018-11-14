@@ -261,6 +261,30 @@ class Reporter(altar.component, family="altar.simulations.monitors.reporter", im
         return
 
 
+    def resampleStart(self, controller, **kwds):
+        """
+        Handler invoked before we start resampling
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: resampleStart")
+        # all done
+        return
+
+
+    def resampleFinish(self, controller, **kwds):
+        """
+        Handler invoked after we are done resampling
+        """
+        # grab a channel
+        channel = controller.info
+        # say something
+        channel.log(f"{self.pyre_name}: resampleFinish")
+        # all done
+        return
+
+
     def betaFinish(self, controller, **kwds):
         """
         Handler invoked at the end of the beta step

@@ -44,6 +44,8 @@ class Notifier(altar.component,
     acceptFinish = "acceptFinish"
     chainAdvanceFinish = "chainAdvanceFinish"
     walkChainsFinish = "walkChainsFinish"
+    resampleStart = "resampleStart"
+    resampleFinish = "resampleFinish"
     betaFinish = "betaFinish"
     samplePosteriorFinish = "samplePosteriorFinish"
 
@@ -119,6 +121,8 @@ class Notifier(altar.component,
             self.acceptFinish: altar.patterns.observable(),
             self.chainAdvanceFinish: altar.patterns.observable(),
             self.walkChainsFinish: altar.patterns.observable(),
+            self.resampleStart: altar.patterns.observable(),
+            self.resampleFinish: altar.patterns.observable(),
             self.samplePosteriorFinish: altar.patterns.observable(),
             self.betaFinish: altar.patterns.observable(),
             self.finish: altar.patterns.observable(),
