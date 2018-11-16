@@ -25,6 +25,9 @@ class Gaussian(base, family="altar.distributions.gaussian"):
 
 
     # user configurable state
+    mean = altar.properties.float(default=0)
+    mean.doc = "the mean value of the distribution"
+
     sigma = altar.properties.float(default=1)
     sigma.doc = "the standard deviation of the distribution"
 
@@ -36,7 +39,7 @@ class Gaussian(base, family="altar.distributions.gaussian"):
         Initialize with the given random number generator
         """
         # set up my pdf
-        self.pdf = altar.pdf.gaussian(rng=rng.rng, sigma=self.sigma)
+        self.pdf = altar.pdf.gaussian(rng=rng.rng, mean=self.mean, sigma=self.sigma)
         # all done
         return self
 
