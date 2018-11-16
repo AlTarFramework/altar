@@ -69,7 +69,7 @@ class Profiler(altar.component,
         Handler invoked at the end of the preparation of the sampling PDF
         """
         # grab the timer and stop it
-        self.pyre_executive.newTimer(name="altar.profiler.preparingSamplePDF").stop()
+        self.pyre_executive.newTimer(name="altar.profiler.prepareSamplingPDF").stop()
         # all done
         return
 
@@ -292,7 +292,7 @@ class Profiler(altar.component,
         phases = [
             "simulation",
             "samplePosterior",
-            "preparingSamplePDF",
+            "prepareSamplingPDF",
             "beta",
             "walk",
             "chainAdvance",
