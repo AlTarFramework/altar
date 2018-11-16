@@ -21,6 +21,10 @@ mogi:
         gpus = 0  ; number of gpus per task
         chains = 2**12
 
+    ; event handlers
+    monitors:
+       prof = altar.bayesian.profiler
+
     ; model configuration
     model:
         psets:
