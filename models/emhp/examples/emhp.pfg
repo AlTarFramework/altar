@@ -14,6 +14,7 @@ emhp:
     ; event handlers
     monitors:
        log = reporter
+       prof = altar.bayesian.profiler
 
 
 ; end of file

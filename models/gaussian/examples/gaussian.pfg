@@ -13,7 +13,11 @@ gaussian:
     job:
         tasks = {gaussian.shell.tasks} ; number of tasks per host
         gpus = 0  ; number of gpus per task
-        chains = 2**10 ; number of chains per task
+        chains = 2**14 ; number of chains per task
+
+    ; monitors
+    monitors:
+        prof = altar.bayesian.profiler
 
     ; model configuration
     model:
