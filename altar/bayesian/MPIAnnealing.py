@@ -171,6 +171,9 @@ class MPIAnnealing(AnnealingMethod):
 
         # save the annealing method for each of my tasks
         self.worker = worker
+        # assign them a worker id
+        self.worker.wid = self.rank
+
         # compute the total number workers
         workers = comm.sum(destination=self.manager, item=worker.workers)
         # the result is meaningful only on the manager task

@@ -23,6 +23,8 @@ class AnnealingMethod:
     # public data
     step = None # the current state of the solver
     iteration = 0 # my iteration counter
+
+    wid = 0 # my worker id
     workers = None # the total number of chain processors
 
     @property
