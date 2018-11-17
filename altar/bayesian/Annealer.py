@@ -54,13 +54,6 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         # initialize the dispatcher
         self.dispatcher.initialize(application=application)
 
-        # go through the registered monitors
-        for monitor in application.monitors.values():
-            # initialize them
-            monitor.initialize(application=application)
-            # and register them with the {dispatcher}
-            self.dispatcher.register(monitor=monitor)
-
         # initialize my other parts
         self.sampler.initialize(application=application)
         self.scheduler.initialize(application=application)
@@ -70,6 +63,13 @@ class Annealer(altar.component, family="altar.controllers.annealer", implements=
         self.worker = self.deduceAnnealingMethod(job=application.job)
         # and initialize it
         self.worker.initialize(application=application)
+
+        # go through the registered monitors
+        for monitor in application.monitors.values():
+            # initialize them
+            monitor.initialize(application=application)
+            # and register them with the {dispatcher}
+            self.dispatcher.register(monitor=monitor)
 
         # all done
         return self
