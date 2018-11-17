@@ -39,6 +39,9 @@ class Job(altar.component, family="altar.simulations.runs.job", implements=run):
     chains = altar.properties.int(default=1)
     chains.doc = "the number of chains per worker"
 
+    steps = altar.properties.int(default=20)
+    steps.doc = 'the length of each Markov chain'
+
     tolerance = altar.properties.float(default=1.0e-3)
     tolerance.doc = "convergence tolerance for β->1.0"
 
