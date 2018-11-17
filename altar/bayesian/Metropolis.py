@@ -29,9 +29,6 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     # user configurable state
-    steps = altar.properties.int(default=20)
-    steps.doc = 'the length of each Markov chain'
-
     scaling = altar.properties.float(default=.1)
     scaling.doc = 'the parameter covariance Σ is scaled by the square of this'
 
@@ -48,6 +45,8 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         """
         Initialize me and my parts given an {application} context
         """
+        # pull the chain length from the job specification
+        self.steps = application.job.steps
         # get the capsule of the random number generator
         rng = application.rng.rng
         # set up the distribution for building the sample multiplicities
@@ -282,6 +281,8 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     # private data
+    steps = 1          # the length of each Markov chain
+
     uniform = None     # the distribution of the sample multiplicities
     uninormal = None   # the distribution of random walk displacement vectors
     sigma_chol = None  # placeholder for the scaled and decomposed parameter covariance matrix
