@@ -22,6 +22,7 @@ class SequentialAnnealing(AnnealingMethod):
 
 
     # public data
+    wid = 0     # my worker id
     workers = 1 # i don't manage anybody else
 
 
