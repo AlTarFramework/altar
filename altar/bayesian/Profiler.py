@@ -33,6 +33,16 @@ class Profiler(altar.component,
         return self
 
 
+    # meta-methods
+    def __init__(self, **kwds):
+        # chain up
+        super().__init__(**kwds)
+        # the counter of beta steps
+        self.beta = 0
+        # all done
+        return
+
+
     # implementation details
     def simulationStart(self, controller, **kwds):
         """
@@ -250,6 +260,8 @@ class Profiler(altar.component,
         """
         # grab the timer and stop it
         self.pyre_executive.newTimer(name="altar.profiler.beta").stop()
+        # update the beta step counter
+        self.beta += 1
         # all done
         return
 
@@ -274,14 +286,14 @@ class Profiler(altar.component,
         timer.stop()
 
         # save the measurements
-        self.save()
+        self.save(controller=controller)
 
         # all done
         return
 
 
     # implementation details
-    def save(self):
+    def save(self, controller):
         """
         Save the times collected by my timers
         """
@@ -309,11 +321,28 @@ class Profiler(altar.component,
             for phase in phases
         ]
 
+        # grab the run characteristics
+        beta = self.beta
+        parameters = controller.model.parameters
+        chains = controller.model.job.chains
+        steps = controller.model.job.steps
+
+        # build the filename
+        filename = f"prof-{beta:03}x{parameters:03}x{chains:06}x{steps:03}.csv"
         # open a file for storing the timings
-        with open("prof.csv", "w", newline='') as stream:
+        with open(filename, "w", newline='') as stream:
             # make a csv write
             writer = csv.writer(stream)
 
+            # persist the run characteristics
+            writer.writerow(("run characteristics",))
+            writer.writerow(("beta steps", beta))
+            writer.writerow(("parameters", parameters))
+            writer.writerow(("chains", chains))
+            writer.writerow(("steps", steps))
+
+            # persist the timings
+            writer.writerow(("timings",))
             # go through the simulation phases and their timers
             for phase, timer in zip(phases, timers):
                 # read the timer
