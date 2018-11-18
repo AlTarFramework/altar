@@ -21,7 +21,7 @@ copyright(PyObject *, PyObject *)
 {
     // the note
     const char * const copyright_note =
-        "altar.beta: (c) 2010-2013 California Institute of Technology";
+        "altar.beta: (c) 2013-2018 ParaSim Inc; 2010-2018 California Institute of Technology";
     // turn it into a python string
     return Py_BuildValue("s", copyright_note);
 }
@@ -82,7 +82,7 @@ PyObject *
 altar::extensions::
 version(PyObject *, PyObject *)
 {
-    const char * const version_string = "0.0";
+    const char * const version_string = "2.0";
     return Py_BuildValue("s", version_string);
 }
 
