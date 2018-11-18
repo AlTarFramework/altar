@@ -23,36 +23,39 @@ namespace altar {
         namespace models {
             namespace mogi {
                 // the module method table
-                PyMethodDef module_methods[] = {
-                    // module metadata
-                    // the version
-                    { version__name__, version, METH_VARARGS, version__doc__ },
-
-                    // sentinel
-                    {0, 0, 0, 0}
-                };
-
-                // the module documentation string
-                const char * const __doc__ = "the mogi extension module";
-
-                // the module definition structure
-                PyModuleDef module_definition = {
-                    // header
-                    PyModuleDef_HEAD_INIT,
-                    // the name of the module
-                    "mogi",
-                    // the module documentation string
-                    __doc__,
-                    // size of the per-interpreter state of the module; -1 if this state is global
-                    -1,
-                    // the methods defined in this module
-                    module_methods
-                };
+                extern PyMethodDef module_methods[];
+                extern PyModuleDef module_definition;
             } // of namespace mogi
         } // of namespace models
     } // of namespace extensions
 } // of namespace altar
 
+PyMethodDef
+altar::extensions::models::mogi::
+module_methods[] = {
+    // module metadata
+    // the version
+    { version__name__, version, METH_VARARGS, version__doc__ },
+
+    // sentinel
+    {0, 0, 0, 0}
+};
+
+// the module definition structure
+PyModuleDef
+altar::extensions::models::mogi::
+module_definition = {
+    // header
+    PyModuleDef_HEAD_INIT,
+    // the name of the module
+    "mogi",
+    // the module documentation string
+    "the mogi extension module",
+    // size of the per-interpreter state of the module; -1 if this state is global
+    -1,
+    // the methods defined in this module
+    module_methods
+};
 
 // initialization function for the module
 // *must* be called PyInit_altar
@@ -61,8 +64,9 @@ PyInit_mogi()
 {
     // create the module
     PyObject * module = PyModule_Create(&altar::extensions::models::mogi::module_definition);
-    // check whether module creation succeeded and raise an exception if not
+    // check whether module creation succeeded
     if (!module) {
+        // and raise an exception if not
         return 0;
     }
     // otherwise, we have an initialized module
