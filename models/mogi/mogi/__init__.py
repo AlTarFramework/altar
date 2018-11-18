@@ -11,12 +11,13 @@
 # the package
 import altar
 
+# my extension module
+from .ext import libmogi
 
 # access to the Mogi source
 from .Source import Source as source
 # and the layout of the input file
 from .Data import Data as data
-
 
 # implementations
 @altar.foundry(implements=altar.models.model, tip="a multi-parameter Mogi model")
