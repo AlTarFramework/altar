@@ -13,8 +13,8 @@
 import csv
 # the package
 import altar
-# the analytic implementation of the Mogi source
-from .Source import Source as source
+# my extensions
+from . import libmogi
 # the encapsulation of the layout of the data in a file
 from .Data import Data as datasheet
 
@@ -24,7 +24,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     """
     An implementation of Mogi[1958]
 
-    The surface displacement calculation for a point pressure source in an elastic half space.
+    The surface displacement calculation for a pressure point source in an elastic half space.
 
     Currently, {mogi} is implemented as a four parameter model: x,y,depth locate the point
     source, and {dV} provides the point source strength as the volume change. It can easily
@@ -62,8 +62,14 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     nu = altar.properties.float(default=.25)
     nu.doc = "the Poisson ratio"
 
+    # operating strategies
+    mode = altar.properties.str(default="native")
+    mode.doc = "the implementation strategy"
+    mode.validators = altar.constraints.isMember("native", "fast")
+
     # public data
     parameters = 0 # adjusted during model initialization
+    strategy = None # the strategy for computing the data log likelihood
 
 
     # protocol obligations
@@ -114,6 +120,20 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
         # save the parameter meta data
         self.meta()
+
+        # pick an implementation strategy
+        if (self.mode) == "fast":
+            # get the fast strategy
+            strategy = None
+        # otherwise
+        else:
+            # get the native strategy
+            from .Native import Native
+            # and deploy it
+            strategy = Native()
+        # initialize it and save it
+        self.strategy = strategy.initialize(model=self)
+
         # show me
         # self.show(job=application.job, channel=self.info)
 
@@ -160,65 +180,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
-        # get my norm
-        norm = self.norm
-        # grab the portion of the sample that's mine
-        θ = self.restrict(theta=step.theta)
-        # the observed displacements
-        displacements = self.d
-        # the inverse of the data covariance matrix
-        cd_inv = self.cd_inv
-        # the normalization
-        normalization = self.normalization
-        # and the storage for the data likelihoods
-        dataLLK = step.data
-
-        # find out how many samples in the set
-        samples = θ.rows
-        # get the parameter sets
-        psets = self.psets
-
-        # get the offsets of the various parameter sets
-        xIdx = self.xIdx
-        yIdx = self.yIdx
-        dIdx = self.dIdx
-        sIdx = self.sIdx
-        offsetIdx = self.offsetIdx
-
-        # get the observations
-        d = self.d
-        los = self.los
-        oid = self.oid
-
-        # for each sample in the sample set
-        for sample in range(samples):
-            # extract the parameters
-            parameters = θ.getRow(sample)
-            # get the location of the source
-            x = parameters[xIdx]
-            y = parameters[yIdx]
-            # its depth
-            d = parameters[dIdx]
-            # and its strength; we model the logarithm of this one, so we have to exponentiate
-            dV = 10**parameters[sIdx]
-
-            # make a source using the sample parameters
-            mogi = source(x=x, y=y, d=d, dV=dV)
-            # compute the expected displacement
-            u = mogi.displacements(locations=self.points, los=los)
-
-            # subtract the observed displacements
-            u -= displacements
-            # adjust using the offset
-            for obs in range(self.observations):
-                # appropriate for the corresponding dataset
-                u[obs] -= parameters[offsetIdx + oid[obs]]
-
-            # compute the norm
-            norm = self.norm.eval(v=u, sigma_inv=cd_inv)
-            # compute its norm, normalize, and store it as the data log likelihood
-            dataLLK[sample] = normalization - norm/2
-
+        # get my strategy
+        strategy = self.strategy
+        # deploy
+        strategy.dataLikelihood(model=self, step=step)
         # all done
         return self
 
