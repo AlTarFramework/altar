@@ -30,6 +30,7 @@ mogi.pkg.drivers := mogi
 mogi.lib.stem := mogi
 mogi.lib.root := models/mogi/libmogi/
 mogi.lib.incdir := $(builder.dest.inc)altar/models/mogi/
+mogi.lib.extern := gsl pyre
 mogi.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # the mogi extension meta-data
