@@ -1,9 +1,8 @@
 // -*- C++ -*-
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
-//
-// (c) 2013-2018 parasim inc
-// all rights reserved
+// parasim
+// (c) 2013-2018 all rights reserved
 //
 
 // my declarations
