@@ -63,7 +63,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     nu.doc = "the Poisson ratio"
 
     # operating strategies
-    mode = altar.properties.str(default="native")
+    mode = altar.properties.str(default="fast")
     mode.doc = "the implementation strategy"
     mode.validators = altar.constraints.isMember("native", "fast")
 
@@ -124,15 +124,13 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         # pick an implementation strategy
         if (self.mode) == "fast":
             # get the fast strategy
-            strategy = None
+            from .Fast import Fast as strategy
         # otherwise
         else:
             # get the native strategy
-            from .Native import Native
-            # and deploy it
-            strategy = Native()
+            from .Native import Native as strategy
         # initialize it and save it
-        self.strategy = strategy.initialize(model=self)
+        self.strategy = strategy().initialize(model=self)
 
         # show me
         # self.show(job=application.job, channel=self.info)
