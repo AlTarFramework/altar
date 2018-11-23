@@ -59,7 +59,6 @@ class Native:
         offsetIdx = model.offsetIdx
 
         # get the observations
-        d = model.d
         los = model.los
         oid = model.oid
         locations = model.points
