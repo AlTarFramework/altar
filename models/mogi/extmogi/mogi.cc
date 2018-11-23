@@ -15,6 +15,7 @@
 // the module method declarations
 #include "exceptions.h"
 #include "metadata.h"
+#include "source.h"
 
 
 // put everything in my private namespace
@@ -36,6 +37,20 @@ module_methods[] = {
     // module metadata
     // the version
     { version__name__, version, METH_VARARGS, version__doc__ },
+
+    // source methods
+    // constructor
+    { newSource__name__, newSource, METH_VARARGS, newSource__doc__ },
+    // user supplied information
+    { data__name__, data, METH_VARARGS, data__doc__ },
+    { locations__name__, locations, METH_VARARGS, locations__doc__ },
+    { los__name__, los, METH_VARARGS, los__doc__ },
+    { oid__name__, oid, METH_VARARGS, oid__doc__ },
+    { layout__name__, layout, METH_VARARGS, layout__doc__ },
+    // the calculation of the displacements
+    { displacements__name__, displacements, METH_VARARGS, displacements__doc__ },
+    // and the residuals
+    { residuals__name__, residuals, METH_VARARGS, residuals__doc__ },
 
     // sentinel
     {0, 0, 0, 0}

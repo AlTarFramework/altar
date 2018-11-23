@@ -7,28 +7,19 @@
 // all rights reserved
 //
 
-#if !defined(altar_extensions_capsules_h)
-#define altar_extensions_capsules_h
+#if !defined(altar_extensions_models_mogi_capsules_h)
+#define altar_extensions_models_mogi_capsules_h
 
 // capsules
 namespace altar {
-
-    // cov
     namespace extensions {
-        const char * const capsule_t = "altar.cov";
-        void free(PyObject *);
-    }
-
-    // vectors
-    namespace vector {
-        const char * const capsule_t = "gsl.vector";
-    }
-    // matrix
-    namespace matrix {
-        const char * const capsule_t = "gsl.matrix";
+        namespace models {
+            namespace mogi {
+                const char * const source_capst = "altar.models.mogi.source";
+            }
+        }
     }
 }
-// local
 
 #endif
 
