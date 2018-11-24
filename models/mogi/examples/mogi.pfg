@@ -20,6 +20,7 @@ mogi:
         tasks = 1 ; number of tasks per host
         gpus = 0  ; number of gpus per task
         chains = 2**12
+        steps = 20
 
     ; event handlers
     monitors:
