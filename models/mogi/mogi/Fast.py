@@ -86,19 +86,13 @@ class Fast:
         for sample in range(samples):
             # get the residuals
             residuals = predicted.getRow(sample)
-            # compute the norm, normalize, and store it
-            dataLLK[sample] = normalization - norm.eval(v=residuals, sigma_inv=cd_inv) / 2
+            # compute the norm, and normalize it
+            llk = normalization - norm.eval(v=residuals, sigma_inv=cd_inv) / 2
+            # store it
+            dataLLK[sample] = llk
 
         # all done
         return self
-
-
-    # meta-methods
-    def __init__(self, **kwds):
-        # chain up
-        super().__init__(**kwds)
-        # all done
-        return
 
 
     # private data
