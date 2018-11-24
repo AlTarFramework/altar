@@ -27,6 +27,10 @@ mogi:
 
     ; model configuration
     model:
+        ; the mogi engine: native or fast
+        mode = fast
+
+        ; parameter sets
         psets:
             location = contiguous
             depth = contiguous
