@@ -10,7 +10,7 @@ gaussian.major := 1
 gaussian.minor := 0
 
 # use the altar area for build temporaries
-gaussian.tmpdir = $(altar.tmpdir)models/gaussian/
+gaussian.tmpdir = ${builder.dest.staging}altar/models/gaussian/
 
 # gaussian consists of a python package
 gaussian.packages := gaussian.pkg

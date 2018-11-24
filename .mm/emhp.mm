@@ -10,7 +10,7 @@ emhp.major := 1
 emhp.minor := 0
 
 # use the altar area for build temporaries
-emhp.tmpdir = $(altar.tmpdir)models/emhp/
+emhp.tmpdir = ${builder.dest.staging}altar/models/emhp/
 
 # emhp consists of a python package
 emhp.packages := emhp.pkg
