@@ -10,7 +10,7 @@ linear.major := 1
 linear.minor := 0
 
 # use the altar area for build temporaries
-linear.tmpdir = $(altar.tmpdir)models/linear/
+linear.tmpdir = ${builder.dest.staging}altar/models/linear/
 
 # linear consists of a python package
 linear.packages := linear.pkg
