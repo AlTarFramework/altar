@@ -75,7 +75,7 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         auto xSrc = gsl_matrix_get(&samples->matrix, sample, _xIdx);
         auto ySrc = gsl_matrix_get(&samples->matrix, sample, _yIdx);
         auto dSrc = gsl_matrix_get(&samples->matrix, sample, _dIdx);
-        auto sSrc = gsl_matrix_get(&samples->matrix, sample, _sIdx);
+        auto sSrc = std::pow(10, gsl_matrix_get(&samples->matrix, sample, _sIdx));
 
         // go through the locations
         for (auto loc=0; loc<_locations->size1; ++loc) {
