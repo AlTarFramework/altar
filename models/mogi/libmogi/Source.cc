@@ -128,22 +128,20 @@ residuals(gsl_matrix * predicted) const {
     channel
         << pyre::journal::at(__HERE__)
         << "computing residuals in place"
-        << pyre::journal::newline
-        << "  shape: " << predicted->size1 << "x" << predicted->size2
         << pyre::journal::endl;
 
     // unpack the number of samples and number of observations
     auto nSamples = predicted->size1;
     auto nObservations = predicted->size2;
 
-    // go through all the samples
-    for (auto sample=0; sample < nSamples; ++sample) {
-        // and all observations
-        for (auto obs=0; obs < nObservations; ++obs) {
+    // go through all observations
+    for (auto obs=0; obs < nObservations; ++obs) {
+        // get the corresponding measurement
+        auto actual = gsl_vector_get(_data, obs);
+        // go though the samples
+        for (auto sample=0; sample < nSamples; ++sample) {
             // get the predicted displacement
             auto pred = gsl_matrix_get(predicted, sample, obs);
-            // get the corresponding measurement
-            auto actual = gsl_vector_get(_data, obs);
             // compute the difference
             auto residual = pred - actual;
             // and store back into the matrix we were handed
