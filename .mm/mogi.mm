@@ -35,7 +35,7 @@ mogi.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # the mogi extension meta-data
 mogi.ext.stem := mogi
-mogi.ext.root := models/mogi/extmogi/
+mogi.ext.root := models/mogi/ext/mogi/
 mogi.ext.pkg := mogi.pkg
 mogi.ext.wraps := mogi.lib
 mogi.ext.extern := mogi.lib gsl pyre python
