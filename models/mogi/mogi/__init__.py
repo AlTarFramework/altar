@@ -11,9 +11,6 @@
 # the package
 import altar
 
-# my extension module
-from .ext import libmogi
-
 # access to the Mogi source
 from .Source import Source as source
 # and the layout of the input file

@@ -13,8 +13,6 @@
 import csv
 # the package
 import altar
-# my extensions
-from . import libmogi
 # the encapsulation of the layout of the data in a file
 from .Data import Data as datasheet
 
@@ -122,12 +120,12 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         self.meta()
 
         # pick an implementation strategy
-        if (self.mode) == "fast":
-            # get the fast strategy
+        if self.mode == "fast":
+            # get the fast strategy that involves a Mogi source implemented in C++
             from .Fast import Fast as strategy
         # otherwise
         else:
-            # get the native strategy
+            # get the strategy implemented in pure python
             from .Native import Native as strategy
         # initialize it and save it
         self.strategy = strategy().initialize(model=self)
