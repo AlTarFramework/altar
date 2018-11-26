@@ -9,8 +9,14 @@
 #
 
 
-# pull the extension module; this must exist, so let import errors bubble up
-from . import mogi as libmogi
+# attempt
+try:
+    # to load the extension module
+    from . import mogi as libmogi
+# if it fails
+except ImportError:
+    # the build/install must have failed somehow; we still have pure python support, so move on
+    pass
 
 
 # end of file

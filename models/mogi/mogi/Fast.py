@@ -12,7 +12,7 @@
 # externals
 import altar
 # the pure python implementation of the Mogi source
-from altar.models.mogi import libmogi
+from altar.models.mogi.ext import libmogi
 
 
 # declaration
