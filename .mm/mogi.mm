@@ -28,7 +28,7 @@ mogi.pkg.drivers := mogi
 
 # the mogi library metadata
 mogi.lib.stem := mogi
-mogi.lib.root := models/mogi/libmogi/
+mogi.lib.root := models/mogi/lib/libmogi/
 mogi.lib.incdir := $(builder.dest.inc)altar/models/mogi/
 mogi.lib.extern := gsl pyre
 mogi.lib.c++.flags += $($(compiler.c++).std.c++17)
