@@ -20,9 +20,9 @@ class Native:
     """
 
     # interface
-    def initialize(self, model):
+    def initialize(self, **kwds):
         """
-        Initialize the strategy with {model} information
+        Initialize the strategy
         """
         # nothing to do
         return self

@@ -22,7 +22,7 @@ class Fast:
     """
 
     # interface
-    def initialize(self, model):
+    def initialize(self, model, **kwds):
         """
         Initialize the strategy with {model} information
         """
