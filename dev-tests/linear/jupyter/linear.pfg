@@ -1,0 +1,43 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+; the linear app
+linear:
+    ; test case configuration
+    model:
+        ; the name of the test case
+        case = patch-9
+        ; the number of free parameters
+        parameters = 18
+        ; the number of observations
+        observations = 108
+
+        ; sample initializer
+        prep:
+            parameters = {linear.model.parameters}
+            sigma = 0.5
+
+        ; prior
+        prior:
+            parameters = {linear.model.parameters}
+            sigma = 0.5
+
+    ; shell
+    ; shell = mpi.shells.mpirun ; for running with mpi
+
+    ; run configuration
+    job.tasks = 1 ; number of tasks per host
+    job.gpus = 0  ; number of gpus per task
+    job.chains = 2**10 ; number of chains per task
+
+
+
+; for parallel runs
+mpi.shells.mpirun # altar.plexus.shell:
+    tasks = 2
+    extra = -mca btl self,tcp
+
+; end of file

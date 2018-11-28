@@ -78,6 +78,12 @@ from . import (
     models,
     # user interfaces
     shells, actions,
+    # cuda
+    cuda,
+    # stats
+    stats,
+    # utils
+    utils,
     )
 
 # my extension modules

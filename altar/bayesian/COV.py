@@ -204,7 +204,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
                 # update the samples
                 for param in range(step.parameters):
                     θ[done, param] = θOld[old, param]
-                # update the log-likelihoods
+                # update the log-densities
                 prior[done] = priorOld[old]
                 data[done] = dataOld[old]
                 posterior[done] = postOld[old]

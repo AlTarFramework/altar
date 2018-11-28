@@ -49,6 +49,15 @@ def metropolis():
     # and return it
     return metropolis
 
+@altar.foundry(implements=sampler, tip="the Adaptive Metropolis algorithm as a Bayesian sampler")
+def adaptivemetropolis():
+    # grab the factory
+    from .AdaptiveMetropolis import AdaptiveMetropolis as adaptivemetropolis
+    # attach its docstring
+    __doc__ = adaptivemetropolis.__doc__
+    # and return it
+    return adaptivemetropolis
+
 
 @altar.foundry(implements=sampler, tip="a monitor that times the various simulation phases")
 def profiler():

@@ -32,7 +32,7 @@ class L2(altar.component, family="altar.norms.l2", implements=Norm):
             # use the specialized implementation
             return self.withCovariance(v=v, sigma_inv=sigma_inv)
         # otherwise, compute the norm and return it
-        return altar.blas.dnrm2(v)
+        return altar.blas.ddot(v, v)
 
 
     # implementation details
@@ -49,7 +49,7 @@ class L2(altar.component, family="altar.norms.l2", implements=Norm):
             sigma_inv.lowerTriangular, sigma_inv.opNoTrans, sigma_inv.nonUnitDiagonal,
             sigma_inv, v)
         # compute the dot product and return it
-        return altar.blas.dnrm2(v)
+        return altar.blas.ddot(v, v)
 
 
 # end of file

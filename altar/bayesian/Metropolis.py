@@ -50,7 +50,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # get the capsule of the random number generator
         rng = application.rng.rng
         # set up the distribution for building the sample multiplicities
-        self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
+        self.uniform = altar.pdf.uniform_pos(rng=rng)
         # set up the distribution for the random walk displacement vectors
         self.uninormal = altar.pdf.ugaussian(rng=rng)
 
@@ -101,11 +101,13 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # unpack what i need
         Σ = step.sigma.clone()
         # scale it
-        Σ *= self.scaling**2
+        Σ *= self.scaling
         # compute its Cholesky decomposition
         self.sigma_chol = altar.lapack.cholesky_decomposition(Σ)
+
         # notify we are done preparing the sampling PDF
         dispatcher.notify(event=dispatcher.prepareSamplingPDFFinish, controller=annealer)
+
         # all done
         return
 
@@ -138,7 +140,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         accepted = rejected = unlikely = 0
 
         # allocate some vectors that we use throughout the following
-        # candidate likelihoods
+        # candidate densities
         cprior = altar.vector(shape=samples)
         cdata = altar.vector(shape=samples)
         cpost = altar.vector(shape=samples)
@@ -157,13 +159,13 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
             # initialize the candidate sample by randomly displacing the current one
             cθ = self.displace(sample=θ)
-            # initialize the likelihoods
-            likelihoods = cprior.zero(), cdata.zero(), cpost.zero()
+            # initialize the densities
+            densities = cprior.zero(), cdata.zero(), cpost.zero()
             # and the covariance matrix
             csigma.zero()
             # build a candidate state
             candidate = self.CoolingStep(beta=β, theta=cθ,
-                                         likelihoods=likelihoods, sigma=csigma)
+                                         densities=densities, sigma=csigma)
 
             # the random displacement may have generated candidates that are outside the
             # support of the model, so we must give it an opportunity to reject them;
@@ -181,10 +183,10 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
             # notify that the verification process is finished
             dispatcher.notify(event=dispatcher.verifyFinish, controller=annealer)
 
-            # compute the likelihoods
-            model.likelihoods(annealer=annealer, step=candidate)
+            # compute the densities
+            model.densities(annealer=annealer, step=candidate)
 
-            # build a vector to hold the difference of the two posterior likelihoods
+            # build a vector to hold the difference of the two posterior densities
             diff = cpost.clone()
             # subtract the previous posterior
             diff -= posterior
@@ -216,7 +218,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
                 accepted += 1
                 # copy the candidate sample
                 θ.setRow(sample, cθ.getRow(sample))
-                # and its likelihoods
+                # and its densities
                 prior[sample] = cprior[sample]
                 data[sample] = cdata[sample]
                 posterior[sample] = cpost[sample]
@@ -270,6 +272,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         acceptance = accepted / (accepted + rejected + unlikely)
         # the fudge factor
         kc = (aw*acceptance + rw)/(aw+rw)
+        
         # don't let it get too small
         if kc < .1: kc = .1
         # or too big
@@ -281,7 +284,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     # private data
-    steps = 1          # the length of each Markov chain
+    steps = 100        # the length of each Markov chain
 
     uniform = None     # the distribution of the sample multiplicities
     uninormal = None   # the distribution of random walk displacement vectors

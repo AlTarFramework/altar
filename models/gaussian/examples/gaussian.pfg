@@ -21,7 +21,7 @@ gaussian:
 
     ; model configuration
     model:
-        init = uniform
+        prep = uniform
         prior = uniform
 
     ; initializer pdf configuration
@@ -33,6 +33,10 @@ gaussian:
         parameters = 2
         support = (-1, 1)
 
+altar.distributions.uniform1 # altar.distributions.uniform:
+    parameters = 1
+    support = (0, 1)
+    
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:

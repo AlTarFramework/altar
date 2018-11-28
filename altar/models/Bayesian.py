@@ -80,31 +80,31 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     @altar.export
-    def priorLikelihood(self, step):
+    def computePrior(self, step):
         """
-        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        Fill {step.prior} with the densities of the samples in {step.theta} in the prior
         distribution
         """
         # i don't know what to do, so...
         raise NotImplementedError(
-            f"model '{type(self).__name__}' must implement 'priorLikelihood'")
+            f"model '{type(self).__name__}' must implement 'computePrior'")
 
 
     @altar.export
-    def dataLikelihood(self, step):
+    def computeDataLikelihood(self, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
         # i don't know what to do, so...
         raise NotImplementedError(
-            f"model '{type(self).__name__}' must implement 'dataLikelihood'")
+            f"model '{type(self).__name__}' must implement 'computeDataLikelihood'")
 
 
     @altar.export
-    def posteriorLikelihood(self, step):
+    def computePosterior(self, step):
         """
-        Given the {step.prior} and {step.data} likelihoods, compute a generalized posterior using
+        Given the {step.prior} and {step.data} densities, compute a generalized posterior using
         {step.beta} and deposit the result in {step.post}
         """
         # prime the posterior
@@ -116,18 +116,19 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
 
 
     @altar.export
-    def likelihoods(self, annealer, step):
+    def densities(self, annealer, step):
         """
-        Convenience function that computes all three likelihoods at once given the current {step}
+        Convenience function that computes all three densities at once given the current {step}
         of the problem
         """
+
         # grab the dispatcher
         dispatcher = annealer.dispatcher
 
         # notify we are about to compute the prior likelihood
         dispatcher.notify(event=dispatcher.priorStart, controller=annealer)
         # compute the prior likelihood
-        self.priorLikelihood(step=step)
+        self.computePrior(step=step)
         # done
         dispatcher.notify(event=dispatcher.priorFinish, controller=annealer)
 
@@ -135,14 +136,14 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         # notify we are about to compute the likelihood of the prior given the data
         dispatcher.notify(event=dispatcher.dataStart, controller=annealer)
         # compute it
-        self.dataLikelihood(step=step)
+        self.computeDataLikelihood(step=step)
         # done
         dispatcher.notify(event=dispatcher.dataFinish, controller=annealer)
 
         # finally, notify we are about to put together the posterior at this temperature
         dispatcher.notify(event=dispatcher.posteriorStart, controller=annealer)
         # compute it
-        self.posteriorLikelihood(step=step)
+        self.computePosterior(step=step)
         # done
         dispatcher.notify(event=dispatcher.posteriorFinish, controller=annealer)
 
@@ -160,6 +161,13 @@ class Bayesian(altar.component, family="altar.models.bayesian", implements=model
         raise NotImplementedError(
             f"model '{type(self).__name__}' must implement 'verify'")
 
+    @altar.provides
+    def update(self, annealer):
+        """
+        Perform any updates to the model 
+        """
+        # nothing to do
+        return self
 
     # notifications
     @altar.export

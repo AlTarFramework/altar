@@ -24,7 +24,8 @@ class SequentialAnnealing(AnnealingMethod):
     # public data
     wid = 0     # my worker id
     workers = 1 # i don't manage anybody else
-
+    rank = 0 #  i need a pseudo rank 
+    manager = 0 # i am my own manager
 
     # interface
     def start(self, annealer):
@@ -38,5 +39,12 @@ class SequentialAnnealing(AnnealingMethod):
         # all done
         return self
 
+    def bottom(self, annealer):
+        """
+        Process(es) performaed at the end of each annealing step
+        """
+        super().bottom(annealer=annealer)
+        # all done
+        return self 
 
 # end of file

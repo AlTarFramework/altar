@@ -44,9 +44,9 @@ class Distribution(altar.protocol, family="altar.distributions"):
         """
 
     @altar.provides
-    def priorLikelihood(self, theta, prior):
+    def computePrior(self, theta, density):
         """
-        Fill my portion of {prior} with the likelihoods of the samples in {theta}
+        Fill my portion of {prior} with the densities of the samples in {theta}
         """
 
     @altar.provides

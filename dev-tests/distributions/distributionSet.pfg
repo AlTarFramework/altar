@@ -1,0 +1,26 @@
+
+; the DistibutionSetTest app
+
+
+; app
+dset:
+    ; member variables 
+    distset:
+        d1 = uniform 
+        d2 = gaussian
+
+        d1:
+            support = (0,10)
+            offset = 0
+            parameters = 3
+        
+        d2:
+            mean
+            offset = 5
+            parameters = 4
+
+
+parameters = 10
+samples = 6
+
+; end of file

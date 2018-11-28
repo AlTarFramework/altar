@@ -1,0 +1,22 @@
+;
+; Lijun Zhu
+; Caltech
+; (c) 2018 all rights reserved
+;
+
+; MomentTest app
+
+rng:
+    seed = 10
+    ; algorithm = 
+
+moment:
+    parameters = 9 ; patches 
+    support = (-1,10) ; low, high limits for displacements 
+    offset = 9     ; offset in parameter set
+    Mu = 32  ; shear modulus in GPa
+    Mw_mean = 6.7 ; mean Mw
+    Mw_sigma = 0.5 ; variance of Mw 
+    patch_area = 1e4 ; patch area in Km^2 
+
+; end of file

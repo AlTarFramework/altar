@@ -41,30 +41,30 @@ class Model(altar.protocol, family="altar.models"):
         """
 
     @altar.provides
-    def priorLikelihood(self, step):
+    def computePrior(self, step):
         """
-        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        Fill {step.prior} with the densities of the samples in {step.theta} in the prior
         distribution
         """
 
     @altar.provides
-    def dataLikelihood(self, step):
+    def computeDataLikelihood(self, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
 
     @altar.provides
-    def posteriorLikelihood(self, step):
+    def computePosterior(self, step):
         """
-        Given the {step.prior} and {step.data} likelihoods, compute a generalized posterior using
+        Given the {step.prior} and {step.data} densities, compute a generalized posterior using
         {step.beta} and deposit the result in {step.post}
         """
 
     @altar.provides
-    def likelihoods(self, step):
+    def densities(self, step):
         """
-        Convenience function that computes all three likelihoods at once given the current {step}
+        Convenience function that computes all three densities at once given the current {step}
         of the problem
         """
 
@@ -73,6 +73,12 @@ class Model(altar.protocol, family="altar.models"):
         """
         Check whether the samples in {step.theta} are consistent with the model requirements and
         update the {mask}, a vector with zeroes for valid samples and non-zero for invalid ones
+        """
+        
+    @altar.provides
+    def update(self, annealer):
+        """
+        Perform any updates to the model 
         """
 
     # notifications

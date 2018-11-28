@@ -20,7 +20,7 @@ def linear():
     # attach its docstring
     __doc__ = linear.__doc__
     # and return it
-    return linear
+    return linear  
 
 
 # end of file

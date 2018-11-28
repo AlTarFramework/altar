@@ -28,9 +28,9 @@ class Native:
         return self
 
 
-    def dataLikelihood(self, model, step):
+    def computeDataLikelihood(self, model, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data.
         """
         # get the norm
@@ -43,7 +43,7 @@ class Native:
         cd_inv = model.cd_inv
         # the normalization
         normalization = model.normalization
-        # and the storage for the data likelihoods
+        # and the storage for the data densities
         dataLLK = step.data
 
         # find out how many samples in the set

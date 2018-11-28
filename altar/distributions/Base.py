@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# Lijun Zhu <ljzhu@caltech.edu>
 #
 # (c) 2013-2018 parasim inc
 # (c) 2010-2018 california institute of technology
@@ -58,9 +59,9 @@ class Base(altar.component, implements=distribution):
 
 
     @altar.export
-    def priorLikelihood(self, theta, likelihood):
+    def computePrior(self, theta, density):
         """
-        Fill my portion of {likelihood} with the likelihoods of the samples in {theta}
+        Fill my portion of {likelihood} with the densities of the samples in {theta}
         """
         # get my pdf implementation
         pdf = self.pdf
@@ -71,13 +72,13 @@ class Base(altar.component, implements=distribution):
 
         # for each one
         for sample in range(samples):
-            # fill the vector with the log likelihoods
-            likelihood[sample] += sum(
+            # fill the vector with the log densities
+            density[sample] += sum(
                 math.log(pdf.density(parameter)) for parameter in θ.getRow(sample))
 
         # all done
         return self
-
+        
 
     @altar.export
     def verify(self, theta, mask):

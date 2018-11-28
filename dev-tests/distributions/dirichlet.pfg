@@ -1,0 +1,19 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+; DirichletTest app
+
+rng:
+    seed = 10
+    ; algorithm = 
+
+dirichlet:
+    order = 6
+    alpha = [1, 1, 1, 1, 1, 1]
+    offset = 2
+    parameters = 6 
+
+; end of file

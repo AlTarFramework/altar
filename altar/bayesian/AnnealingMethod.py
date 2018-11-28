@@ -94,6 +94,8 @@ class AnnealingMethod:
         scheduler.update(step=self.step)
         # update the iteration counter
         self.iteration += 1
+        # record iteration to step
+        self.step.iteration = self.iteration
         # all done
         return self
 
@@ -127,8 +129,14 @@ class AnnealingMethod:
         """
         Notification that we are at the bottom of an update
         """
-        # notify the model
+        
+        # update model data (LZ)
+        # needs worker info from annealer
+        annealer.model.update(annealer=annealer)
+
+        # notify the model (MA)
         annealer.model.bottom(step=self.step)
+
         # all done
         return self
 
@@ -142,7 +150,7 @@ class AnnealingMethod:
         # ask it to render itself to the screen
         step.print(channel=annealer.info)
         # ask the recorder to record it
-        annealer.archiver.record(step=step)
+        # annealer.archiver.record(step=step)
         # all done
         return self
 

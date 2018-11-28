@@ -97,6 +97,9 @@ dbeta(vector_t *llk, double llkMedian, vector_t *w)
 {
     // build my debugging channel
     pyre::journal::debug_t debug("altar.beta");
+    
+    // turn off the err_handler (from Hailiang)
+    gsl_error_handler_t * gsl_hdl = gsl_set_error_handler_off ();
 
     // consistency checks
     assert(_betaMin == 0);
@@ -441,7 +444,7 @@ double cov::cov(double dbeta, void * parameters)
 
     // compute the COV
     double mean = gsl_stats_mean(p.w->data, p.w->stride, p.w->size);
-    double sdev = gsl_stats_sd(p.w->data, p.w->stride, p.w->size);
+    double sdev = gsl_stats_sd_m(p.w->data, p.w->stride, p.w->size, mean);
     double cov = sdev / mean;
     // store it
     p.cov = cov;

@@ -44,9 +44,9 @@ class Null(Bayesian, family="altar.models.null"):
 
 
     @altar.export
-    def priorLikelihood(self, step):
+    def computePrior(self, step):
         """
-        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        Fill {step.prior} with the densities of the samples in {step.theta} in the prior
         distribution
         """
         # do nothing
@@ -54,9 +54,9 @@ class Null(Bayesian, family="altar.models.null"):
 
 
     @altar.export
-    def dataLikelihood(self, step):
+    def computeDataLikelihood(self, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
         # do nothing

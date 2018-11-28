@@ -23,12 +23,13 @@ class CoolingStep:
     # public data
     beta = None      # the inverse temperature
     theta = None     # a (samples x parameters) matrix
-    prior = None     # a (samples) vector with logs of the sample likelihoods
-    data = None      # a (samples) vector with the logs of the data likelihoods given the samples
+    prior = None     # a (samples) vector with logs of the sample densities
+    data = None      # a (samples) vector with the logs of the data densities given the samples
     posterior = None # a (samples) vector with the logs of the posterior likelihood
 
     sigma = None # the parameter covariance matrix
 
+    iteration = 0 # the sequence number of annealing step; assigned as worker.iteration
 
     # read-only public data
     @property
@@ -64,8 +65,8 @@ class CoolingStep:
 
         # initialize it
         model.initializeSample(step=step)
-        # compute the likelihoods
-        model.likelihoods(annealer=annealer, step=step)
+        # compute the densities
+        model.densities(annealer=annealer, step=step)
 
         # return the initialized state
         return step
@@ -83,7 +84,7 @@ class CoolingStep:
         data = altar.vector(shape=samples).zero()
         posterior = altar.vector(shape=samples).zero()
         # build one of my instances and return it
-        return cls(beta=0, theta=theta, likelihoods=(prior, data, posterior))
+        return cls(beta=0, theta=theta, densities=(prior, data, posterior))
 
 
     # interface
@@ -95,14 +96,14 @@ class CoolingStep:
         beta = self.beta
         theta = self.theta.clone()
         sigma = self.sigma.clone()
-        likelihoods = self.prior.clone(), self.data.clone(), self.posterior.clone()
+        densities = self.prior.clone(), self.data.clone(), self.posterior.clone()
 
         # make one and return it
-        return type(self)(beta=beta, theta=theta, likelihoods=likelihoods, sigma=sigma)
+        return type(self)(beta=beta, theta=theta, densities=densities, sigma=sigma)
 
 
     # meta-methods
-    def __init__(self, beta, theta, likelihoods, sigma=None, **kwds):
+    def __init__(self, beta, theta, densities, sigma=None, **kwds):
         # chain up
         super().__init__(**kwds)
 
@@ -110,8 +111,8 @@ class CoolingStep:
         self.beta = beta
         # store the sample set
         self.theta = theta
-        # store the likelihoods
-        self.prior, self.data, self.posterior = likelihoods
+        # store the densities
+        self.prior, self.data, self.posterior = densities
 
         # get the number of parameters
         dof = self.parameters
@@ -138,9 +139,10 @@ class CoolingStep:
         # the sample
         θ = self.theta
         channel.line(f"{indent}θ: ({θ.rows} samples) x ({θ.columns} parameters)")
+
         if θ.rows <= 10 and θ.columns <= 10:
             channel.line("\n".join(θ.print(interactive=False, indent=indent*2)))
-
+            
         if samples < 10:
             # the prior
             prior = self.prior
@@ -155,11 +157,17 @@ class CoolingStep:
             channel.line(f"{indent}posterior:")
             channel.line(posterior.print(interactive=False, indent=indent*2))
 
-        if parameters < 10:
+        if parameters < 10:            
             # the data covariance
             Σ = self.sigma
             channel.line(f"{indent}Σ: {Σ.rows} x {Σ.columns}")
             channel.line("\n".join(Σ.print(interactive=False, indent=indent*2)))
+
+        # the statistics of parameters
+        mean, sd = altar.stats.mean_sd(θ)
+        channel.line(f"{indent}parameters (mean, sd):")
+        for i in range(min(100, parameters)):
+            channel.line(f"{indent} ({mean[i]}, {sd[i]})")
 
         # flush
         channel.log()

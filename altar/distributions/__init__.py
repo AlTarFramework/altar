@@ -47,5 +47,22 @@ def ugaussian():
     # and return it
     return ugaussian
 
+@altar.foundry(implements=distribution, tip="the Dirichlet probability distribution")
+def dirichlet():
+    # grab the factory
+    from .Dirichlet import Dirichlet as dirichlet
+    # attach its docstring
+    __doc__ = dirichlet.__doc__
+    # and return it
+    return dirichlet
+
+@altar.foundry(implements=distribution, tip="the distribution with a set of distributions")
+def distributionset():
+    # grab the factory
+    from .DistributionSet import DistributionSet as distributionset
+    # attach its docstring
+    __doc__ = distributionset.__doc__
+    # and return it
+    return distributionset
 
 # end of file

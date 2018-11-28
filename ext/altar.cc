@@ -17,7 +17,7 @@
 #include "exceptions.h"
 #include "metadata.h"
 #include "dbeta.h"
-
+#include "distributions.h"
 
 // put everything in my private namespace
 namespace altar {
@@ -35,6 +35,16 @@ namespace altar {
             // annealing schedule
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta__name__, dbeta, METH_VARARGS, dbeta__doc__},
+
+
+            // distributions
+            // uniform
+            { uniform::sample__name__, uniform::sample, METH_VARARGS, uniform::sample__doc__},
+            { uniform::verify__name__, uniform::verify, METH_VARARGS, uniform::verify__doc__},
+            { uniform::logpdf__name__, uniform::logpdf, METH_VARARGS, uniform::logpdf__doc__},
+            // gaussian 
+            { gaussian::sample__name__, gaussian::sample, METH_VARARGS, gaussian::sample__doc__},
+            { gaussian::logpdf__name__, gaussian::logpdf, METH_VARARGS, gaussian::logpdf__doc__},
 
             // sentinel
             {0, 0, 0, 0}

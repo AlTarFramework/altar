@@ -30,12 +30,12 @@ class Contiguous(altar.component,
     prior = altar.distributions.distribution()
     prior.doc = "the prior distribution"
 
-    prep = altar.distributions.distribution()
+    prep = altar.distributions.distribution(default=None)
     prep.doc = "the distribution to use to initialize this parameter set"
 
 
     # state set by the model
-    offset = 0 # adjusted by the model after the full set of parameters is known
+    offset = altar.properties.int(default=0) # adjusted by the model after the full set of parameters is known
 
 
     # interface
@@ -50,13 +50,19 @@ class Contiguous(altar.component,
         # get my count
         count = self.count
         # adjust the number of parameters of my distributions
-        self.prep.parameters = self.prior.parameters = count
-
+        self.prior.parameters = count
+        
         # get the random number generator
         rng = model.rng
         # initialize my distributions
-        self.prep.initialize(rng=rng)
         self.prior.initialize(rng=rng)
+        
+        # if prep is not provided, set it to prior; else initialize it
+        if self.prep is None:
+            self.prep = self.prior
+        else:
+            self.prep.parameters = count
+            self.prep.initialize(rng=rng)
 
         # return my parameter count so the next set can be initialized properly
         return count
@@ -76,14 +82,16 @@ class Contiguous(altar.component,
 
 
     @altar.export
-    def priorLikelihood(self, theta, priorLLK):
+    def computePrior(self, theta, density):
         """
-        Fill {priorLLK} with the log likelihoods of the samples in {theta} in my prior distribution
+        Fill {priorLLK} with the log densities of the samples in {theta} in my prior distribution
         """
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=theta)
         # delegate
-        self.prior.priorLikelihood(theta=θ, likelihood=priorLLK)
+
+        self.prior.computePrior(theta=θ, density=density)
+
         # all done
         return self
 

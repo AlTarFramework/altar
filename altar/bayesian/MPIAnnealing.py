@@ -218,7 +218,7 @@ class MPIAnnealing(AnnealingMethod):
         # covariance matrix, so the local copy is good enough
         return self.CoolingStep(
             beta=β, theta=θ,
-            likelihoods=(prior,data,posterior), sigma=step.sigma)
+            densities=(prior,data,posterior), sigma=step.sigma)
 
 
     def partition(self):
@@ -257,7 +257,7 @@ class MPIAnnealing(AnnealingMethod):
 
         # grab my portion of the sample set
         step.theta.excerpt(matrix=θ, source=manager, communicator=comm)
-        # my portion of the likelihoods
+        # my portion of the densities
         step.prior.excerpt(vector=prior, source=manager, communicator=comm)
         step.data.excerpt(vector=data, source=manager, communicator=comm)
         step.posterior.excerpt(vector=posterior, source=manager, communicator=comm)

@@ -45,9 +45,9 @@ class ParameterSet(altar.protocol, family="altar.models.parameters"):
         """
 
     @altar.provides
-    def priorLikelihood(self, theta, priorLLK):
+    def computePrior(self, theta, density):
         """
-        Fill {priorLLK} with the likelihoods of the samples in {theta} in my prior distribution
+        Fill {priorLLK} with the densities of the samples in {theta} in my prior distribution
         """
 
     @altar.provides

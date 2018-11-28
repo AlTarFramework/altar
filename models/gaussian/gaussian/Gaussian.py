@@ -81,29 +81,29 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
 
     @altar.export
-    def priorLikelihood(self, step):
+    def computePrior(self, step):
         """
-        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        Fill {step.prior} with the densities of the samples in {step.theta} in the prior
         distribution
         """
         # grab my prior pdf
         pdf = self.prior
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
-        # and the storage for the prior likelihoods
+        # and the storage for the prior densities
         likelihood = step.prior
 
         # delegate
-        pdf.priorLikelihood(theta=θ, likelihood=likelihood)
+        pdf.computePrior(theta=θ, likelihood=likelihood)
 
         # all done
         return self
 
 
     @altar.export
-    def dataLikelihood(self, step):
+    def computeDataLikelihood(self, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
         # cache the inverse of {σ}
@@ -111,7 +111,7 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
-        # and the storage for the data likelihoods
+        # and the storage for the data densities
         data = step.data
 
         # find out how many samples in the set
@@ -195,7 +195,11 @@ class Gaussian(altar.models.bayesian, family="altar.models.gaussian"):
 
         # all done
         return
-
+        
+    @altar.export
+    def update(self, step):
+        print("this is test update")
+        return self
 
     # implementation details
     peak = None # the location of my central value

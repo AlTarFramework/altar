@@ -153,33 +153,33 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
 
 
     @altar.export
-    def priorLikelihood(self, step):
+    def computePrior(self, step):
         """
-        Fill {step.prior} with the likelihoods of the samples in {step.theta} in the prior
+        Fill {step.prior} with the densities of the samples in {step.theta} in the prior
         distribution
         """
         # grab the portion of the sample that's mine
         θ = self.restrict(theta=step.theta)
-        # and the storage for the prior likelihoods
-        likelihood = step.prior
+        # and the storage for the prior densities
+        prior = step.prior
         # go through each parameter set
         for pset in self.psets.values():
             # and ask each one to {prep} the sample
-            pset.priorLikelihood(theta=θ, priorLLK=likelihood)
+            pset.computePrior(theta=θ, density=prior)
         # all done
         return self
 
 
     @altar.export
-    def dataLikelihood(self, step):
+    def computeDataLikelihood(self, step):
         """
-        Fill {step.data} with the likelihoods of the samples in {step.theta} given the available
+        Fill {step.data} with the densities of the samples in {step.theta} given the available
         data. This is what is usually referred to as the "forward model"
         """
         # get my strategy
         strategy = self.strategy
         # deploy
-        strategy.dataLikelihood(model=self, step=step)
+        strategy.computeDataLikelihood(model=self, step=step)
         # all done
         return self
 

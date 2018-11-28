@@ -1,0 +1,37 @@
+;
+; Lijun Zhu
+; Caltech
+; (c) 1998-2018 all rights reserved
+;
+
+; the linear app
+culinear:
+    ; test case configuration
+    model:
+        ; the name of the test case
+        case = ../patch-9
+        ; the number of free parameters
+        parameters = 18
+        ; the number of observations
+        observations = 108
+
+        ; sample initializer
+        prep:
+            parameters = {culinear.model.parameters}
+            sigma = 0.5
+
+        ; prior
+        prior:
+            parameters = {culinear.model.parameters}
+            sigma = 0.5
+
+
+    ; run configuration
+    job.tasks = 1 ; number of tasks per host
+    job.gpus = 1  ; number of gpus per task
+    job.chains = 2**16 ; number of chains per task
+
+
+
+
+; end of file
