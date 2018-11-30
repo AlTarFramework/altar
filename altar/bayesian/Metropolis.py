@@ -101,7 +101,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # unpack what i need
         Σ = step.sigma.clone()
         # scale it
-        Σ *= self.scaling
+        Σ *= self.scaling**2
         # compute its Cholesky decomposition
         self.sigma_chol = altar.lapack.cholesky_decomposition(Σ)
 
