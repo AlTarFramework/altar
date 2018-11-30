@@ -28,7 +28,7 @@ def moment():
 @altar.foundry(implements=altar.models.model, tip="static inversion model")
 def static():
     # grab the factory
-    from altar.models.linear.Linear import Linear as static
+    from .Static import Static as static
     # attach its docstring
     __doc__ = static.__doc__
     # and return it

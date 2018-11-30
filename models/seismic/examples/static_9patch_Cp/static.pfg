@@ -1,0 +1,73 @@
+;
+; Lijun Zhu
+; Caltech
+; (c) 1998-2018 all rights reserved
+;
+
+; the static without Cp
+static:
+    ; test case configuration
+    model:
+        ; the name of the test case
+        case = input
+        
+        ; input file names
+        green_file = static.gf.txt
+        cd_file = static.Cd.txt
+        data_file = static.data.txt
+        
+        ; sensitivity kernels
+        nCmu = 2
+        cmu_file = static.Cmu.txt
+        kmu_file = static.kernel.pertL[n].txt
+        
+        ; the number of free parameters        
+        parameters = 18
+        ; the number of observations
+        observations = 168
+
+        ; sample initializer
+        parametersets:
+            strike = contiguous
+            dip = contiguous
+      
+            strike:
+                offset = 0 
+                count = 9
+                prior = gaussian
+                prior.mean = 0
+                prior.sigma = 0.5
+            dip: 
+                offset = 9
+                count = 9
+                prior = altar.models.seismic.moment
+                prior:
+                    support = (-0.5, 10)
+                    Mw_mean = 7.2628 ; mean scale
+                    Mw_sigma = 0.2 ; 
+                    Mu = 30 ; shear modulus in GPa
+                    area = 3600 ; total area in km^2
+
+    ; shell
+    ; shell = mpi.shells.mpirun ; for running with mpi
+
+    ; run configuration
+    job.tasks = 1 ; number of tasks per host
+    job.gpus = 1  ; number of gpus per task
+    job.chains = 2**10 ; number of chains per task
+
+    ; sampler
+    controller:
+        sampler.steps = 200
+    ; rng     
+    rng:
+        seed = 1
+        algorithm = mt19937
+
+
+; for parallel runs
+; mpi.shells.mpirun # altar.plexus.shell:
+;    tasks = 2
+;    extra = -mca btl self,tcp
+
+; end of file

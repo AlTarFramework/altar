@@ -32,11 +32,11 @@ static:
                 count = 9
                 prior = altar.models.seismic.moment
                 prior:
-                    support = (-0.5, 20)
-                    Mw_mean = 7.5535
-                    Mw_sigma = 0.5
-                    Mu = 32
-                    patch_area = 3600
+                    support = (-0.5, 2)
+                    Mw_mean = 7.2846
+                    Mw_sigma = 0.2
+                    Mu = 30 ; GPa
+                    area = 3600 ; km^2
 
     ; shell
     ; shell = mpi.shells.mpirun ; for running with mpi
@@ -46,7 +46,7 @@ static:
     job.gpus = 1  ; number of gpus per task
     job.chains = 2**12 ; number of chains per task
 
-
+    
 
 ; for parallel runs
 ;mpi.shells.mpirun # altar.plexus.shell:

@@ -32,8 +32,8 @@ class Moment(uniform, family="altar.distributions.moment"):
     area_patches_file = altar.properties.path(default=None)
     area_patches_file.doc = "input file for area of each patch, in unit of km^2"
     
-    patch_area = altar.properties.float(default=1.0)
-    patch_area.doc = "patch area, if the same, in unit of km^2" 
+    area = altar.properties.float(default=1.0)
+    area.doc = "total area in unit of km^2" 
     
     Mw_mean = altar.properties.float(default=1.0)
     Mw_mean.doc = " the mean moment magnitude scale"
@@ -58,7 +58,7 @@ class Moment(uniform, family="altar.distributions.moment"):
         # initialize the area for each patches
         self.patches = self.parameters  
         # by default, assign the constant patch_area to each patch 
-        self.area_patches = altar.vector(shape=self.patches).fill(self.patch_area)
+        self.area_patches = altar.vector(shape=self.patches).fill(self.area/self.patches)
         # if a file is provided, load it 
         if self.area_patches_file is not None: 
             self.area_patches.load(self.area_patches_file.uri)

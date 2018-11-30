@@ -12,10 +12,10 @@
 
 # the package
 import altar
-from altar.models.linear.Linear import Linear as linear
+from .Static import Static as static
 
 # declaration
-class StaticCp(linear, family="altar.models.staticCp"):
+class StaticCp(static, family="altar.models.staticCp"):
     """
     Linear Model with prediction uncertainty Cp, in addition to data uncertainty Cd 
     Cp = Kp Cmu Kp^T 
@@ -43,10 +43,12 @@ class StaticCp(linear, family="altar.models.staticCp"):
     cmu_file.doc = "the covariance describing the uncertainty of model parameter"
     
     # kmu are a set (nCmu) of derivations of Green's functions shape=(observations, parameters)
-    kmu_file = altar.properties.str(default="kmu.txt")
+    kmu_file = altar.properties.str(default="kmu[n].txt")
     kmu_file.doc = "the sensitity kernel of model parameter: input as kmu1.txt, ..."
     
     # initial model 
+    initialModel_file = altar.properties.str(default="init_model.txt")
+    initialModel_file.doc = "the initial mean model"
 
 
     # protocol obligations
@@ -59,9 +61,9 @@ class StaticCp(linear, family="altar.models.staticCp"):
         super().initialize(application=application)
 
         # convert the input filenames into data
-        self.Kmu, self.Cmu = self.loadInputsCp()
-        # set Cp to 0 
-        self.Cp = altar.matrix(shape=self.Cd.shape).fill(0)
+        self.Kmu, self.Cmu, self.meanModel = self.loadInputsCp()
+        # set Cp 
+        self.Cp = self.computeCp(theta_mean=self.meanModel) 
 
         # all done
         return self
@@ -96,11 +98,11 @@ class StaticCp(linear, family="altar.models.staticCp"):
             
         # the sensitivity kernel, Kmu ususally
         nCmu = self.nCmu 
-        prefix, suffix = self.kmu_file.split(".")
+        prefix, suffix = self.kmu_file.split("[n]")
         kmu =[]
         kmu_i = altar.matrix(shape=(self.observations, self.parameters))
         for i in range (nCmu):
-            kmufn = prefix+str(i)+"."+suffix
+            kmufn = prefix+str(i+1)+suffix
             try:
                 kmuf = ifs[kmufn]
             except ifs.NotFoundErr:
@@ -110,9 +112,24 @@ class StaticCp(linear, family="altar.models.staticCp"):
                 kmu_i.load(kmuf.uri)
                 kmu.append(kmu_i)
                 
+        
+        # the initial model
+        try:
+            # get the path to the file
+            initModelf = ifs[self.initialModel_file]
+        # if the file doesn't exist
+        except ifs.NotFoundError:
+            channel.log(f"missing initial model file: no '{initModelf}' in '{self.case}'")
+            raise
+        # if all goes well
+        else:
+            # and load the file contents into memory
+            initModel = altar.vector(shape=self.parameters)
+            initModel.load(initModelf.uri)    
+        
 
         # all done
-        return kmu, cmu
+        return kmu, cmu, initModel
 
     #Cp - related functions 
 
@@ -134,34 +151,26 @@ class StaticCp(linear, family="altar.models.staticCp"):
         # G = Cd_inv x G; d = Cd_inv x d
         Cd_inv = self.Cd_inv
         self.G = altar.blas.dtrmm(Cd_inv.sideLeft, Cd_inv.upperTriangular, Cd_inv.opNoTrans,
-            Cd_inv.nonUnitDiagonal, 1, Cd_inv, self.G0)
+            Cd_inv.nonUnitDiagonal, 1, Cd_inv, self.G)
         self.d = altar.blas.dtrmv( Cd_inv.upperTriangular, Cd_inv.opNoTrans, Cd_inv.nonUnitDiagonal,
-            Cd_inv, self.d0)
+            Cd_inv, self.d)
         # prepare the residuals matrix
         self.residuals = self.initializeResiduals(samples=samples, data=self.d)
         # all done 
         return self
 
 
-    def computeCp(self, step):
+    def computeCp(self, theta_mean):
         """
         Calculate Cp 
         """
+        
         # grab the samples  shape=(samples, parameters) 
-        θ = self.restrict(theta=step.theta)
         parameters = self.parameters
         observations = self.observations
         nCmu = self.nCmu
-        
-        # get 
-        Cp = self.Cp
-        
-        # calculate the mean model 
-        theta_mean = altar.vector(shape=parameters)
-        for i in range(parameters):
-            param_v = θ.getColumn(i)
-            param = param_v.mean()
-            theta_mean[i] = param
+            
+        Cp = altar.matrix(shape=(observations, observations))
         
         # calculate 
         kv = altar.vector(shape=observations)
@@ -183,7 +192,7 @@ class StaticCp(linear, family="altar.models.staticCp"):
         altar.blas.dgemm(KpC.opNoTrans, Kp.opTrans, 1.0, KpC, Kp, 0.0, Cp)
 
         # all done                  
-        return self        
+        return Cp     
 
 
     @altar.export
@@ -191,31 +200,48 @@ class StaticCp(linear, family="altar.models.staticCp"):
         """
         Model update interface
         """
-        worker = annealer.worker
+        super().update(annealer=annealer)
         
-        # get the step 
-        # ???? check whether the step data is local or global 
-        step = worker.step 
-        # calculate Cp from a mean model from current state
-        self.computeCp(step)
-        # update Cchi
+        # get the work samples 
+        step = annealer.worker.step 
+        θ = self.restrict(theta=step.theta)
+        
+        # calculate the mean model 
+        theta_mean = self.meanModel
+        for i in range(self.parameters):
+            param_v = θ.getColumn(i)
+            param_mean = param_v.mean()
+            theta_mean[i] = param_mean
+        
+        # compute Cp from the mean model 
+        self.Cp = self.computeCp(theta_mean = theta_mean)
+        
+        # update Cd
         self.Cd.copy(self.Cd0)
         self.Cd += self.Cp
-        
+
         # compute the normalization
         self.normalization = self.computeNormalization(observations=self.observations, cd=self.Cd)
+
         # compute the inverse of {Cd}
         self.Cd_inv = self.computeCovarianceInverse(self.Cd)
+        
         # merge Cd to green and d
         # G = Cd_inv x G; d = Cd_inv x d
         Cd_inv = self.Cd_inv
+        self.G.copy(self.G0)
         self.G = altar.blas.dtrmm(Cd_inv.sideLeft, Cd_inv.upperTriangular, Cd_inv.opNoTrans,
-            Cd_inv.nonUnitDiagonal, 1, Cd_inv, self.G0)
+            Cd_inv.nonUnitDiagonal, 1, Cd_inv, self.G)
+        self.d.copy(self.d0)
         self.d = altar.blas.dtrmv( Cd_inv.upperTriangular, Cd_inv.opNoTrans, Cd_inv.nonUnitDiagonal,
-            Cd_inv, self.d0)
+            Cd_inv, self.d)    
+            
         # prepare the residuals matrix
         samples = step.samples
         self.residuals = self.initializeResiduals(samples=samples, data=self.d)
+        
+        # recalculate densities
+        # self.densities(annealer=annealer, step=step)
         #all done
         return self
 
@@ -228,6 +254,6 @@ class StaticCp(linear, family="altar.models.staticCp"):
 
     # computed
     Cp = None # the covariance matrix associated with model uncertainty
-
+    meanModel = None
 
 # end of file

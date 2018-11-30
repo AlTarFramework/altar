@@ -36,12 +36,7 @@ __pycache__/
 # machine dependent config
 /.mm/config.mm
 
-# tests for developers
-/dev-tests
-
 # example results
-/models/linear/examples/results
-/models/seismic/examples/patch-9/results
-/models/seismic/examples/patch-9-Cp/results
+results/
 
 # end of file
