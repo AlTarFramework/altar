@@ -63,6 +63,14 @@ class Fast:
         source = self.source
         # compute the portion of the sample that belongs to this model
         θ = model.restrict(theta=step.theta)
+        # allocate a matrix to hold the predicted displacements
+        predicted = altar.matrix(shape=(step.samples, model.observations))
+
+        # compute the predicted displacements
+        libmogi.displacements(source, θ.capsule, predicted.data)
+        # compute the residuals (in place)
+        libmogi.residuals(source, predicted.data)
+
         # get the norm
         norm = model.norm
         # the inverse of the data covariance matrix
@@ -71,14 +79,6 @@ class Fast:
         normalization = model.normalization
         # and the data likelihood vector
         dataLLK = step.data
-
-        # allocate a matrix to hold the predicted displacements
-        predicted = altar.matrix(shape=(step.samples, model.observations))
-
-        # compute the predicted displacements
-        libmogi.displacements(source, θ.capsule, predicted.data)
-        # compute the residuals (in place)
-        libmogi.residuals(source, predicted.data)
 
         # find out how many samples in the set
         samples = θ.rows
