@@ -120,15 +120,36 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         self.meta()
 
         # pick an implementation strategy
-        if self.mode == "fast":
-            # get the fast strategy that involves a Mogi source implemented in C++
-            from .Fast import Fast as strategy
+        # if the user has asked for CUDA support
+        if application.job.gpus > 0:
+            # attempt to
+            try:
+                # use the CUDA implementation
+                from .CUDA import CUDA as strategy
+            # if this fails
+            except ImportError:
+                # make a channel
+                channel = application.error
+                # complain
+                raise channel.log("unable to find CUDA support")
+        # if the user specified {fast} mode
+        elif self.mode == "fast":
+            # attempt to
+            try:
+                # get the fast strategy that involves a Mogi source implemented in C++
+                from .Fast import Fast as strategy
+            # if this fails
+            except ImportError:
+                # make channel
+                channel = application.error
+                # complain
+                raise channel.log("unable to find support for <fast> mode")
         # otherwise
         else:
             # get the strategy implemented in pure python
             from .Native import Native as strategy
         # initialize it and save it
-        self.strategy = strategy().initialize(model=self)
+        self.strategy = strategy().initialize(application=application, model=self)
 
         # show me
         # self.show(job=application.job, channel=self.info)
