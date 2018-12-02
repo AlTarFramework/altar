@@ -20,4 +20,22 @@ class CUDAAnnealing(AnnealingMethod):
     """
 
 
+    # public data
+    wid = 0     # my worker id
+    workers = 1 # i don't manage anybody else
+
+
+    # interface
+    def start(self, annealer):
+        """
+        Start the annealing process
+        """
+        # chain up
+        super().start(annealer=annealer)
+        # build a cooling step to hold the state of the problem
+        self.step = self.CoolingStep.start(annealer=annealer)
+        # all done
+        return self
+
+
 # end of file
