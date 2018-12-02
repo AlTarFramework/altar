@@ -17,10 +17,10 @@ mogi:
 
     ; job layout
     job:
-        tasks = 1 ; number of tasks per host
-        gpus = 0  ; number of gpus per task
-        chains = 2**12
-        steps = 20
+        tasks = 1       ; number of tasks per host
+        gpus = 1        ; number of gpus per task
+        chains = 2**12  ; number of chains per task
+        steps = 20      ; the length of each chain
 
     ; event handlers
     monitors:
@@ -59,9 +59,9 @@ mogi:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (11, 13)
+                    support = (9, 11)
                 prior:
-                    support = (11, 13)
+                    support = (9, 11)
             offsets:
                 count = 2
                 prep = uniform
