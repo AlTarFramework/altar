@@ -1,0 +1,38 @@
+// -*- C++ -*-
+//
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// (c) 2013-2018 parasim inc
+// all rights reserved
+//
+
+// code guard
+#if !defined(altar_models_cudamogi_Source_icc)
+#error This header file contains implementation details of class altar::models::cudamogi::Source
+#endif
+
+
+// interface
+void
+altar::models::cudamogi::Source::
+layout(size_type xIdx, size_type dIdx, size_type sIdx, size_type offsetIdx) {
+    // assign
+    _xIdx = xIdx;
+    _yIdx = xIdx + 1;
+    _dIdx = dIdx;
+    _sIdx = sIdx;
+    _offsetIdx = offsetIdx;
+
+    // make a channel
+    pyre::journal::debug_t channel("cudamogi.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached the parameter set layout"
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+// end of file
