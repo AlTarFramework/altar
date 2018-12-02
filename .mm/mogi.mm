@@ -15,9 +15,9 @@ mogi.tmpdir = ${builder.dest.staging}altar/models/mogi/
 # mogi consists of a python package
 mogi.packages := mogi.pkg
 # a library
-mogi.libraries = mogi.lib
+mogi.libraries = mogi.lib mogi.cudalib
 # and an extension
-mogi.extensions := mogi.ext
+mogi.extensions := mogi.ext mogi.cudaext
 
 # the mogi package meta-data
 mogi.pkg.stem := mogi
@@ -41,5 +41,27 @@ mogi.ext.wraps := mogi.lib
 mogi.ext.extern := mogi.lib gsl pyre python
 # compile options for the sources
 mogi.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the mogi CUDA library metadata
+mogi.cudalib.stem := cudamogi
+mogi.cudalib.root := models/mogi/lib/libcudamogi/
+mogi.cudalib.incdir := $(builder.dest.inc)altar/models/cudamogi/
+mogi.cudalib.extern := gsl pyre cuda
+# compile options for the sources
+mogi.cudalib.c++.flags += $($(compiler.c++).std.c++17)
+mogi.cudalib.cuda.flags += $(nvcc.std.c++14)
+
+# the mogi CUDA extension meta-data
+mogi.cudaext.stem := cudamogi
+mogi.cudaext.root := models/mogi/ext/cudamogi/
+mogi.cudaext.pkg := mogi.pkg
+mogi.cudaext.wraps := mogi.cudalib
+mogi.cudaext.extern := mogi.cudalib gsl pyre python cuda
+# compile options for the sources
+mogi.cudaext.lib.c++.flags += $($(compiler.c++).std.c++17)
+mogi.cudaext.lib.cuda.flags += $(nvcc.std.c++14)
+
+# specify the CUDA libraries
+cuda.libraries += cudart cudadevrt
 
 # end of file
