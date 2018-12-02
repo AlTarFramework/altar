@@ -15,9 +15,9 @@ mogi.tmpdir = ${builder.dest.staging}altar/models/mogi/
 # mogi consists of a python package
 mogi.packages := mogi.pkg
 # a library
-mogi.libraries = mogi.lib mogi.cudalib
+mogi.libraries = mogi.lib ${if ${value cuda.dir},mogi.cudalib}
 # and an extension
-mogi.extensions := mogi.ext mogi.cudaext
+mogi.extensions := mogi.ext ${if ${value cuda.dir},mogi.cudaext}
 
 # the mogi package meta-data
 mogi.pkg.stem := mogi
