@@ -332,7 +332,7 @@ altar::extensions::gaussian::logpdf(PyObject *, PyObject * args) {
         PyErr_SetString(PyExc_TypeError, "invalid matrix capsule for theta");
         return 0;
     }
-    
+
     // get the {theta} matrix (view)
     gsl_matrix_view * theta_view =
         static_cast<gsl_matrix_view *>(PyCapsule_GetPointer(thetaCapsule, gsl::matrix::view_t));
@@ -341,7 +341,7 @@ altar::extensions::gaussian::logpdf(PyObject *, PyObject * args) {
     // get the {pdf} vector
     gsl_vector * pdf =
         static_cast<gsl_vector *>(PyCapsule_GetPointer(pdfCapsule, altar::vector::capsule_t));
-        
+
     // get the problem sizes
     const size_t samples = theta->size1;
     const size_t parameters = theta->size2;
@@ -349,6 +349,12 @@ altar::extensions::gaussian::logpdf(PyObject *, PyObject * args) {
     const size_t offset=0;
 
     double logpdf,value,density;
+
+    // gaussian pdf = { 1 \over \sqrt{2 pi sigma^2} } \exp (-x^2 / 2 \sigma^2)
+    // log pdf = -x^2/2\sigma^2 - 0.5*log(2\pi\sigma^2)
+    double sigma_pref = -0.5/(sigma*sigma);
+    double logpref = -0.5*log(2*M_PI*sigma*sigma);
+
     // for each sample
     for (size_t sample=0; sample<samples; ++sample)
     {
@@ -357,10 +363,9 @@ altar::extensions::gaussian::logpdf(PyObject *, PyObject * args) {
         // and every parameter
         for (size_t idx=offset; idx<parameters+offset; ++idx)
         {
-            value = gsl_matrix_get(theta, sample, idx);
-            density = gsl_ran_gaussian_pdf((value-mean), sigma);
-            logpdf += log(density);
-
+            value = gsl_matrix_get(theta, sample, idx)-mean;
+            density = value*value*sigma_pref+logpref;
+            logpdf += density;
         }
         // store in the prior vector
         gsl_vector_set(pdf, sample, logpdf);

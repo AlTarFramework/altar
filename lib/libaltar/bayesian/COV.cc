@@ -25,6 +25,7 @@
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_eigen.h>
 
 #include <pyre/journal.h>
 
@@ -93,7 +94,7 @@ update(state_t & state)
 
 double
 altar::bayesian::COV::
-dbeta(vector_t *llk, double llkMedian, vector_t *w)
+dbeta_gsl(vector_t *llk, double llkMedian, vector_t *w)
 {
     // build my debugging channel
     pyre::journal::debug_t debug("altar.beta");
@@ -244,6 +245,120 @@ dbeta(vector_t *llk, double llkMedian, vector_t *w)
 }
 
 
+/// @par Main functionality
+/// Calculate the new annealing temperature by iterative grid-based searching
+/// @param [in] covargs Arguments for function minimization
+/// @return The calculated beta value
+double
+altar::bayesian::COV::
+dbeta(vector_t *llk, double llkMedian, vector_t *w)
+{
+    // build my debugging channel
+    pyre::journal::debug_t debug("altar.beta");
+
+    // turn off the err_handler (Hailiang)
+    gsl_error_handler_t * gsl_hdl = gsl_set_error_handler_off ();
+
+    // consistency checks
+    assert(_betaMin == 0);
+    assert(_betaMax == 1);
+
+    // the beta search region
+    double beta_low = 0;
+    double beta_high = _betaMax - _beta;
+    double beta_guess = _betaMin + 5.0e-5;
+
+    assert(beta_high >= beta_low);
+    assert(beta_high >= beta_guess);
+    assert(beta_guess >= beta_low);
+
+    // allocate space for the parameters
+    cov::args covargs;
+    // attach the two vectors
+    covargs.w = w;
+    covargs.llk = llk;
+    // store our initial guess
+    covargs.dbeta = beta_guess;
+    // initialize the COV target
+    covargs.target = _target;
+    // initialize the median of the log-likelihoods
+    covargs.llkMedian = llkMedian; 
+
+    // search bounds and initial guess
+    double f_beta_high = cov::cov(beta_high, &covargs);
+
+    // check whether we can skip straight to beta = 1
+    if (covargs.cov < _target || std::abs(covargs.cov-_target) < _tolerance) {
+        debug 
+            << pyre::journal::at(__HERE__)
+            << " ** skipping to beta = " << _betaMax << " **" 
+            << pyre::journal::endl;
+        // save my state
+        _beta = _betaMax;
+        _cov = covargs.cov;
+        // all done
+        return beta_high;
+    }
+
+    double f_beta_low = cov::cov(beta_low, &covargs);
+    // do this last so our first printout reflects the values at out guess
+    double f_beta_guess = cov::cov(beta_guess, &covargs);
+
+    // iterative grid searching
+    //double beta_grid_tolerance=1.E-6;
+    const int Nbeta=10;
+    int nbeta = 0;
+    double dbeta, beta_step;
+    int Nloop = 0;
+    if (debug) std::cout<<"dbeta minimization based on iterative grid searching:"<<std::endl;
+    bool Qfind = false;
+    do
+    {
+        ++Nloop;
+        beta_step = (beta_high-beta_low)/Nbeta;
+        int count=0;
+        for (beta_guess=beta_low, nbeta=0; nbeta<=Nbeta; beta_guess+=beta_step, ++nbeta)
+        {
+            f_beta_guess = cov::cov(beta_guess, &covargs);
+            if (std::abs(covargs.cov-_target) < _tolerance)
+            {
+                Qfind = true;
+                break;
+            }
+            if (covargs.cov >= _target)
+            {
+               if (nbeta==0) Qfind = true;
+               break;
+            }
+        }
+        if (nbeta>Nbeta) beta_guess -= beta_step;
+        if (debug) {
+            std::cout 
+                <<"      dbeta_low: "<<std::setw(11)<<std::setprecision(8)<<beta_low
+                <<"      dbeta_high: "<<std::setw(11)<<beta_high
+                <<"      dbeta_guess: "<<std::setw(11)<<beta_guess
+                <<"      cov: "<<std::setw(15)<<covargs.cov
+                << std::endl;
+        }
+        beta_high = beta_guess;
+        beta_low = beta_guess-beta_step;
+    }
+    while (Nloop<=Nbeta && !Qfind);
+
+    // assign dbeta
+    dbeta = beta_guess;
+
+    // make sure that we are left with the COV and weights evaluated for this guess
+    cov::cov(dbeta, &covargs);
+    
+    // adjust my state
+    _cov = covargs.cov;
+    _beta += dbeta;
+    // return the beta update
+    return dbeta;
+}
+
+
 // meta-methods
 altar::bayesian::COV::
 ~COV()
@@ -315,6 +430,57 @@ void
 altar::bayesian::COV::
 conditionCovariance(matrix_t * sigma) const
 {
+    // get matrix size
+    size_t m = sigma->size1;
+    // set minimum eigenvalue ratio
+	double eval_ratio_min = 0.001;
+    
+    // solve the eigen value problem
+    gsl_vector *eval = gsl_vector_alloc (m);
+    gsl_matrix *evec = gsl_matrix_alloc (m, m);     
+    gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (m);
+
+    gsl_eigen_symmv (sigma, eval, evec, w);
+    gsl_eigen_symmv_free (w);
+    
+    // sort the eigen values in ascending order (magnitude)
+    gsl_eigen_symmv_sort (eval, evec,  GSL_EIGEN_SORT_ABS_ASC);
+
+    // make a transpose of the eigen vector matrix
+	gsl_matrix *evecT = gsl_matrix_alloc(m,m);
+	gsl_matrix_transpose_memcpy(evecT, evec);
+
+    // allocate a matrix for conditioned eigen values
+	gsl_matrix *diagM = gsl_matrix_calloc(m,m);
+    
+    // set the minimum eigen value as the max * ratio
+	double eval_min = eval_ratio_min*gsl_vector_get(eval,m-1);
+    double eval_i;
+    // copy the eigenvalues, set it to eval_min if smaller
+    for (size_t i = 0; i < m; i++)
+    {
+    	eval_i  = gsl_vector_get (eval, i);
+		if (eval_i<eval_min) gsl_matrix_set(diagM, i, i, eval_min);
+		else gsl_matrix_set(diagM, i, i, eval_i);
+    }
+    
+    // reconstruct sigma from the conditioned eigen values
+	gsl_matrix *tmp = gsl_matrix_alloc(m,m);
+	gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, diagM, evecT, 0.0, tmp);
+	gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, evec, tmp, 0.0, sigma);
+
+    // make sigma symmetric
+	gsl_matrix_transpose_memcpy(tmp, sigma);
+	gsl_matrix_add(sigma,tmp);
+	gsl_matrix_scale(sigma, 0.5);
+    
+    // free temporary data 
+    gsl_vector_free (eval);
+    gsl_matrix_free (evec);
+    gsl_matrix_free (evecT);
+    gsl_matrix_free (diagM);
+    gsl_matrix_free (tmp);
+    
     // all done
     return;
 }
@@ -446,16 +612,17 @@ double cov::cov(double dbeta, void * parameters)
     double mean = gsl_stats_mean(p.w->data, p.w->stride, p.w->size);
     double sdev = gsl_stats_sd_m(p.w->data, p.w->stride, p.w->size, mean);
     double cov = sdev / mean;
-    // store it
-    p.cov = cov;
+
 
     // if the COV is not well-defined
     if (gsl_isinf(cov) || gsl_isnan(cov)) {
         // set our metric to some big value
         p.metric = 1e100;
+        p.cov = 1e100;
     } else {
         // otherwise
         p.metric = gsl_pow_2(cov - p.target);
+        p.cov = cov;
     }
 
     // and return

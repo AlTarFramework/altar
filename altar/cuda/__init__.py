@@ -22,7 +22,10 @@ except ImportError:
 if WITH_CUDA: 
     from cupy.cuda import (
         #
-        device, cublas, curand,
+        device, cublas, curand, 
+        )
+    from cupy import (
+        random,
         )
 
     from .Conversion import (

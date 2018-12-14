@@ -35,6 +35,7 @@ class CUDAAnnealing(SequentialAnnealing):
         self.deviceID = rank % gpus
         # initialize  
         self.device = altar.cuda.device.Device(self.deviceID) 
+        self.device.use()
 
         # chain ups
         return 

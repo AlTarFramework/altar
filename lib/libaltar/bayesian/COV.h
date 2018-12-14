@@ -38,6 +38,7 @@ public:
     typedef gsl_vector vector_t;
     typedef gsl_matrix matrix_t;
 
+    enum method_t {GSL=0, GRID=1};
     // accessors
 public:
     inline auto cov() const;
@@ -50,6 +51,7 @@ public:
     // lower level interface
 public:
     virtual double dbeta(vector_t * llk, double llkMedian, vector_t * w);
+    virtual double dbeta_gsl(vector_t * llk, double llkMedian, vector_t * w);
 
     // meta-methods
 public:

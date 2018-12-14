@@ -38,6 +38,9 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
     rejectionWeight = altar.properties.float(default=1)
     rejectionWeight.doc = 'the weight of rejected samples during covariance rescaling'
 
+    steps = altar.properties.int(default=100)
+    steps.doc = "the length of each Markov chain"
+
 
     # protocol obligations
     @altar.export
@@ -46,7 +49,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         Initialize me and my parts given an {application} context
         """
         # pull the chain length from the job specification
-        self.steps = application.job.steps
+        # self.steps = application.job.steps
         # get the capsule of the random number generator
         rng = application.rng.rng
         # set up the distribution for building the sample multiplicities
@@ -101,9 +104,10 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # unpack what i need
         Σ = step.sigma.clone()
         # scale it
-        Σ *= self.scaling**2
+        Σ *= self.scaling
         # compute its Cholesky decomposition
         self.sigma_chol = altar.lapack.cholesky_decomposition(Σ)
+        self.sigma_chol.view(start=(0,0), shape=(3,3)).print()
 
         # notify we are done preparing the sampling PDF
         dispatcher.notify(event=dispatcher.prepareSamplingPDFFinish, controller=annealer)
@@ -270,21 +274,23 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         rw = self.rejectionWeight
         # compute the acceptance ratio
         acceptance = accepted / (accepted + rejected + unlikely)
+
         # the fudge factor
         kc = (aw*acceptance + rw)/(aw+rw)
         
         # don't let it get too small
-        if kc < .1: kc = .1
+        if kc < .01: kc = .01
         # or too big
         if kc > 1.: kc = 1.
         # store it
-        self.scaling = kc
+        self.scaling = kc*kc
+        print(f"acceptance {acceptance}, {kc}")
         # and return
         return self
 
 
     # private data
-    steps = 100        # the length of each Markov chain
+
 
     uniform = None     # the distribution of the sample multiplicities
     uninormal = None   # the distribution of random walk displacement vectors

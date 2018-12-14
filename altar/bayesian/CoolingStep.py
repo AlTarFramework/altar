@@ -101,6 +101,17 @@ class CoolingStep:
         # make one and return it
         return type(self)(beta=beta, theta=theta, densities=densities, sigma=sigma)
 
+    def computePosterior(self):
+        """
+        (Re-)Compute the posterior from prior, data, and (updated) beta 
+        """
+        # prime the posterior
+        self.posterior.copy(self.prior)
+        # compute it; this expression reduces to Bayes' theorem for β->1
+        altar.blas.daxpy(self.beta, self.data, self.posterior)
+        # all done
+        return self
+
 
     # meta-methods
     def __init__(self, beta, theta, densities, sigma=None, **kwds):
@@ -166,7 +177,7 @@ class CoolingStep:
         # the statistics of parameters
         mean, sd = altar.stats.mean_sd(θ)
         channel.line(f"{indent}parameters (mean, sd):")
-        for i in range(min(100, parameters)):
+        for i in range(min(20, parameters)):
             channel.line(f"{indent} ({mean[i]}, {sd[i]})")
 
         # flush

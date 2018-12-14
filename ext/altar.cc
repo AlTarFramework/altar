@@ -18,6 +18,7 @@
 #include "metadata.h"
 #include "dbeta.h"
 #include "distributions.h"
+#include "utils.h"
 
 // put everything in my private namespace
 namespace altar {
@@ -36,6 +37,8 @@ namespace altar {
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta__name__, dbeta, METH_VARARGS, dbeta__doc__},
 
+            // utils
+            { utils::matrix_condition__name__, utils::matrix_condition, METH_VARARGS, utils::matrix_condition__doc__},
 
             // distributions
             // uniform

@@ -60,7 +60,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         # instantiate my COV calculator; {beta.cov} needs the {rng} capsule
         self.minimizer = altar.libaltar.cov(rng.rng, self.maxiter, self.tolerance, self.target)
         # set up the distribution for building the sample multiplicities
-        self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
+        self.uniform = altar.pdf.uniform_pos(rng=rng)
         # all done
         return self
 
@@ -72,6 +72,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # get the new temperature and store it
         β = self.updateTemperature(step=step)
+
         # compute the new parameter covariance matrix
         Σ = self.computeCovariance(step=step)
         # rank the samples according to their likelihood
@@ -84,6 +85,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         step.prior.copy(prior)
         step.data.copy(data)
         step.posterior.copy(posterior)
+        # recompute posterior from updated beta
+        step.computePosterior()
 
         # and return it
         return step
@@ -223,6 +226,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # no need to symmetrize it since it is symmetric by construction
         # NYI: check the eigenvalues to verify positive definiteness
+        altar.libaltar.matrix_condition(Σ.data)
         # all done
         return Σ
 

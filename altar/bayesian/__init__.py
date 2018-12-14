@@ -49,6 +49,17 @@ def metropolis():
     # and return it
     return metropolis
 
+
+@altar.foundry(implements=sampler, tip="the cuda Metropolis algorithm as a Bayesian sampler")
+def cudametropolis():
+    # grab the factory
+    from .cudaMetropolis import cudaMetropolis as cudametropolis
+    # attach its docstring
+    __doc__ = cudametropolis.__doc__
+    # and return it
+    return cudametropolis
+
+
 @altar.foundry(implements=sampler, tip="the Adaptive Metropolis algorithm as a Bayesian sampler")
 def adaptivemetropolis():
     # grab the factory
