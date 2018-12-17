@@ -1,0 +1,67 @@
+# -*- Makefile -*-
+#
+# michael a.g. aïvázis
+# parasim
+# (c) 1998-2018 all rights reserved
+#
+
+# project meta-data
+cdm.major := 1
+cdm.minor := 0
+
+# use the altar area for build temporaries
+cdm.tmpdir = ${builder.dest.staging}altar/models/cdm/
+
+# cdm consists of a python package
+cdm.packages := cdm.pkg
+# a library
+cdm.libraries = cdm.lib ${if ${value cuda.dir},cdm.cudalib}
+# and an extension
+cdm.extensions := cdm.ext ${if ${value cuda.dir},cdm.cudaext}
+
+# the cdm package meta-data
+cdm.pkg.stem := cdm
+cdm.pkg.root := models/cdm/cdm/
+cdm.pkg.bin := models/cdm/bin/
+cdm.pkg.pycdir := $(builder.dest.pyc)altar/models/cdm/
+cdm.pkg.drivers := cdm
+
+# the cdm library metadata
+cdm.lib.stem := cdm
+cdm.lib.root := models/cdm/lib/libcdm/
+cdm.lib.incdir := $(builder.dest.inc)altar/models/cdm/
+cdm.lib.extern := gsl pyre
+cdm.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the cdm extension meta-data
+cdm.ext.stem := cdm
+cdm.ext.root := models/cdm/ext/cdm/
+cdm.ext.pkg := cdm.pkg
+cdm.ext.wraps := cdm.lib
+cdm.ext.extern := cdm.lib gsl pyre python
+# compile options for the sources
+cdm.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the cdm CUDA library metadata
+cdm.cudalib.stem := cudacdm
+cdm.cudalib.root := models/cdm/lib/libcudacdm/
+cdm.cudalib.incdir := $(builder.dest.inc)altar/models/cudacdm/
+cdm.cudalib.extern := gsl pyre cuda
+# compile options for the sources
+cdm.cudalib.c++.flags += $($(compiler.c++).std.c++17)
+cdm.cudalib.cuda.flags += $(nvcc.std.c++14)
+
+# the cdm CUDA extension meta-data
+cdm.cudaext.stem := cudacdm
+cdm.cudaext.root := models/cdm/ext/cudacdm/
+cdm.cudaext.pkg := cdm.pkg
+cdm.cudaext.wraps := cdm.cudalib
+cdm.cudaext.extern := cdm.cudalib gsl pyre python cuda
+# compile options for the sources
+cdm.cudaext.lib.c++.flags += $($(compiler.c++).std.c++17)
+cdm.cudaext.lib.cuda.flags += $(nvcc.std.c++14)
+
+# specify the CUDA libraries
+cuda.libraries += cudart cudadevrt
+
+# end of file
