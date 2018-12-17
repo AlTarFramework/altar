@@ -5,6 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
+# add me to the pile
+projects += emhp
+
 # project meta-data
 emhp.major := 1
 emhp.minor := 0
