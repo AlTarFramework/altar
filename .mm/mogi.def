@@ -5,6 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
+# add me to the pile
+projects += mogi
+
 # project meta-data
 mogi.major := 1
 mogi.minor := 0

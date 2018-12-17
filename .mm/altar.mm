@@ -44,4 +44,7 @@ altar.pkg.tests.prerequisites := altar.pkg altar.ext
 tests.altar.application_run.clean = \
     ${addprefix $(altar.pkg.tests.prefix),llk.txt sigma.txt theta.txt}
 
+# models
+include emhp.def gaussian.def mogi.def linear.def
+
 # end of file

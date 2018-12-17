@@ -5,6 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
+# add me to the pile
+projects += linear
+
 # project meta-data
 linear.major := 1
 linear.minor := 0

@@ -5,6 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
+# add me to the pile
+projects += gaussian
+
 # project meta-data
 gaussian.major := 1
 gaussian.minor := 0
