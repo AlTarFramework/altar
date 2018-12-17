@@ -5,6 +5,9 @@
 # (c) 1998-2018 all rights reserved
 #
 
+# add me to the pile
+projects += cdm
+
 # project meta-data
 cdm.major := 1
 cdm.minor := 0
