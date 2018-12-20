@@ -78,6 +78,8 @@ from . import (
     models,
     # user interfaces
     shells, actions,
+    # various utilities
+    utils,
     )
 
 # my extension modules

@@ -1,0 +1,48 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+; the linear app
+linear:
+    ; test case configuration
+    model:
+        ; the name of the test case
+        case = input
+        ; the number of free parameters
+        parameters = 8
+        ; the number of observations
+        observations = 8
+
+        ; sample initializer
+        prep = gaussian
+        prep:
+            parameters = {linear.model.parameters}
+            sigma = 1
+            mean = 0
+
+        ; prior
+        prior = gaussian
+        prior:
+            parameters = {linear.model.parameters}
+            sigma = 1
+            mean = 0
+
+    monitors:
+        prof = altar.bayesian.profiler
+
+    ; run configuration
+    job.tasks = 1 ; number of tasks per host
+    job.gpus = 0  ; number of gpus per task
+    job.chains = 2**12 ; number of chains per task
+    job.steps = 100 ; number of Metropolis updates per beta step
+
+    ; shell
+    ; shell = mpi.shells.mpirun ; for running with mpi
+
+; for parallel runs
+mpi.shells.mpirun # altar.plexus.shell:
+    extra = -mca btl self,tcp
+
+; end of file

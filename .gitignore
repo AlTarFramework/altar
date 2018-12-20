@@ -2,12 +2,15 @@
 
 # junk
 *~
-__pycache__
 .DS_Store
 
 # the default build locations
 /builds
 /products
+
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
 
 # the synthetic data from the mogi model
 /models/mogi/examples/synthetic/*.txt
@@ -29,5 +32,11 @@ __pycache__
 /doc/**/*.pdf
 # but not those that are figures
 !doc/**/figures/*.pdf
+
+# machine dependent config
+/.mm/config.mm
+
+# example results
+results/
 
 # end of file

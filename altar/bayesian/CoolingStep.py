@@ -100,6 +100,16 @@ class CoolingStep:
         # make one and return it
         return type(self)(beta=beta, theta=theta, likelihoods=likelihoods, sigma=sigma)
 
+    def computePosterior(self):
+        """
+        (Re-)Compute the posterior from prior, data, and (updated) beta
+        """
+        # copy prior to posterior
+        self.posterior.copy(self.prior)
+        # add beta*dataLikelihood
+        altar.blas.daxpy(self.beta, self.data, self.posterior)
+        # all done
+        return self
 
     # meta-methods
     def __init__(self, beta, theta, likelihoods, sigma=None, **kwds):
@@ -160,6 +170,13 @@ class CoolingStep:
             Σ = self.sigma
             channel.line(f"{indent}Σ: {Σ.rows} x {Σ.columns}")
             channel.line("\n".join(Σ.print(interactive=False, indent=indent*2)))
+
+        # the statistics of parameters
+        mean, sd = altar.utils.mean_sd(θ)
+        channel.line(f"{indent}parameters (mean, sd):")
+        for i in range(min(20, parameters)):
+            channel.line(f"{indent} ({mean[i]}, {sd[i]})")
+
 
         # flush
         channel.log()

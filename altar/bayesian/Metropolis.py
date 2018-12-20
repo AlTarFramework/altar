@@ -29,7 +29,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
 
 
     # user configurable state
-    scaling = altar.properties.float(default=.1)
+    scaling = altar.properties.float(default=.3)
     scaling.doc = 'the parameter covariance Σ is scaled by the square of this'
 
     acceptanceWeight = altar.properties.float(default=8)
@@ -50,7 +50,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         # get the capsule of the random number generator
         rng = application.rng.rng
         # set up the distribution for building the sample multiplicities
-        self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
+        self.uniform = altar.pdf.uniform_pos(rng=rng)
         # set up the distribution for the random walk displacement vectors
         self.uninormal = altar.pdf.ugaussian(rng=rng)
 
