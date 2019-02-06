@@ -12,15 +12,16 @@
 # framework
 import altar
 # externals
+import numpy
 from math import sqrt, pi as π
+# library
+from .libcdm import CDM
 
 
 # declaration
 class Source:
     """
-    An implementation of CDM[1958]
-
-    The surface displacement calculation for a point pressure source in an elastic half space.
+    The source response for a Compound Dislocation Model in an elastic half space.
     """
 
 
@@ -46,10 +47,9 @@ class Source:
     # interface
     def displacements(self, locations, los):
         """
-        Compute the expected displacements from a point pressure source at a set of observation
-        locations
+        Compute the expected displacements at a set of observation locations from a compound
+        (triaxial) dislocation source at depth.
         """
-        print("what what?")
         # the location of the source
         x_src = self.x
         y_src = self.y
@@ -67,15 +67,26 @@ class Source:
         # get the material properties
         v = self.v
 
+        # from locations, a vector of (x,y) tuples, create the flattened vectors Xf, Yf required by
+        # CDM
+        Xf = numpy.zeros(len(locations), dtype=float)
+        Yf = numpy.zeros(len(locations), dtype=float)
+        for i, p in enumerate(locations):
+            Xf[i] = p[0]
+            Yf[i] = p[1]
+
         # allocate space for the result
         u = altar.vector(shape=len(locations))
         # go through each observation location
         for index, (x_obs,y_obs) in enumerate(locations):
             # compute the displacements
-            ue, un, uv = 0,0,0 # MGA
+            ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src,
+                              omegaX_src, omegaY_src, omegaZ_src,
+                              ax_src, ay_src, az_src, opening, v)
 
-            # store the expected displacement
-            u[index] = ue * los[index, 0] + un * los[index, 1] + uv * los[index,2]
+            # project the expected displacement along LOS and store
+            print("ue,un,uv are not scalars")
+            u[index] = ue * los[index,0] + un * los[index,1] + uv * los[index,2]
 
         # all done
         return u
