@@ -29,13 +29,15 @@ cdm:
     ; model configuration
     model:
         ; the cdm engine: native or fast
-        mode = fast
+        mode = native
 
         ; parameter sets
         psets:
             location = contiguous
             depth = contiguous
-            source = contiguous
+            opening = contiguous
+            a = contiguous
+            omega = contiguous
             offsets = contiguous
 
             location:
@@ -54,14 +56,30 @@ cdm:
                     support = (2000, 4000)
                 prior:
                     support = (2000, 4000)
-            source:
+            opening:
                 count = 1
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (9, 11)
+                    support = (0, 1)
                 prior:
-                    support = (9, 11)
+                    support = (0, 1)
+            a:
+                count = 3
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 1)
+                prior:
+                    support = (0, 1)
+            omega:
+                count = 3
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 45)
+                prior:
+                    support = (0, 45)
             offsets:
                 count = 2
                 prep = uniform

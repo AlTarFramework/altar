@@ -20,14 +20,8 @@ from .Data import Data as datasheet
 # declaration
 class CDM(altar.models.bayesian, family="altar.models.cdm"):
     """
-    An implementation of CDM[1958]
+    An implementation of the Compound Dislocation Model, Nikhoo et al. [2017]
 
-    The surface displacement calculation for a pressure point source in an elastic half space.
-
-    Currently, {cdm} is implemented as a four parameter model: x,y,depth locate the point
-    source, and {dV} provides the point source strength as the volume change. It can easily
-    become a five parameter model by including the Poisson ratio of the elastic material to the
-    list of free parameters.
     """
 
 
@@ -242,7 +236,13 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
         self.xIdx = psets["location"].offset
         self.yIdx = self.xIdx + 1
         self.dIdx = psets["depth"].offset
-        self.sIdx = psets["source"].offset
+        self.openingIdx = psets["opening"].offset
+        self.aXIdx = psets["a"].offset
+        self.aYIdx = self.aXIdx + 1
+        self.aZIdx = self.aXIdx + 2
+        self.omegaXIdx = psets["omega"].offset
+        self.omegaYIdx = self.omegaXIdx + 1
+        self.omegaZIdx = self.omegaXIdx + 2
         self.offsetIdx = psets["offsets"].offset
 
         # all done
@@ -440,7 +440,13 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     xIdx = 0
     yIdx = 0
     dIdx = 0
-    sIdx = 0
+    openingIdx = 0
+    aXIdx = 0
+    aYIdx = 0
+    aZIdx = 0
+    omegaXIdx = 0
+    omegaYIdx = 0
+    omegaZIdx = 0
     offsetIdx = 0
 
     # computed

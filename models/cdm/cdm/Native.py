@@ -55,7 +55,13 @@ class Native:
         xIdx = model.xIdx
         yIdx = model.yIdx
         dIdx = model.dIdx
-        sIdx = model.sIdx
+        aXIdx = model.aXIdx
+        aYIdx = model.aYIdx
+        aZIdx = model.aZIdx
+        omegaXIdx = model.omegaXIdx
+        omegaYIdx = model.omegaYIdx
+        omegaZIdx = model.omegaZIdx
+        openingIdx = model.openingIdx
         offsetIdx = model.offsetIdx
 
         # get the observations
@@ -73,11 +79,21 @@ class Native:
             y = parameters[yIdx]
             # its depth
             d = parameters[dIdx]
-            # and its strength; we model the logarithm of this one, so we have to exponentiate
-            dV = 10**parameters[sIdx]
+            # and its opening
+            opening = parameters[openingIdx]
+
+            # get the semi-axis information
+            aX = parameters[aXIdx]
+            aY = parameters[aYIdx]
+            aZ = parameters[aZIdx]
+            omegaX = parameters[omegaXIdx]
+            omegaY = parameters[omegaYIdx]
+            omegaZ = parameters[omegaZIdx]
 
             # make a source using the sample parameters
-            cdm = source(x=x, y=y, d=d, dV=dV)
+            cdm = source(x=x, y=y, d=d,
+                         ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
+                         opening=opening, v=model.nu)
             # compute the expected displacement
             u = cdm.displacements(locations=locations, los=los)
 
