@@ -71,22 +71,20 @@ class Source:
         # CDM
         Xf = numpy.zeros(len(locations), dtype=float)
         Yf = numpy.zeros(len(locations), dtype=float)
-        for i, p in enumerate(locations):
-            Xf[i] = p[0]
-            Yf[i] = p[1]
+        for i, loc in enumerate(locations):
+            Xf[i] = loc[0]
+            Yf[i] = loc[1]
 
         # allocate space for the result
         u = altar.vector(shape=len(locations))
+        # compute the displacements
+        ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src,
+                          omegaX_src, omegaY_src, omegaZ_src, ax_src, ay_src, az_src,
+                          opening, v)
         # go through each observation location
-        for index, (x_obs,y_obs) in enumerate(locations):
-            # compute the displacements
-            ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src,
-                              omegaX_src, omegaY_src, omegaZ_src,
-                              ax_src, ay_src, az_src, opening, v)
-
+        for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
             # project the expected displacement along LOS and store
-            print("ue,un,uv are not scalars")
-            u[index] = ue * los[index,0] + un * los[index,1] + uv * los[index,2]
+            u[idx] = ux * los[idx,0] + uy * los[idx,1] + uz * los[idx,2]
 
         # all done
         return u
