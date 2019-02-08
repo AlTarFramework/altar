@@ -44,7 +44,9 @@ public:
     inline void locations(gsl_matrix * locations);
     inline void los(gsl_matrix * los);
     inline void oids(const oids_type & oids);
-    inline void layout(size_type xIdx, size_type dIdx, size_type sIdx, size_type offsetIdx);
+    inline void layout(size_type xIdx, size_type dIdx,
+                       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+                       size_type offsetIdx);
 
     void displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const;
     void residuals(gsl_matrix * predicted) const;
@@ -63,7 +65,13 @@ private:
     size_type _xIdx;
     size_type _yIdx;
     size_type _dIdx;
-    size_type _sIdx;
+    size_type _openingIdx;
+    size_type _aXIdx;
+    size_type _aYIdx;
+    size_type _aZIdx;
+    size_type _omegaXIdx;
+    size_type _omegaYIdx;
+    size_type _omegaZIdx;
     size_type _offsetIdx;
 
 };

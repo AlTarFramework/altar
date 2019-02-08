@@ -23,7 +23,13 @@ Source(double nu):
     _xIdx(0),
     _yIdx(0),
     _dIdx(0),
-    _sIdx(0),
+    _openingIdx(0),
+    _aXIdx(0),
+    _aYIdx(0),
+    _aZIdx(0),
+    _omegaXIdx(0),
+    _omegaYIdx(0),
+    _omegaZIdx(0),
     _offsetIdx(0)
 {}
 
@@ -103,12 +109,20 @@ oids(const oids_type & oids) {
 
 void
 altar::models::cdm::Source::
-layout(size_type xIdx, size_type dIdx, size_type sIdx, size_type offsetIdx) {
+layout(size_type xIdx, size_type dIdx,
+       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+       size_type offsetIdx) {
     // assign
     _xIdx = xIdx;
     _yIdx = xIdx + 1;
     _dIdx = dIdx;
-    _sIdx = sIdx;
+    _openingIdx = openingIdx;
+    _aXIdx = aXIdx;
+    _aYIdx = aXIdx + 1;
+    _aZIdx = aXIdx + 2;
+    _omegaXIdx = omegaXIdx;
+    _omegaYIdx = omegaXIdx + 1;
+    _omegaZIdx = omegaXIdx + 2;
     _offsetIdx = offsetIdx;
 
     // make a channel

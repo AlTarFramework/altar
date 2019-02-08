@@ -75,42 +75,8 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         auto xSrc = gsl_matrix_get(&samples->matrix, sample, _xIdx);
         auto ySrc = gsl_matrix_get(&samples->matrix, sample, _yIdx);
         auto dSrc = gsl_matrix_get(&samples->matrix, sample, _dIdx);
-        auto sSrc = std::pow(10, gsl_matrix_get(&samples->matrix, sample, _sIdx));
+        auto openingSrc = std::pow(10, gsl_matrix_get(&samples->matrix, sample, _openingIdx));
 
-        // go through the locations
-        for (auto loc=0; loc<_locations->size1; ++loc) {
-            // unpack the location of the observation point
-            auto xObs = gsl_matrix_get(_locations, loc, 0);
-            auto yObs = gsl_matrix_get(_locations, loc, 1);
-
-            // compute the displacement from the source to the observation point
-            auto x = xSrc - xObs;
-            auto y = ySrc - yObs;
-            auto d = dSrc;
-            // turn it into a distance
-            auto R = std::sqrt(x*x + y*y + d*d);
-
-            // compute the elastic response
-            auto C = (_nu - 1) * sSrc / pi;
-
-            // put it together
-            auto CR3 = C / (R*R*R);
-
-            // compute the components of the unit LOS vector
-            auto nx = gsl_matrix_get(_los, loc, 0);
-            auto ny = gsl_matrix_get(_los, loc, 1);
-            auto nz = gsl_matrix_get(_los, loc, 2);
-
-            // compute the expected displacement
-            auto u = (x*nx + y*ny - d*nz) * CR3;
-            // find the shift that corresponds to this observation
-            auto shift = gsl_matrix_get(&samples->matrix, sample, _offsetIdx+_oids[loc]);
-            // and apply it to the projected displacement
-            u -= shift;
-
-            // save
-            gsl_matrix_set(predicted, sample, loc, u);
-        }
     }
 
     // all done

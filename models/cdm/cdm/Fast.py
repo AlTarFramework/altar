@@ -48,7 +48,10 @@ class Fast:
         # attach the map of observations to their set
         libcdm.oid(source, oid)
         # inform the source about the parameter layout; assumes contiguous parameter sets
-        libcdm.layout(source, model.xIdx, model.dIdx, model.sIdx, model.offsetIdx)
+        libcdm.layout(source,
+                      model.xIdx, model.dIdx,
+                      model.openingIdx, model.aXIdx, model.omegaXIdx,
+                      model.offsetIdx)
 
         # nothing to do
         return self
