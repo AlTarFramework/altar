@@ -34,8 +34,26 @@ class CDM(altar.application, family="altar.applications.cdm"):
     d = altar.properties.float(default=3000)
     d.doc = "the depth of the CDM source"
 
-    dV = altar.properties.float(default=10e10)
-    dV.doc = "the strength of the CDM source"
+    aX = altar.properties.float(default=400)
+    aX.doc = "the x semi-axis length"
+
+    aY = altar.properties.float(default=450)
+    aY.doc = "the y semi-axis length"
+
+    aZ = altar.properties.float(default=800)
+    aZ.doc = "the z semi-axis length"
+
+    omegaX = altar.properties.float(default=0)
+    omegaX.doc = "the CDM rotation about the x axis"
+
+    omegaY = altar.properties.float(default=0)
+    omegaY.doc = "the CDM rotation about the y axis"
+
+    omegaZ = altar.properties.float(default=0)
+    omegaZ.doc = "the CDM rotation about the z axis"
+
+    opening = altar.properties.float(default=1e-3)
+    opening.doc = "the tensile component of the Burgers vector of the dislocation"
 
     nu = altar.properties.float(default=.25)
     nu.doc = "the Poisson ratio"
@@ -78,7 +96,11 @@ class CDM(altar.application, family="altar.applications.cdm"):
         # dedcue the number of observations
         observations = len(stations)
         # make a source
-        source = altar.models.cdm.source(x=self.x, y=self.y, d=self.d, dV=self.dV, nu=self.nu)
+        source = altar.models.cdm.source(
+            x=self.x, y=self.y, d=self.d,
+            ax=self.aX, ay=self.aY, az=self.aZ,
+            omegaX=self.omegaX, omegaY=self.omegaY, omegaZ=self.omegaZ,
+            opening=self.opening, v=self.nu)
 
         # observe all displacements from the same angle for now
         theta = π/4 # the azimuthal angle
