@@ -12,11 +12,11 @@
 #include <pyre/journal.h>
 #include <gsl/gsl_matrix.h>
 
+// support
+#include "cdm.h"
+
 // my declarations
 #include "Source.h"
-
-// make pi
-const auto pi = 4*std::atan(1.0);
 
 // meta-methods
 // destructor
@@ -69,15 +69,63 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
     auto nSamples = samples->matrix.size1;
     auto nParameters = samples->matrix.size2;
 
+    // allocate storage for the displacement vectors; we reuse this for all samples
+    gsl_matrix * disp = gsl_matrix_alloc(_locations->size1, 3);
+
     // go through all the samples
     for (auto sample=0; sample<nSamples; ++sample) {
         // unpack the parameters
+        // location of the dislocation
         auto xSrc = gsl_matrix_get(&samples->matrix, sample, _xIdx);
         auto ySrc = gsl_matrix_get(&samples->matrix, sample, _yIdx);
         auto dSrc = gsl_matrix_get(&samples->matrix, sample, _dIdx);
-        auto openingSrc = std::pow(10, gsl_matrix_get(&samples->matrix, sample, _openingIdx));
+        // the opening
+        auto openingSrc = gsl_matrix_get(&samples->matrix, sample, _openingIdx);
+        // the semi axes
+        auto aX = gsl_matrix_get(&samples->matrix, sample, _aXIdx);
+        auto aY = gsl_matrix_get(&samples->matrix, sample, _aYIdx);
+        auto aZ = gsl_matrix_get(&samples->matrix, sample, _aZIdx);
+        // the orientations
+        auto omegaX = gsl_matrix_get(&samples->matrix, sample, _omegaXIdx);
+        auto omegaY = gsl_matrix_get(&samples->matrix, sample, _omegaYIdx);
+        auto omegaZ = gsl_matrix_get(&samples->matrix, sample, _omegaZIdx);
 
+
+        // compute the displacements
+        cdm(_locations,
+            xSrc, ySrc, dSrc,
+            aX, aY, aZ,
+            omegaX, omegaY, omegaZ,
+            openingSrc,
+            _nu,
+            disp);
+
+        // apply the location specific projection to LOS vector and dataset shift
+        for (auto loc=0; loc<_locations->size1; ++loc) {
+            // compute the components of the unit LOS vector
+            auto nx = gsl_matrix_get(_los, loc, 0);
+            auto ny = gsl_matrix_get(_los, loc, 1);
+            auto nz = gsl_matrix_get(_los, loc, 2);
+
+            // get the three components of the predicted displacement for this location
+            auto ux = gsl_matrix_get(disp, loc, 0);
+            auto uy = gsl_matrix_get(disp, loc, 0);
+            auto ud = gsl_matrix_get(disp, loc, 0);
+
+            // project; don't forget {ud} is positive into the ground
+            auto u = ux*nx + uy*ny - ud*nz;
+            // find the shift that corresponds to this observation
+            auto shift = gsl_matrix_get(&samples->matrix, sample, _offsetIdx+_oids[loc]);
+            // and apply it to the projected displacement
+            u -= shift;
+
+            // save
+            gsl_matrix_set(predicted, sample, loc, u);
+        }
     }
+
+    // clean up
+    gsl_matrix_free(disp);
 
     // all done
     return;

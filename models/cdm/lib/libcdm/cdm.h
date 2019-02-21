@@ -12,12 +12,14 @@
 namespace altar {
     namespace models {
         namespace cdm {
-            void cdm(double X, double Y,
+            void cdm(const gsl_matrix * locations,
                      double X0, double Y0, double depth,
-                     double omegaX, double omegaY, double omegaZ,
                      double ax, double ay, double az,
+                     double omegaX, double omegaY, double omegaZ,
                      double opening,
-                     double nu);
+                     double nu,
+                     gsl_matrix * predicted
+                     );
         }
     }
 }

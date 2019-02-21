@@ -5,415 +5,389 @@
 // all rights reserved
 //
 
+// externals
+#include <cmath>
+#include <limits>
+#include <array>
+#include <stdexcept>
+#include <gsl/gsl_matrix.h>
 // declarations
 #include "cdm.h"
 
-// local helpers
+// type definitions
+using vec_t = std::array<double, 3>;
+using mat_t = std::array<double, 9>;
+// constants
+// pi
+const auto pi = 4*std::atan(1.0);
+// machine epsilon
+const auto eps = std::numeric_limits<double>::epsilon();
 
+// local helpers
+static void
+RDdispSurf(const gsl_matrix * locations,
+           const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
+           double opening, double nu,
+           gsl_matrix * results);
+
+static vec_t
+AngSetupFSC(double x, double y,
+            const vec_t & b, const vec_t & PA, const vec_t & PB,
+            double nu);
+
+static vec_t
+AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
+               double nu, double a);
+
+// algebra
+inline static vec_t operator+(const vec_t &);
+inline static vec_t operator-(const vec_t &);
+
+inline static vec_t operator+(const vec_t &, const vec_t &);
+inline static vec_t operator-(const vec_t &, const vec_t &);
+
+inline static vec_t operator*(double, const vec_t &);
+inline static vec_t operator*(const vec_t &, double);
+inline static vec_t operator/(const vec_t &, double);
+
+inline static mat_t operator*(const mat_t &, const mat_t &);
+
+inline static double norm(const vec_t &);
+inline static double dot(const vec_t &, const vec_t &);
+inline static vec_t cross(const vec_t &, const vec_t &);
+
+inline static mat_t transpose(const mat_t & m);
+
+inline static vec_t xform(const mat_t & m, const vec_t & v);
+
+// trig
+inline double sin(double);
+inline double cos(double);
+
+// the displacement calculator
 // definitions
 void
 altar::models::cdm::
-cdm(double X, double Y,
-    double X0, double Y0, double depth,
+cdm(const gsl_matrix * locations,
+    double x, double y, double depth,
+    double aX, double aY, double aZ,
     double omegaX, double omegaY, double omegaZ,
-    double ax, double ay, double az,
     double opening,
-    double nu)
+    double nu,
+    gsl_matrix * predicted)
 {
-    //
-    // CDM
-    // calculates the surface displacements and potency associated with a CDM
-    // that is composed of three mutually orthogonal rectangular dislocations in
-    // a half-space.
+    // convert semi-axes to axes
+    aX *= 2;
+    aY *= 2;
+    aZ *= 2;
 
-    // CDM: Compound Dislocation Model
-    // RD: Rectangular Dislocation
-    // EFCS: Earth-Fixed Coordinate System
-    // RDCS: Rectangular Dislocation Coordinate System
-    // ADCS: Angular Dislocation Coordinate System
-    // (The origin of the RDCS is the RD centroid. The axes of the RDCS are
-    // aligned with the strike, dip and normal vectors of the RD, respectively.)
+    // short circuit the trivial case
+    if (std::abs(aX) < eps && std::abs(aY) < eps && std::abs(aZ) < eps) {
+        // no displacements
+        gsl_matrix_set_zero(predicted);
+        // all done
+        return;
+    }
 
-    // INPUTS
-    // X and Y:
-    // Horizontal coordinates of calculation points in EFCS (East, North, Up).
-    // X and Y must have the same size.
+    // the axis specific coordinate matrices
+    mat_t Rx = {1.,  0.,          0.,
+                0.,  cos(omegaX), sin(omegaX),
+                0., -sin(omegaX), cos(omegaX) };
 
-    // X0, Y0 and depth:
-    // Horizontal coordinates (in EFCS) and depth of the CDM centroid. The depth
-    // must be a positive value. X0, Y0 and depth have the same unit as X and Y.
+    mat_t Ry = {cos(omegaY), 0., -sin(omegaY),
+                0.,          1.,  0.,
+                sin(omegaY), 0.,  cos(omegaY) };
 
-    // omegaX, omegaY and omegaZ:
-    // Clockwise rotation angles about X, Y and Z axes, respectively, that
-    // specify the orientation of the CDM in space. The input values must be in
-    // degrees.
+    mat_t Rz = { cos(omegaZ), sin(omegaZ), 0.,
+                -sin(omegaZ), cos(omegaZ), 0.,
+                 0.,         0.,           1.};
 
-    // ax, ay and az:
-    // Semi-axes of the CDM along the X, Y and Z axes, respectively, before
-    // applying the rotations. ax, ay and az have the same unit as X and Y.
+    // the coordinate rotation matrix
+    mat_t R  = Rz * (Ry * Rx);
+    // extract its three columns
+    vec_t R_0 = { R[0],   R[3],   R[6] };
+    vec_t R_1 = { R[0+1], R[3+1], R[6+1] };
+    vec_t R_2 = { R[0+2], R[3+2], R[6+2] };
 
-    // opening:
-    // The opening (tensile component of the Burgers vector) of the RDs that
-    // form the CDM. The unit of opening must be the same as the unit of ax, ay
-    // and az.
+    // the centroid
+    vec_t P0 = { x, y, -depth };
 
-    // nu:
-    // Poisson's ratio.
+    vec_t P1 = P0 + (aY*R_1 + aZ*R_2)/2;
+    vec_t P2 = P1 - aY*R_1;
+    vec_t P3 = P2 - aZ*R_2;
+    vec_t P4 = P1 - aZ*R_2;
 
-    // OUTPUTS
-    // ue, un and uv:
-    // Calculated displacement vector components in EFCS. ue, un and uv have the
-    // same unit as opening and the CDM semi-axes in inputs.
+    vec_t Q1 = P0 + (aZ*R_2 - aX*R_0)/2;
+    vec_t Q2 = Q1 + aX*R_0;
+    vec_t Q3 = Q2 - aZ*R_2;
+    vec_t Q4 = Q1 - aZ*R_2;
 
-    // DV:
-    // Potency of the CDM. DV has the unit of volume (the unit of displacements,
-    // opening and CDM semi-axes to the power of 3).
+    vec_t R1 = P0 + (aX*R_0 + aY*R_1)/2;
+    vec_t R2 = R1 - aX*R_0;
+    vec_t R3 = R2 - aY*R_1;
+    vec_t R4 = R1 - aY*R_1;
 
-    // Example: Calculate and plot the vertical displacements on a regular grid.
+    // check that all z components are negative
+    if (P1[2] > 0 || P2[2] > 0 || P3[2] > 0 || P4[2] > 0 ||
+        Q1[2] > 0 || Q2[2] > 0 || Q3[2] > 0 || Q4[2] > 0 ||
+        R1[2] > 0 || R2[2] > 0 || R3[2] > 0 || R4[2] > 0) {
+        // complain...
+        throw std::domain_error("the CDM must be below the surface");
+    }
 
-    // [X,Y] = numpy.meshgrid(-7:.02:7,-5:.02:5);
-    // X0 = 0.5; Y0 = -0.25; depth = 2.75; omegaX = 5; omegaY = -8; omegaZ = 30;
-    // ax = 0.4; ay = 0.45; az = 0.8; opening = 1e-3; nu = 0.25;
-    // import te[ [ue,un,uv,DV] = CDM(X,Y,X0,Y0,depth,omegaX,omegaY,omegaZ,ax,ay,az,...
-    // opening,nu);
-    // figure
-    // surf(X,Y,reshape(uv,size(X)),'edgecolor','none')
-    // view(2)
-    // axis equal
-    // axis tight
-    // set(gcf,'renderer','painters')
+    // dispatch the various cases
+    if (std::abs(aX) < eps && std::abs(aY) > eps && std::abs(aZ) > eps) {
+        RDdispSurf(locations, P1, P2, P3, P4, opening, nu, predicted);
+    } else if (std::abs(aX) > eps && std::abs(aY) < eps && std::abs(aZ) > eps) {
+        RDdispSurf(locations, Q1, Q2, Q3, Q4, opening, nu, predicted);
+    } else if (std::abs(aX) > eps && std::abs(aY) > eps && std::abs(aZ) < eps) {
+        RDdispSurf(locations, R1, R2, R3, R4, opening, nu, predicted);
+    } else {
+        // allocate room for the partial results
+        gsl_matrix * P = gsl_matrix_alloc(locations->size1, 3);
+        gsl_matrix * Q = gsl_matrix_alloc(locations->size1, 3);
+        gsl_matrix * R = gsl_matrix_alloc(locations->size1, 3);
+        // compute
+        RDdispSurf(locations, P1, P2, P3, P4, opening, nu, P);
+        RDdispSurf(locations, Q1, Q2, Q3, Q4, opening, nu, Q);
+        RDdispSurf(locations, R1, R2, R3, R4, opening, nu, R);
+        // assemble
+        for (auto loc=0; loc<locations->size1; ++loc) {
+            for (auto axis=0; axis<3; ++axis) {
+                // combine
+                auto result =
+                    gsl_matrix_get(P, loc, axis) +
+                    gsl_matrix_get(Q, loc, axis) +
+                    gsl_matrix_get(R, loc, axis);
+                // assign
+                gsl_matrix_set(predicted, loc, axis, result);
+            }
+        }
+    }
 
-    // Reference journal article:
-    // Nikkhoo, M., Walter, T. R., Lundgren, P. R., Prats-Iraola, P. (2016):
-    // Compound dislocation models (CDMs) for volcano deformation analyses.
-    // Submitted to Geophysical Journal International
-    // Copyright (c) 2016 Mehdi Nikkhoo
-
-    // Permission is hereby granted, free of charge, to any person obtaining a
-    // copy of this software and associated documentation files
-    // (the "Software"), to deal in the Software without restriction, including
-    // without limitation the rights to use, copy, modify, merge, publish,
-    // distribute, sublicense, and/or sell copies of the Software, and to permit
-    // persons to whom the Software is furnished to do so, subject to the
-    // following conditions:
-
-    // The above copyright notice and this permission notice shall be included
-    // in all copies or substantial portions of the Software.
-
-    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-    // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-    // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-    // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-    // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-    // USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-    // I appreciate any comments or bug reports.
-
-    // Mehdi Nikkhoo
-    // Created: 2015.5.22
-    // Last modified: 2016.10.18
-
-    // Section 2.1, Physics of Earthquakes and Volcanoes
-    // Department 2, Geophysics
-    // Helmholtz Centre Potsdam
-    // German Research Centre for Geosciences (GFZ)
-
-    // email:
-    // mehdi.nikkhoo@gfz-potsdam.de
-    // mehdi.nikkhoo@gmail.com
-
-    // website:
-    // http://www.volcanodeformation.com
-
-    double ue = 0;
-    double un = 0;
-    double uv = 0;
-    double DV = 0;
-
-    /*
-    # [X, Y] is a meshgrid with X = repeated rows and Y = repeated columns
-    # rows = linspace(xmin, xmax, (xmax-xmin)/dx +1)
-    # columns = linspace(ymin, ymax, (ymax-ymin)/dy +1)
-    # We will use numpy.ndarray for the array objects rather than matrices
-    # (see, https://docs.scipy.org/doc/numpy-dev/user/numpy-for-matlab-users.html)
-    #
-    # this matlab code flattens a matrix in column major order and returns a column vector
-    # X = X(:);
-    # Y = Y(:);
-    # in Python use method 'flatten' to flatten the 2-D array as an ndarray.  We will not
-    # reshape ndarrays into column or row vectors until they are used in a matrix operation
-    # where it would matter, which is maybe never since the common sense thing is done correctly
-    # using the ndarray (shape of ndarray is coerced to make sense in the matrix operation).
-    # In the following use of flatten, argument order='F' would create a column vector
-    # (see docs.scipy.org/doc/numpy-dev/user/numpy-for-matlab-users.html)
-#    X = X.flatten()
-#    Y = Y.flatten()
-
-    # convert the semi-axes (lengths) to axes
-    ax = 2*ax;
-    ay = 2*ay;
-    az = 2*az;
-
-    # the axes coordinate rotation matrices
-    Rx = numpy.array([
-         [1.,  0.,            0.          ],
-         [0.,  cosd(omegaX),  sind(omegaX)],
-         [0., -sind(omegaX), cosd(omegaX)]
-    ])
-
-    Ry = numpy.array([
-         [cosd(omegaY), 0., -sind(omegaY)],
-         [0.,           1.,  0.          ],
-         [sind(omegaY), 0.,  cosd(omegaY)]
-    ])
-
-    Rz = numpy.array([
-         [ cosd(omegaZ), sind(omegaZ), 0.],
-         [-sind(omegaZ), cosd(omegaZ), 0.],
-         [ 0.,           0.,           1.]
-    ])
-
-    # the coordinate rotation matrix
-    R = Rz.dot(Ry.dot(Rx));
-
-    # The centroid
-    P0 = numpy.array([X0, Y0, -depth])
-
-    P1 = (P0+ay*R[:,1]/2. + az*R[:,2]/2.)
-    P2 = (P1-ay*R[:,1])
-    P3 = P2-az*R[:,2]
-    P4 = P1-az*R[:,2]
-
-    Q1 = P0-ax*R[:,0]/2. + az*R[:,2]/2.
-    Q2 = Q1+ax*R[:,0]
-    Q3 = Q2-az*R[:,2]
-    Q4 = Q1-az*R[:,2]
-
-    R1 = P0+ax*R[:,0]/2. + ay*R[:,1]/2.
-    R2 = R1-ax*R[:,0]
-    R3 = R2-ay*R[:,1]
-    R4 = R1-ay*R[:,1]
-
-    VertVec = numpy.array([P1[2], P2[2], P3[2], P4[2], Q1[2], Q2[2], Q3[2], Q4[2], R1[2], R2[2],
-                           R3[2], R4[2]])
-
-    if numpy.any(VertVec>0):
-        print(' error: Half-space solution: The CDM must be under the free surface!')
-        ierr=1;
-        raise ValueError('Half-space solution: The CDM must be under the free surface!' +
-                         ' VertVec={}'.format(VertVec))
-        return
-
-    if ax == 0 and ay == 0 and az == 0:
-        ue = numpy.zeros(numpy.shape(X))
-        un = numpy.zeros(numpy.shape(X))
-        uv = numpy.zeros(numpy.shape(X))
-    elif ax == 0 and ay !=0 and az !=0:
-        [ue, un, uv] = RDdispSurf(X, Y, P1, P2, P3, P4, opening, nu)
-    elif ax != 0 and ay == 0 and az != 0:
-        [ue, un, uv] = RDdispSurf(X, Y, Q1, Q2, Q3, Q4, opening, nu)
-    elif ax != 0 and ay != 0 and az == 0:
-        [ue, un, uv] = RDdispSurf(X, Y, R1, R2, R3, R4, opening, nu)
-    else:
-        [ue1, un1, uv1] = RDdispSurf(X, Y, P1, P2, P3, P4, opening, nu)
-        [ue2, un2, uv2] = RDdispSurf(X, Y, Q1, Q2, Q3, Q4, opening, nu)
-        [ue3, un3, uv3] = RDdispSurf(X, Y, R1, R2, R3, R4, opening, nu)
-        ue = ue1+ue2+ue3
-        un = un1+un2+un3
-        uv = uv1+uv2+uv3
-    #endif
-
-    # Calculate the CDM potency (aX, aY and aZ were converted to full axes)
-    DV = (ax*ay+ax*az+ay*az)*opening
-
-    return  ue, un, uv, ierr
-    */
+    // all done
     return;
 }
 
-/*
-def RDdispSurf(X, Y, P1, P2, P3, P4, opening, nu):
-    """
-    RDdispSurf calculates surface displacements associated with a rectangular
-    dislocation in an elastic half-space.
-    """
+// implementations
+static void
+RDdispSurf(const gsl_matrix * locations,
+           const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
+           double opening, double nu,
+           gsl_matrix * results) {
+    // cross
+    auto V = cross(P2-P1, P4-P1);
+    auto b = opening * V/norm(V);
 
-    bx = opening
+    // go through each location
+    for (auto loc=0; loc<locations->size1; ++loc) {
+        // unpack the observation point coordinates
+        auto x = gsl_matrix_get(locations, loc, 0);
+        auto y = gsl_matrix_get(locations, loc, 1);
+        // compute
+        auto u1 = AngSetupFSC(x,y, b, P1, P2, nu);
+        auto u2 = AngSetupFSC(x,y, b, P2, P3, nu);
+        auto u3 = AngSetupFSC(x,y, b, P3, P4, nu);
+        auto u4 = AngSetupFSC(x,y, b, P4, P1, nu);
 
-    Vnorm = numpy.cross(P2-P1, P4-P1)
-    Vnorm = Vnorm/norm(Vnorm)
-    bX = bx*Vnorm[0]
-    bY = bx*Vnorm[1]
-    bZ = bx*Vnorm[2]
+        // assemble
+        for (auto axis=0; axis<3; ++axis) {
+            auto u = u1[axis] + u2[axis] + u3[axis] + u4[axis];
+            gsl_matrix_set(results, loc, axis, u);
+        }
+    }
 
-    [u1,v1,w1] = AngSetupFSC(X,Y,bX,bY,bZ,P1,P2,nu) # Side P1P2
-    [u2,v2,w2] = AngSetupFSC(X,Y,bX,bY,bZ,P2,P3,nu) # Side P2P3
-    [u3,v3,w3] = AngSetupFSC(X,Y,bX,bY,bZ,P3,P4,nu) # Side P3P4
-    [u4,v4,w4] = AngSetupFSC(X,Y,bX,bY,bZ,P4,P1,nu) # Side P4P1
+    // all done
+    return;
+};
 
-    ue = u1+u2+u3+u4
-    un = v1+v2+v3+v4
-    uv = w1+w2+w3+w4
+static vec_t
+AngSetupFSC(double x, double y,
+            const vec_t & b, const vec_t & PA, const vec_t & PB,
+            double nu) {
 
-    return  ue, un, uv
+    vec_t SideVec = PB - PA;
+    vec_t eZ = {0, 0, 1};
+    auto beta = std::acos(dot(SideVec, eZ) / norm(SideVec));
 
+    if (std::abs(beta) < eps || std::abs(pi - beta) < eps) {
+        return { 0,0,0 };
+    }
 
-def CoordTrans(x1, x2, x3, A):
-    """
-    CoordTrans transforms the coordinates of the vectors, from
-    x1x2x3 coordinate system to X1X2X3 coordinate system. "A" is the
-    transformation matrix, whose columns e1,e2 and e3 are the unit base
-    vectors of the x1x2x3. The coordinates of e1,e2 and e3 in A must be given
-    in X1X2X3. The transpose of A (i.e., A') will transform the coordinates
-    from X1X2X3 into x1x2x3.
-    """
+    vec_t ey1 = { SideVec[0], SideVec[1], 0 };
+    ey1 = ey1 / norm(ey1);
+    vec_t ey3 = -eZ;
+    vec_t ey2 = cross(ey3, ey1);
 
-# In Matlab these three lines ensure that x1, x2, x3 are column vectors, which is assumed in the
-# Matlab version of this routine.  There is no need to do this with numpy.array.
-#    x1 = x1(:);
-#    x2 = x2(:);
-#    x3 = x3(:);
+    mat_t A = { ey1[0], ey1[1], ey1[2],
+                ey2[0], ey2[1], ey2[2],
+                ey3[0], ey3[1], ey3[2]};
 
-    # check that the vectors x1, x2, x3 are of the correct length
-#    if not (len(x1)==3 and len(x2)==3 and len(x3)==3):
-#        raise ValueError("not all of x1, x2, x3 are of length 3")
+    vec_t adcsA = xform(A, {x-PA[0], y-PA[1], -PA[2]});
+    vec_t adcsAB = xform(A, SideVec);
+    vec_t adcsB = adcsA - adcsAB;
 
-    # no need to convert x1, x2, x3 from column vectors into row vectors. They are
-    # numpy ndarrays and ready to work properly; the following uses them as rows in an array.
-    r = A.dot(numpy.array([x1, x2, x3]))
-    if len(r.shape) == 2:
-        X1 = r[0,:]
-        X2 = r[1,:]
-        X3 = r[2,:]
-    else:
-        X1 = r[0]
-        X2 = r[1]
-        X3 = r[2]
-    return X1, X2, X3
+    // transform the slip vector
+    vec_t bADCS = xform(A, b);
 
+    vec_t vA, vB;
+    // distinguish the two configurations
+    if (beta*adcsA[0] > 0) {
+        // configuration I
+        vA = AngDisDispSurf(adcsA, -pi+beta, b, nu, -PA[2]);
+        vB = AngDisDispSurf(adcsB, -pi+beta, b, nu, -PB[2]);
+    } else {
+        // configuration II
+        vA = AngDisDispSurf(adcsA, beta, b, nu, -PB[2]);
+        vB = AngDisDispSurf(adcsB, beta, b, nu, -PB[2]);
+    }
 
-def AngSetupFSC(X, Y, bX, bY, bZ, PA, PB, nu):
-    """
-    AngSetupSurf calculates the displacements associated with an angular
-    dislocation pair on each side of an RD in a half-space.
-    """
+    vec_t v = xform(transpose(A), vB - vA);
 
-    SideVec = PB-PA
-    eZ = numpy.array([0, 0, 1])
-    beta = numpy.arccos(-SideVec.dot(eZ)/norm(SideVec))
+    return v;
+}
 
-    eps = numpy.spacing(1) # distance between 1 and the nearest floating point number
-    if numpy.abs(beta)<eps or numpy.abs(numpy.pi-beta)<eps :
-        ue = numpy.zeros(numpy.shape(X))
-        un = numpy.zeros(numpy.shape(X))
-        uv = numpy.zeros(numpy.shape(X))
-    else:
-        ey1 = numpy.array([*SideVec[0:2],0])
-        ey1 = ey1/norm(ey1)
-        ey3 = -eZ
-        ey2 = numpy.cross(ey3,ey1)
-        A = numpy.array([ey1, ey2, ey3]) # Transformation matrix
+static vec_t
+AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
+               double nu, double a)
+{
+    // unpack
+    auto b1 = b[0];
+    auto b2 = b[1];
+    auto b3 = b[2];
+    auto y1 = y[0];
+    auto y2 = y[1];
+    // common factors
+    auto sinB = std::sin(beta);
+    auto cosB = std::cos(beta);
+    auto cotB = 1 / std::tan(beta);
+    auto z1 = y1*cosB + a*sinB;
+    auto z3 = y1*sinB - a*cosB;
+    auto r2 = y1*y1 + y2*y2 + a*a;
+    auto r = std::sqrt(r2);
 
-        # Transform coordinates from EFCS to the first ADCS
-        [y1A, y2A, unused] = CoordTrans(X-PA[0], Y-PA[1], numpy.zeros(X.size)-PA[2], A)
-        # Transform coordinates from EFCS to the second ADCS
-        [y1AB, y2AB, unused] = CoordTrans(SideVec[0], SideVec[1], SideVec[2], A)
-        y1B = y1A-y1AB
-        y2B = y2A-y2AB
+    // the Burgers function
+    auto Fi = 2*std::atan2(y2, (r+a)/std::tan(beta/2) - y1);
 
-        # Transform slip vector components from EFCS to ADCS
-        [b1, b2, b3] = CoordTrans(bX, bY, bZ, A)
+    auto v1b1 = b1/2/pi*((1-(1-2*nu)*cotB*cotB)*Fi +
+                         y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
+                         y2*(r*sinB-y1)*cosB/r/(r-z3));
 
-        # Determine the best artefact-free configuration for the calculation
-        # points near the free surface
-        I = (beta*y1A)>=0
-        J = numpy.logical_not(I)
+    auto v2b1 = b1/2/pi*((1-2*nu)*((.5+cotB*cotB)*std::log(r+a)-cotB/sinB*std::log(r-z3)) -
+                         1./(r+a)*((1-2*nu)*(y1*cotB-a/2-y2*y2/2/(r+a))+y2*y2/r) +
+                         y2*y2*cosB/r/(r-z3));
 
-        v1A = numpy.zeros(I.shape)
-        v2A = numpy.zeros(I.shape)
-        v3A = numpy.zeros(I.shape)
-        v1B = numpy.zeros(I.shape)
-        v2B = numpy.zeros(I.shape)
-        v3B = numpy.zeros(I.shape)
+    auto v3b1 = b1/2/pi*((1-2*nu)*Fi*cotB+y2/(r+a)*(2*nu+a/r) - y2*cosB/(r-z3)*(cosB+a/r));
 
-        # Configuration I
-        v1A[I], v2A[I], v3A[I] = AngDisDispSurf(y1A[I], y2A[I], -numpy.pi+beta, b1, b2, b3, nu,
-                                                -PA[2])
-        v1B[I], v2B[I], v3B[I] = AngDisDispSurf(y1B[I], y2B[I], -numpy.pi+beta, b1, b2, b3, nu,
-                                                -PB[2])
+    auto v1b2 = b2/2/pi*(-(1-2*nu)*((.5-cotB*cotB)*std::log(r+a) + cotB*cotB*cosB*std::log(r-z3) ) -
+                         1/(r+a)*((1-2*nu)*(y1*cotB+.5*a+y1*y1/2/(r+a)) - y1*y1/r) +
+                         z1*(r*sinB-y1)/r/(r-z3));
 
-        # Configuration II
-        v1A[J], v2A[J], v3A[J] = AngDisDispSurf(y1A[J], y2A[J], beta, b1, b2, b3, nu, -PA[2])
-        v1B[J], v2B[J], v3B[J] = AngDisDispSurf(y1B[J], y2B[J], beta, b1, b2, b3, nu, -PB[2])
+    auto v2b2 = b2/2/pi*((1+(1-2*nu)*cotB*cotB)*Fi -
+                         y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
+                         y2*z1/r/(r-z3));
 
-        # Calculate total displacements in ADCS
-        v1 = v1B-v1A
-        v2 = v2B-v2A
-        v3 = v3B-v3A
+    auto v3b2 = b2/2/pi*(-(1-2*nu)*cotB*(std::log(r+a)-cosB*std::log(r-z3)) -
+                         y1/(r+a)*(2*nu+a/r) + z1/(r-z3)*(cosB+a/r));
 
-        # Transform total displacements from ADCS to EFCS
-        [ue, un, uv] = CoordTrans(v1, v2, v3, A.transpose())
+    auto v1b3 = b3/2/pi*(y2*(r*sinB-y1)*sinB/r/(r-z3));
+    auto v2b3 = b3/2/pi*(-y2*y2*sinB/r/(r-z3));
+    auto v3b3 = b3/2/pi*(Fi + y2*(r*cosB+a)*sinB/r/(r-z3));
 
-    return ue, un, uv
+    auto v1 = v1b1 + v1b2 + v1b3;
+    auto v2 = v2b1 + v2b2 + v2b3;
+    auto v3 = v3b1 + v3b2 + v3b3;
 
+    return {v1, v2, v3};
+}
 
-def AngDisDispSurf(y1, y2, beta, b1, b2, b3, nu, a):
-    """
-    AngDisDispSurf calculates the displacements associated with an angular dislocation
-    in a half-space.
-    """
+// algebra
+inline static
+vec_t operator+(const vec_t & v) {
+    return v;
+}
 
-    sinB = numpy.sin(beta)
-    cosB = numpy.cos(beta)
-    cotB = 1.0/numpy.tan(beta)
-    z1 = y1*cosB + a*sinB
-    z3 = y1*sinB - a*cosB
-    r2 = y1**2 + y2**2 + a**2
-    r = numpy.sqrt(r2)
+inline static
+vec_t operator-(const vec_t & v) {
+    return -1.0*v;
+}
 
-    Fi = 2*numpy.arctan2(y2, (r+a)/numpy.tan(beta/2)-y1) # The Burgers function
+inline static
+vec_t operator+(const vec_t & v1, const vec_t & v2) {
+    return {v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]};
+}
 
-    v1b1 = b1/2/numpy.pi*(
-               (1-(1-2*nu)*cotB**2)*Fi +
-               y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
-               y2*(r*sinB-y1)*cosB/r/(r-z3)
-           )
-    v2b1 = b1/2/numpy.pi*(
-               (1-2*nu)*((.5+cotB**2)*numpy.log(r+a)-cotB/sinB*numpy.log(r-z3)) -
-               1./(r+a)*((1-2*nu)*(y1*cotB-a/2-y2**2/2/(r+a))+y2**2/r) +
-               y2**2*cosB/r/(r-z3)
-           )
-    v3b1 = b1/2/numpy.pi*(
-               (1-2*nu)*Fi*cotB+y2/(r+a)*(2*nu+a/r) -
-               y2*cosB/(r-z3)*(cosB+a/r)
-          )
+inline static
+vec_t operator-(const vec_t & v1, const vec_t & v2) {
+    return {v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]};
+}
 
-    v1b2 = b2/2/numpy.pi*(
-               -(1-2*nu)*((.5-cotB**2)*numpy.log(r+a) + cotB**2*cosB*numpy.log(r-z3) ) -
-               1/(r+a)*((1-2*nu)*(y1*cotB+.5*a+y1**2/2/(r+a)) - y1**2/r) +
-               z1*(r*sinB-y1)/r/(r-z3)
-           )
-    v2b2 = b2/2/numpy.pi*(
-               (1+(1-2*nu)*cotB**2)*Fi -
-               y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
-               y2*z1/r/(r-z3)
-           )
-    v3b2 = b2/2/numpy.pi*(
-               -(1-2*nu)*cotB*(numpy.log(r+a)-cosB*numpy.log(r-z3)) -
-               y1/(r+a)*(2*nu+a/r) +
-               z1/(r-z3)*(cosB+a/r)
-           )
+inline static
+vec_t operator*(double a, const vec_t & v) {
+    return {a*v[0], a*v[1], a*v[2]};
+}
 
-    v1b3 = b3/2/numpy.pi*(y2*(r*sinB-y1)*sinB/r/(r-z3))
-    v2b3 = b3/2/numpy.pi*(-y2**2*sinB/r/(r-z3))
-    v3b3 = b3/2/numpy.pi*(Fi + y2*(r*cosB+a)*sinB/r/(r-z3))
+inline static
+vec_t operator*(const vec_t & v, double a) {
+    return {v[0]*a, v[1]*a, v[2]*a};
+}
 
-    v1 = v1b1 + v1b2 + v1b3
-    v2 = v2b1 + v2b2 + v2b3
-    v3 = v3b1 + v3b2 + v3b3
+inline static
+vec_t operator/(const vec_t & v, double a) {
+    return {v[0]/a, v[1]/a, v[2]/a};
+}
 
-    return v1, v2, v3
-*/
+inline static
+mat_t operator*(const mat_t & m1, const mat_t & m2) {
+    return { m1[0]*m2[0] + m1[2]*m2[3] + m1[2]*m2[6],
+             m1[0]*m2[1] + m1[2]*m2[4] + m1[2]*m2[7],
+             m1[0]*m2[2] + m1[2]*m2[5] + m1[2]*m2[8],
+
+             m1[3]*m2[0] + m1[4]*m2[3] + m1[5]*m2[6],
+             m1[3]*m2[1] + m1[4]*m2[4] + m1[5]*m2[7],
+             m1[3]*m2[2] + m1[4]*m2[5] + m1[5]*m2[8],
+
+             m1[6]*m2[0] + m1[7]*m2[3] + m1[8]*m2[6],
+             m1[6]*m2[1] + m1[7]*m2[4] + m1[8]*m2[7],
+             m1[6]*m2[2] + m1[7]*m2[5] + m1[8]*m2[8] };
+};
+
+inline static
+double norm(const vec_t & v) {
+    return std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+}
+
+inline static
+double dot(const vec_t & v1, const vec_t & v2) {
+    return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+}
+
+inline static
+vec_t cross(const vec_t & v1, const vec_t & v2) {
+    return { v1[1]*v2[2] - v1[2]*v2[1], v1[2]*v2[0] - v1[0]*v2[2], v1[0]*v2[1] - v1[1]*v2[0] };
+}
+
+inline static mat_t transpose(const mat_t & m) {
+    return {m[0], m[3], m[6],
+            m[1], m[4], m[7],
+            m[2], m[5], m[8]};
+};
+
+inline static
+vec_t xform(const mat_t & m, const vec_t & v) {
+    return {m[0]*v[0] + m[1]*v[2] + m[2]*v[3],
+            m[3]*v[0] + m[4]*v[2] + m[5]*v[3],
+            m[6]*v[0] + m[7]*v[2] + m[8]*v[3]};
+};
+
+// trig
+inline double sin(double omega) {
+
+    return std::sin(omega * 180/pi);
+};
+
+inline double cos(double omega) {
+    return std::cos(omega * 180/pi);
+};
 
 // end-of-file
