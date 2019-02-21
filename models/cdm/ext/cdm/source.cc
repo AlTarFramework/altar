@@ -370,7 +370,7 @@ layout(PyObject *, PyObject * args)
 
     // unpack the arguments
     int status = PyArg_ParseTuple(args,
-                                  "O!kkkk:layout",
+                                  "O!kkkkkk:layout",
                                   &PyCapsule_Type, &pySource,
                                   &xIdx, &dIdx,
                                   &openingIdx, &aXIdx, &omegaXIdx,
