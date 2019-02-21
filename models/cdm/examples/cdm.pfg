@@ -1,0 +1,97 @@
+;
+; michael a.g. aïvázis
+; orthologue
+; (c) 1998-2018 all rights reserved
+;
+
+cdm:
+    ; shell
+    ; shell = mpi.shells.mpirun ; for running with mpi
+
+    controller:
+        ; saving the results of the calculation
+        archiver:
+            theta = theta.asc
+            sigma = sigma.asc
+            llk = posterior.asc
+
+    ; job layout
+    job:
+        tasks = 1       ; number of tasks per host
+        gpus = 0        ; number of gpus per task
+        chains = 2**12  ; number of chains per task
+        steps = 20      ; the length of each chain
+
+    ; event handlers
+    monitors:
+       prof = altar.bayesian.profiler
+
+    ; model configuration
+    model:
+        ; the cdm engine: native or fast
+        mode = native
+
+        ; parameter sets
+        psets:
+            location = contiguous
+            depth = contiguous
+            opening = contiguous
+            a = contiguous
+            omega = contiguous
+            offsets = contiguous
+
+            location:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-5000, 5000)
+                prior:
+                    support = (-5000, 5000)
+            depth:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (2000, 4000)
+                prior:
+                    support = (2000, 4000)
+            opening:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 1)
+                prior:
+                    support = (0, 1)
+            a:
+                count = 3
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 1)
+                prior:
+                    support = (0, 1)
+            omega:
+                count = 3
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (0, 45)
+                prior:
+                    support = (0, 45)
+            offsets:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-0.1, 0.1)
+                prior:
+                    support = (-0.1, 0.1)
+
+
+; for parallel runs
+mpi.shells.mpirun # altar.plexus.shell:
+    extra = -mca btl self,tcp
+
+; end of file
