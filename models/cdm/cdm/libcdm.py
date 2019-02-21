@@ -150,7 +150,7 @@ def CDM(X, Y, X0, Y0, depth, omegaX, omegaY, omegaZ, ax, ay, az, opening, nu):
     ue=0
     un=0
     uv=0
-    DV=0;
+    DV=0
 
     # [X, Y] is a meshgrid with X = repeated rows and Y = repeated columns
     # rows = linspace(xmin, xmax, (xmax-xmin)/dx +1)
@@ -171,9 +171,9 @@ def CDM(X, Y, X0, Y0, depth, omegaX, omegaY, omegaZ, ax, ay, az, opening, nu):
 #    Y = Y.flatten()
 
     # convert the semi-axes (lengths) to axes
-    ax = 2*ax;
-    ay = 2*ay;
-    az = 2*az;
+    ax = 2*ax
+    ay = 2*ay
+    az = 2*az
 
     # the axes coordinate rotation matrices
     Rx = numpy.array([
@@ -195,7 +195,7 @@ def CDM(X, Y, X0, Y0, depth, omegaX, omegaY, omegaZ, ax, ay, az, opening, nu):
     ])
 
     # the coordinate rotation matrix
-    R = Rz.dot(Ry.dot(Rx));
+    R = Rz.dot(Ry.dot(Rx))
 
     # The centroid
     P0 = numpy.array([X0, Y0, -depth])
@@ -239,7 +239,6 @@ def CDM(X, Y, X0, Y0, depth, omegaX, omegaY, omegaZ, ax, ay, az, opening, nu):
         ue = ue1+ue2+ue3
         un = un1+un2+un3
         uv = uv1+uv2+uv3
-    #endif
 
     # Calculate the CDM potency (aX, aY and aZ were converted to full axes)
     DV = (ax*ay+ax*az+ay*az)*opening
