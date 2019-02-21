@@ -14,55 +14,62 @@
 // declarations
 #include "cdm.h"
 
-// type definitions
-using vec_t = std::array<double, 3>;
-using mat_t = std::array<double, 9>;
-// constants
-// pi
-const auto pi = 4*std::atan(1.0);
-// machine epsilon
-const auto eps = std::numeric_limits<double>::epsilon();
+namespace altar {
+    namespace models {
+        namespace cdm {
 
-// local helpers
-static void
-RDdispSurf(const gsl_matrix * locations,
-           const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
-           double opening, double nu,
-           gsl_matrix * results);
+            // type definitions
+            using vec_t = std::array<double, 3>;
+            using mat_t = std::array<double, 9>;
+            // constants
+            // pi
+            const auto pi = 4*std::atan(1.0);
+            // machine epsilon
+            const auto eps = std::numeric_limits<double>::epsilon();
 
-static vec_t
-AngSetupFSC(double x, double y,
-            const vec_t & b, const vec_t & PA, const vec_t & PB,
-            double nu);
+            // local helpers
+            static void
+            RDdispSurf(const gsl_matrix * locations,
+                       const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
+                       double opening, double nu,
+                       gsl_matrix * results);
 
-static vec_t
-AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
-               double nu, double a);
+            static vec_t
+            AngSetupFSC(double x, double y,
+                        const vec_t & b, const vec_t & PA, const vec_t & PB,
+                        double nu);
 
-// algebra
-inline static vec_t operator+(const vec_t &);
-inline static vec_t operator-(const vec_t &);
+            static vec_t
+            AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
+                           double nu, double a);
 
-inline static vec_t operator+(const vec_t &, const vec_t &);
-inline static vec_t operator-(const vec_t &, const vec_t &);
+            // algebra
+            inline static vec_t operator+(const vec_t &);
+            inline static vec_t operator-(const vec_t &);
 
-inline static vec_t operator*(double, const vec_t &);
-inline static vec_t operator*(const vec_t &, double);
-inline static vec_t operator/(const vec_t &, double);
+            inline static vec_t operator+(const vec_t &, const vec_t &);
+            inline static vec_t operator-(const vec_t &, const vec_t &);
 
-inline static mat_t operator*(const mat_t &, const mat_t &);
+            inline static vec_t operator*(double, const vec_t &);
+            inline static vec_t operator*(const vec_t &, double);
+            inline static vec_t operator/(const vec_t &, double);
 
-inline static double norm(const vec_t &);
-inline static double dot(const vec_t &, const vec_t &);
-inline static vec_t cross(const vec_t &, const vec_t &);
+            inline static mat_t operator*(const mat_t &, const mat_t &);
 
-inline static mat_t transpose(const mat_t & m);
+            inline static double norm(const vec_t &);
+            inline static double dot(const vec_t &, const vec_t &);
+            inline static vec_t cross(const vec_t &, const vec_t &);
 
-inline static vec_t xform(const mat_t & m, const vec_t & v);
+            inline static mat_t transpose(const mat_t & m);
 
-// trig
-inline double sin(double);
-inline double cos(double);
+            inline static vec_t xform(const mat_t & m, const vec_t & v);
+
+            // trig
+            inline double sin(double);
+            inline double cos(double);
+        }
+    }
+}
 
 // the displacement calculator
 // definitions
@@ -171,6 +178,7 @@ cdm(const gsl_matrix * locations,
 
 // implementations
 static void
+altar::models::cdm::
 RDdispSurf(const gsl_matrix * locations,
            const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
            double opening, double nu,
@@ -201,7 +209,9 @@ RDdispSurf(const gsl_matrix * locations,
     return;
 };
 
-static vec_t
+static
+altar::models::cdm::vec_t
+altar::models::cdm::
 AngSetupFSC(double x, double y,
             const vec_t & b, const vec_t & PA, const vec_t & PB,
             double nu) {
@@ -247,7 +257,9 @@ AngSetupFSC(double x, double y,
     return v;
 }
 
-static vec_t
+static
+altar::models::cdm::vec_t
+altar::models::cdm::
 AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
                double nu, double a)
 {
@@ -303,42 +315,58 @@ AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
 
 // algebra
 inline static
-vec_t operator+(const vec_t & v) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator+(const vec_t & v) {
     return v;
 }
 
 inline static
-vec_t operator-(const vec_t & v) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator-(const vec_t & v) {
     return -1.0*v;
 }
 
 inline static
-vec_t operator+(const vec_t & v1, const vec_t & v2) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator+(const vec_t & v1, const vec_t & v2) {
     return {v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]};
 }
 
 inline static
-vec_t operator-(const vec_t & v1, const vec_t & v2) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator-(const vec_t & v1, const vec_t & v2) {
     return {v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]};
 }
 
 inline static
-vec_t operator*(double a, const vec_t & v) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator*(double a, const vec_t & v) {
     return {a*v[0], a*v[1], a*v[2]};
 }
 
 inline static
-vec_t operator*(const vec_t & v, double a) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator*(const vec_t & v, double a) {
     return {v[0]*a, v[1]*a, v[2]*a};
 }
 
 inline static
-vec_t operator/(const vec_t & v, double a) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+operator/(const vec_t & v, double a) {
     return {v[0]/a, v[1]/a, v[2]/a};
 }
 
 inline static
-mat_t operator*(const mat_t & m1, const mat_t & m2) {
+altar::models::cdm::mat_t
+altar::models::cdm::
+operator*(const mat_t & m1, const mat_t & m2) {
     return { m1[0]*m2[0] + m1[2]*m2[3] + m1[2]*m2[6],
              m1[0]*m2[1] + m1[2]*m2[4] + m1[2]*m2[7],
              m1[0]*m2[2] + m1[2]*m2[5] + m1[2]*m2[8],
@@ -353,40 +381,56 @@ mat_t operator*(const mat_t & m1, const mat_t & m2) {
 };
 
 inline static
-double norm(const vec_t & v) {
+double
+altar::models::cdm::
+norm(const vec_t & v) {
     return std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 }
 
 inline static
-double dot(const vec_t & v1, const vec_t & v2) {
+double
+altar::models::cdm::
+dot(const vec_t & v1, const vec_t & v2) {
     return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 }
 
 inline static
-vec_t cross(const vec_t & v1, const vec_t & v2) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+cross(const vec_t & v1, const vec_t & v2) {
     return { v1[1]*v2[2] - v1[2]*v2[1], v1[2]*v2[0] - v1[0]*v2[2], v1[0]*v2[1] - v1[1]*v2[0] };
 }
 
-inline static mat_t transpose(const mat_t & m) {
+inline static
+altar::models::cdm::mat_t
+altar::models::cdm::
+transpose(const mat_t & m) {
     return {m[0], m[3], m[6],
             m[1], m[4], m[7],
             m[2], m[5], m[8]};
 };
 
 inline static
-vec_t xform(const mat_t & m, const vec_t & v) {
+altar::models::cdm::vec_t
+altar::models::cdm::
+xform(const mat_t & m, const vec_t & v) {
     return {m[0]*v[0] + m[1]*v[2] + m[2]*v[3],
             m[3]*v[0] + m[4]*v[2] + m[5]*v[3],
             m[6]*v[0] + m[7]*v[2] + m[8]*v[3]};
 };
 
 // trig
-inline double sin(double omega) {
-
+inline
+double
+altar::models::cdm::
+sin(double omega) {
     return std::sin(omega * 180/pi);
 };
 
-inline double cos(double omega) {
+inline
+double
+altar::models::cdm::
+cos(double omega) {
     return std::cos(omega * 180/pi);
 };
 
