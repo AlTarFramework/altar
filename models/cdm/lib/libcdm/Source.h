@@ -73,7 +73,6 @@ private:
     size_type _omegaYIdx;
     size_type _omegaZIdx;
     size_type _offsetIdx;
-
 };
 
 // the implementations of the inline methods

@@ -170,6 +170,11 @@ cdm(const gsl_matrix * locations,
                 gsl_matrix_set(predicted, loc, axis, result);
             }
         }
+
+        // clean up
+        gsl_matrix_free(P);
+        gsl_matrix_free(Q);
+        gsl_matrix_free(R);
     }
 
     // all done
