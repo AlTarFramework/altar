@@ -90,7 +90,6 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         auto omegaY = gsl_matrix_get(&samples->matrix, sample, _omegaYIdx);
         auto omegaZ = gsl_matrix_get(&samples->matrix, sample, _omegaZIdx);
 
-
         // compute the displacements
         cdm(_locations,
             xSrc, ySrc, dSrc,
