@@ -12,7 +12,8 @@
 namespace altar {
     namespace models {
         namespace cdm {
-            void cdm(const gsl_matrix * locations,
+            void cdm(int sample,
+                     const gsl_matrix * locations, const gsl_matrix * los,
                      double X0, double Y0, double depth,
                      double ax, double ay, double az,
                      double omegaX, double omegaY, double omegaZ,
