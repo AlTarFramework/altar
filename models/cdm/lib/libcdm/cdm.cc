@@ -29,7 +29,8 @@ namespace altar {
 
             // local helpers
             static void
-            RDdispSurf(const gsl_matrix * locations,
+            RDdispSurf(int sample,
+                       const gsl_matrix * locations, const gsl_matrix * los,
                        const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
                        double opening, double nu,
                        gsl_matrix * results);
@@ -75,7 +76,8 @@ namespace altar {
 // definitions
 void
 altar::models::cdm::
-cdm(const gsl_matrix * locations,
+cdm(int sample,
+    const gsl_matrix * locations, const gsl_matrix * los,
     double x, double y, double depth,
     double aX, double aY, double aZ,
     double omegaX, double omegaY, double omegaZ,
@@ -144,37 +146,15 @@ cdm(const gsl_matrix * locations,
 
     // dispatch the various cases
     if (std::abs(aX) < eps && std::abs(aY) > eps && std::abs(aZ) > eps) {
-        RDdispSurf(locations, P1, P2, P3, P4, opening, nu, predicted);
+        RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
     } else if (std::abs(aX) > eps && std::abs(aY) < eps && std::abs(aZ) > eps) {
-        RDdispSurf(locations, Q1, Q2, Q3, Q4, opening, nu, predicted);
+        RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
     } else if (std::abs(aX) > eps && std::abs(aY) > eps && std::abs(aZ) < eps) {
-        RDdispSurf(locations, R1, R2, R3, R4, opening, nu, predicted);
+        RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
     } else {
-        // allocate room for the partial results
-        gsl_matrix * P = gsl_matrix_alloc(locations->size1, 3);
-        gsl_matrix * Q = gsl_matrix_alloc(locations->size1, 3);
-        gsl_matrix * R = gsl_matrix_alloc(locations->size1, 3);
-        // compute
-        RDdispSurf(locations, P1, P2, P3, P4, opening, nu, P);
-        RDdispSurf(locations, Q1, Q2, Q3, Q4, opening, nu, Q);
-        RDdispSurf(locations, R1, R2, R3, R4, opening, nu, R);
-        // assemble
-        for (auto loc=0; loc<locations->size1; ++loc) {
-            for (auto axis=0; axis<3; ++axis) {
-                // combine
-                auto result =
-                    gsl_matrix_get(P, loc, axis) +
-                    gsl_matrix_get(Q, loc, axis) +
-                    gsl_matrix_get(R, loc, axis);
-                // assign
-                gsl_matrix_set(predicted, loc, axis, result);
-            }
-        }
-
-        // clean up
-        gsl_matrix_free(P);
-        gsl_matrix_free(Q);
-        gsl_matrix_free(R);
+        RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
+        RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
+        RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
     }
 
     // all done
@@ -184,7 +164,8 @@ cdm(const gsl_matrix * locations,
 // implementations
 static void
 altar::models::cdm::
-RDdispSurf(const gsl_matrix * locations,
+RDdispSurf(int sample,
+           const gsl_matrix * locations, const gsl_matrix * los,
            const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
            double opening, double nu,
            gsl_matrix * results) {
@@ -204,10 +185,22 @@ RDdispSurf(const gsl_matrix * locations,
         auto u4 = AngSetupFSC(x,y, b, P4, P1, nu);
 
         // assemble
-        for (auto axis=0; axis<3; ++axis) {
-            auto u = u1[axis] + u2[axis] + u3[axis] + u4[axis];
-            gsl_matrix_set(results, loc, axis, u);
-        }
+        auto u = u1 + u2 + u3 + u4;
+        // compute the unit LOS vector
+        vec_t n = { gsl_matrix_get(los, loc, 0),
+                    gsl_matrix_get(los, loc, 1),
+                    gsl_matrix_get(los, loc, 2) };
+
+        // project the displacement to the LOS
+        auto uLOS = dot(u, n);
+        // save by accumulating my contribution to the slot
+        // N.B.: note the "+=": the general case call this function three times
+        // get the current value
+        auto current = gsl_matrix_get(results, sample, loc);
+        // update
+        current += uLOS;
+        // save
+        gsl_matrix_set(results, sample, loc, current);
     }
 
     // all done
@@ -220,7 +213,6 @@ altar::models::cdm::
 AngSetupFSC(double x, double y,
             const vec_t & b, const vec_t & PA, const vec_t & PB,
             double nu) {
-
     vec_t SideVec = PB - PA;
     vec_t eZ = {0, 0, 1};
     auto beta = std::acos(dot(SideVec, eZ) / norm(SideVec));

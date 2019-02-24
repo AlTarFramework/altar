@@ -69,8 +69,8 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
     auto nSamples = samples->matrix.size1;
     auto nParameters = samples->matrix.size2;
 
-    // allocate storage for the displacement vectors; we reuse this for all samples
-    gsl_matrix * disp = gsl_matrix_alloc(_locations->size1, 3);
+    // clean up the resulting matrix
+    gsl_matrix_set_zero(predicted);
 
     // go through all the samples
     for (auto sample=0; sample<nSamples; ++sample) {
@@ -91,40 +91,26 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         auto omegaZ = gsl_matrix_get(&samples->matrix, sample, _omegaZIdx);
 
         // compute the displacements
-        cdm(_locations,
+        cdm(sample, _locations, _los,
             xSrc, ySrc, dSrc,
             aX, aY, aZ,
             omegaX, omegaY, omegaZ,
             openingSrc,
             _nu,
-            disp);
+            predicted);
 
         // apply the location specific projection to LOS vector and dataset shift
         for (auto loc=0; loc<_locations->size1; ++loc) {
-            // compute the components of the unit LOS vector
-            auto nx = gsl_matrix_get(_los, loc, 0);
-            auto ny = gsl_matrix_get(_los, loc, 1);
-            auto nz = gsl_matrix_get(_los, loc, 2);
-
-            // get the three components of the predicted displacement for this location
-            auto ux = gsl_matrix_get(disp, loc, 0);
-            auto uy = gsl_matrix_get(disp, loc, 0);
-            auto ud = gsl_matrix_get(disp, loc, 0);
-
-            // project; don't forget {ud} is positive into the ground
-            auto u = ux*nx + uy*ny - ud*nz;
+            // get the current value
+            auto u = gsl_matrix_get(predicted, sample, loc);
             // find the shift that corresponds to this observation
             auto shift = gsl_matrix_get(&samples->matrix, sample, _offsetIdx+_oids[loc]);
             // and apply it to the projected displacement
             u -= shift;
-
             // save
             gsl_matrix_set(predicted, sample, loc, u);
         }
     }
-
-    // clean up
-    gsl_matrix_free(disp);
 
     // all done
     return;
