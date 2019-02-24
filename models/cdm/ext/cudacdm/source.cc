@@ -371,13 +371,16 @@ layout(PyObject *, PyObject * args)
 {
     // storage
     PyObject * pySource;
-    std::size_t xIdx, dIdx, sIdx, offsetIdx;
+    std::size_t xIdx, dIdx, openingIdx, aXIdx, omegaXIdx, offsetIdx;
 
     // unpack the arguments
     int status = PyArg_ParseTuple(args,
-                                  "O!kkkk:layout",
+                                  "O!kkkkkk:layout",
                                   &PyCapsule_Type, &pySource,
-                                  &xIdx, &dIdx, &sIdx, &offsetIdx);
+                                  &xIdx, &dIdx,
+                                  &openingIdx, &aXIdx, &omegaXIdx,
+                                  &offsetIdx);
+
     // if something went wrong
     if (!status) {
         // complain
@@ -404,7 +407,7 @@ layout(PyObject *, PyObject * args)
         << pyre::journal::endl;
 
     // attach the map
-    source->layout(xIdx, dIdx, sIdx, offsetIdx);
+    source->layout(xIdx, dIdx, openingIdx, aXIdx, omegaXIdx, offsetIdx);
 
     // all done
     Py_INCREF(Py_None);
