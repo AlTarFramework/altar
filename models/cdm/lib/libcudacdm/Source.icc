@@ -14,12 +14,20 @@
 // interface
 void
 altar::models::cudacdm::Source::
-layout(size_type xIdx, size_type dIdx, size_type sIdx, size_type offsetIdx) {
+layout(size_type xIdx, size_type dIdx,
+       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+       size_type offsetIdx) {
     // assign
     _xIdx = xIdx;
     _yIdx = xIdx + 1;
     _dIdx = dIdx;
-    _sIdx = sIdx;
+    _openingIdx = openingIdx;
+    _aXIdx = aXIdx;
+    _aYIdx = aXIdx + 1;
+    _aZIdx = aXIdx + 2;
+    _omegaXIdx = omegaXIdx;
+    _omegaYIdx = omegaXIdx + 1;
+    _omegaZIdx = omegaXIdx + 2;
     _offsetIdx = offsetIdx;
 
     // make a channel
