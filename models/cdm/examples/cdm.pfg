@@ -1,7 +1,7 @@
 ;
 ; michael a.g. aïvázis
 ; orthologue
-; (c) 1998-2018 all rights reserved
+; (c) 1998-2019 all rights reserved
 ;
 
 cdm:
@@ -19,7 +19,7 @@ cdm:
     job:
         tasks = 1       ; number of tasks per host
         gpus = 0        ; number of gpus per task
-        chains = 2**12  ; number of chains per task
+        chains = 2**2  ; number of chains per task
         steps = 20      ; the length of each chain
 
     ; event handlers
@@ -29,7 +29,7 @@ cdm:
     ; model configuration
     model:
         ; the cdm engine: native or fast
-        mode = native
+        mode = fast
 
         ; parameter sets
         psets:
