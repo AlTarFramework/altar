@@ -112,7 +112,7 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
             theta = record.theta
             phi = record.phi
             # form the projection vectors and store them
-            self.los[obs, 0] = sin(theta) * cos(phi)
+            self.los[obs, 0] = -sin(theta) * cos(phi)
             self.los[obs, 1] = sin(theta) * sin(phi)
             self.los[obs, 2] = cos(theta)
 
