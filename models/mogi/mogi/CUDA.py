@@ -96,7 +96,8 @@ class CUDA:
             # get the residuals
             residuals = predicted.getRow(sample)
             # compute the norm, and normalize it
-            llk = normalization - norm.eval(v=residuals, sigma_inv=cd_inv) / 2
+            normeval = norm.eval(v=residuals, sigma_inv=cd_inv)
+            llk = normalization - normeval**2.0 / 2.0
             # store it
             dataLLK[sample] = llk
 

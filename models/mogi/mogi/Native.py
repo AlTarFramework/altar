@@ -74,7 +74,8 @@ class Native:
             # its depth
             d = parameters[dIdx]
             # and its strength; we model the logarithm of this one, so we have to exponentiate
-            dV = 10**parameters[sIdx]
+            #dV = 10**parameters[sIdx]
+            dV = 1.e6*parameters[sIdx]
 
             # make a source using the sample parameters
             mogi = source(x=x, y=y, d=d, dV=dV)
@@ -89,9 +90,9 @@ class Native:
                 u[obs] -= parameters[offsetIdx + oid[obs]]
 
             # compute the norm of the displacements
-            residual = norm.eval(v=u, sigma_inv=cd_inv)
+            normeval = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
-            dataLLK[sample] = normalization - residual/2
+            dataLLK[sample] = normalization - normeval**2.0 /2.0
 
         # all done
         return self
