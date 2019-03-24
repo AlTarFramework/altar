@@ -75,7 +75,7 @@ class Native:
             d = parameters[dIdx]
             # and its strength; we model the logarithm of this one, so we have to exponentiate
             #dV = 10**parameters[sIdx]
-            dV = 1.e6**parameters[sIdx]
+            dV = 1.e6*parameters[sIdx]
 
             # make a source using the sample parameters
             mogi = source(x=x, y=y, d=d, dV=dV)
