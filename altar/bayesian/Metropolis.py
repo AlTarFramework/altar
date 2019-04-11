@@ -49,8 +49,9 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         self.steps = application.job.steps
         # get the capsule of the random number generator
         rng = application.rng.rng
-        # set up the distribution for building the sample multiplicities
-        self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
+        # set up the distribution for building the sample multiplicities; use a strictly
+        # positive distribution to avoid generating candidates with zero displacement
+        self.uniform = altar.pdf.uniform_pos(support=(0,1), rng=rng)
         # set up the distribution for the random walk displacement vectors
         self.uninormal = altar.pdf.ugaussian(rng=rng)
 
