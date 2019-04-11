@@ -89,9 +89,9 @@ class Native:
                 u[obs] -= parameters[offsetIdx + oid[obs]]
 
             # compute the norm of the displacements
-            residual = norm.eval(v=u, sigma_inv=cd_inv)
+            nrm = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
-            dataLLK[sample] = normalization - residual/2
+            dataLLK[sample] = normalization - nrm**2 / 2
 
         # all done
         return self
