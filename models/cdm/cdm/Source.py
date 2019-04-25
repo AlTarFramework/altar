@@ -84,7 +84,6 @@ class Source:
         # go through each observation location
         for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
             # project the expected displacement along LOS and store
-            print(ux, ' ', uy, ' ', uz)
             u[idx] = ux * los[idx,0] + uy * los[idx,1] + uz * los[idx,2]
 
         # all done
