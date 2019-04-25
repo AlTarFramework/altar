@@ -90,16 +90,14 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         auto omegaY = gsl_matrix_get(&samples->matrix, sample, _omegaYIdx);
         auto omegaZ = gsl_matrix_get(&samples->matrix, sample, _omegaZIdx);
 
-
-        // compute the displacements
         cdm(_locations,
             xSrc, ySrc, dSrc,
+            openingSrc,
             aX, aY, aZ,
             omegaX, omegaY, omegaZ,
-            openingSrc,
             _nu,
             disp);
-
+        
         // apply the location specific projection to LOS vector and dataset shift
         for (auto loc=0; loc<_locations->size1; ++loc) {
             // compute the components of the unit LOS vector
@@ -109,16 +107,16 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
 
             // get the three components of the predicted displacement for this location
             auto ux = gsl_matrix_get(disp, loc, 0);
-            auto uy = gsl_matrix_get(disp, loc, 0);
-            auto ud = gsl_matrix_get(disp, loc, 0);
+            auto uy = gsl_matrix_get(disp, loc, 1);
+            auto ud = gsl_matrix_get(disp, loc, 2);
 
-            // project; don't forget {ud} is positive into the ground
-            auto u = ux*nx + uy*ny - ud*nz;
+            // project
+            auto u = ux*nx + uy*ny + ud*nz;
             // find the shift that corresponds to this observation
             auto shift = gsl_matrix_get(&samples->matrix, sample, _offsetIdx+_oids[loc]);
             // and apply it to the projected displacement
             u -= shift;
-
+            
             // save
             gsl_matrix_set(predicted, sample, loc, u);
         }
@@ -147,7 +145,6 @@ residuals(gsl_matrix * predicted) const {
     // unpack the number of samples and number of observations
     auto nSamples = predicted->size1;
     auto nObservations = predicted->size2;
-
     // go through all observations
     for (auto obs=0; obs < nObservations; ++obs) {
         // get the corresponding measurement

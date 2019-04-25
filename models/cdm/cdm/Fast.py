@@ -49,10 +49,8 @@ class Fast:
         libcdm.oid(source, oid)
         # inform the source about the parameter layout; assumes contiguous parameter sets
         libcdm.layout(source,
-                      model.xIdx, model.dIdx,
-                      model.openingIdx, model.aXIdx, model.omegaXIdx,
+                      model.xIdx, model.dIdx, model.openingIdx, model.aXIdx, model.omegaXIdx,
                       model.offsetIdx)
-
         # nothing to do
         return self
 
@@ -90,7 +88,8 @@ class Fast:
             # get the residuals
             residuals = predicted.getRow(sample)
             # compute the norm, and normalize it
-            llk = normalization - norm.eval(v=residuals, sigma_inv=cd_inv) / 2
+            normeval = norm.eval(v=residuals, sigma_inv=cd_inv)
+            llk = normalization - normeval**2.0 / 2.0
             # store it
             dataLLK[sample] = llk
 

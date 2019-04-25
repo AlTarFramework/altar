@@ -78,12 +78,13 @@ class Source:
         # allocate space for the result
         u = altar.vector(shape=len(locations))
         # compute the displacements
-        ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src,
-                          omegaX_src, omegaY_src, omegaZ_src, ax_src, ay_src, az_src,
-                          opening, v)
+        ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src, opening,
+                          ax_src, ay_src, az_src, omegaX_src, omegaY_src, omegaZ_src,
+                          v)
         # go through each observation location
         for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
             # project the expected displacement along LOS and store
+            print(ux, ' ', uy, ' ', uz)
             u[idx] = ux * los[idx,0] + uy * los[idx,1] + uz * los[idx,2]
 
         # all done
@@ -91,8 +92,8 @@ class Source:
 
 
     # meta-methods
-    def __init__(self, x=x, y=y, d=d, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
-                 ax=ax, ay=ay, az=az, opening=opening, v=v, **kwds):
+    def __init__(self, x=x, y=y, d=d, opening=opening, ax=ax, ay=ay, az=az,
+                 omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ, v=v, **kwds):
         # chain up
         super().__init__(**kwds)
         # store the location

@@ -14,9 +14,9 @@ namespace altar {
         namespace cdm {
             void cdm(const gsl_matrix * locations,
                      double X0, double Y0, double depth,
+                     double opening,
                      double ax, double ay, double az,
                      double omegaX, double omegaY, double omegaZ,
-                     double opening,
                      double nu,
                      gsl_matrix * predicted
                      );
