@@ -130,14 +130,7 @@ class CDM(altar.application, family="altar.applications.cdm"):
         for idx, (x,y) in enumerate(stations):
             # make a new entry in the data sheet
             observation = data.pyre_new()
-            # western stations
-            if x < 0:
-                # come from a different data set
-                observation.oid = 0
-            # than
-            else:
-                # eastern stations
-                observation.oid = 0
+            observation.oid = 0
 
             # record the location of this observation
             observation.x = x
