@@ -146,8 +146,7 @@ def CDM(X, Y, X0, Y0, depth, opening, ax, ay, az, omegaX, omegaY, omegaZ, nu):
     April 2018 by Eric Gurrola
     Jet Propulsion Lab/Caltech
     """
-    #print(depth, opening, ax, ay, az, omegaX, omegaY, omegaZ, nu)
-    #print(grace)
+
     ue=0
     un=0
     uv=0
