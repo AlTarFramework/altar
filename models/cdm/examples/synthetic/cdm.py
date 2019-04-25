@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+h#!/usr/bin/env python3
 # -*- python -*-
 # -*- coding: utf-8 -*-
 #
@@ -16,7 +16,6 @@ from math import sin, cos, pi as π
 import altar
 # my model
 import altar.models.cdm
-
 
 # app
 class CDM(altar.application, family="altar.applications.cdm"):
@@ -46,13 +45,13 @@ class CDM(altar.application, family="altar.applications.cdm"):
     omegaX = altar.properties.float(default=0)
     omegaX.doc = "the CDM rotation about the x axis"
 
-    omegaY = altar.properties.float(default=0)
+    omegaY = altar.properties.float(default=-45)
     omegaY.doc = "the CDM rotation about the y axis"
 
     omegaZ = altar.properties.float(default=0)
     omegaZ.doc = "the CDM rotation about the z axis"
 
-    opening = altar.properties.float(default=1e-3)
+    opening = altar.properties.float(default=100.0)
     opening.doc = "the tensile component of the Burgers vector of the dislocation"
 
     nu = altar.properties.float(default=.25)
@@ -97,16 +96,16 @@ class CDM(altar.application, family="altar.applications.cdm"):
         observations = len(stations)
         # make a source
         source = altar.models.cdm.source(
-            x=self.x, y=self.y, d=self.d,
+            x=self.x, y=self.y, d=self.d, opening=self.opening,
             ax=self.aX, ay=self.aY, az=self.aZ,
             omegaX=self.omegaX, omegaY=self.omegaY, omegaZ=self.omegaZ,
-            opening=self.opening, v=self.nu)
+            v=self.nu)
 
         # observe all displacements from the same angle for now
         theta = π/4 # the azimuthal angle
         phi = π     # the polar angle
         # build the common projection vector
-        s = sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)
+        s = -sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)
 
         # allocate a matrix to hold the projections
         los = altar.matrix(shape=(observations,3))
@@ -134,7 +133,7 @@ class CDM(altar.application, family="altar.applications.cdm"):
             # western stations
             if x < 0:
                 # come from a different data set
-                observation.oid = 1
+                observation.oid = 0
             # than
             else:
                 # eastern stations
@@ -158,7 +157,7 @@ class CDM(altar.application, family="altar.applications.cdm"):
         # go through the observations
         for idx, observation in enumerate(data):
             # set the covariance to a fraction of the "observed" displacement
-            correlation[idx,idx] = 1.0 #.01 * observation.d
+            correlation[idx,idx] = 0.0001 #1.0 #.01 * observation.d
 
         # all done
         return data, correlation
@@ -169,11 +168,16 @@ class CDM(altar.application, family="altar.applications.cdm"):
         Create a set of station coordinate
         """
         # get some help
-        import itertools
-        # build a set of points on a grid
-        stations = itertools.product(range(-5,6), range(-5,6))
+        import numpy as np
+        xx = np.linspace(-6000,6000, 15)
+        yy = np.linspace(-6000,6000, 15)
+        x,y = np.meshgrid(xx, yy)
+        x=x.flatten()
+        y = y.flatten()
+        stations = [tuple((y[i], x[i])) for i in range(0,len(x))]
+        
         # and return it
-        return tuple((x*1000, y*1000) for x,y in stations)
+        return stations
 
 
 # bootstrap
