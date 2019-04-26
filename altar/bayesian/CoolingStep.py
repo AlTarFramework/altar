@@ -101,6 +101,18 @@ class CoolingStep:
         return type(self)(beta=beta, theta=theta, likelihoods=likelihoods, sigma=sigma)
 
 
+    def computePosterior(self):
+        """
+        (Re-)Compute the posterior from prior, data, and (updated) beta
+        """
+        # in log, posterior = prior + beta * datalikelihood
+        # make a copy of prior at first
+        self.posterior.copy(self.prior)
+        # add the data likelihood
+        altar.blas.daxpy(self.beta, self.data, self.posterior)
+        # all done
+        return self
+
     # meta-methods
     def __init__(self, beta, theta, likelihoods, sigma=None, **kwds):
         # chain up
@@ -161,11 +173,60 @@ class CoolingStep:
             channel.line(f"{indent}Σ: {Σ.rows} x {Σ.columns}")
             channel.line("\n".join(Σ.print(interactive=False, indent=indent*2)))
 
+
+        # print statistics (axis=0 average over samples)
+        mean, sd = θ.mean_sd(axis=0)
+        channel.line(f"{indent}parameters (<40) (mean, sd):")
+        for i in range(min(40, parameters)):
+            channel.line(f"{indent} ({mean[i]}, {sd[i]})")
+
         # flush
         channel.log()
 
         # all done
         return channel
 
+    def save_hdf5(self, path=None, iteration=0):
+        """
+        Save Coolinging Step to HDF5 file
+        Arguments:
+            path - string or altar.primitives.path, output directory
+            iteration - int, current annealing step
+        Returns:
+            None
+        """
+        import os
+        import h5py
+        import numpy
+
+        # determine the output name as "{path}/step_{iteration}.h5"
+        str_iteration = 'final' if iteration is None else str(iteration).zfill(3)
+        if path is not None:
+            str_path = path.path if isinstance(path, altar.primitives.path) else path
+            if not os.path.exists(str_path):
+                os.makedirs(str_path)
+        else:
+            str_path = '.'
+        suffix = '.h5'
+        filename = os.path.join(str_path, "step_"+str_iteration+suffix)
+
+        f=h5py.File(filename, 'w')
+        f.create_dataset('beta', data=numpy.asarray(self.beta))
+        f.create_dataset('covariance', data=self.sigma.ndarray())
+        f.create_dataset('theta', data=self.theta.ndarray())
+        f.create_dataset('prior', data=self.prior.ndarray())
+        f.create_dataset('likelihood', data=self.data.ndarray())
+        f.create_dataset('posterior', data=self.posterior.ndarray())
+        f.close()
+
+        # all done
+        return
+
+    def load_hdf5(self, path=None, iteration=0):
+        """
+        load CoolingStep from HDF5 file
+        """
+        # to be done
+        return
 
 # end of file

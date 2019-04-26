@@ -70,6 +70,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         Push {step} forward along the annealing schedule
         """
+
         # get the new temperature and store it
         β = self.updateTemperature(step=step)
         # compute the new parameter covariance matrix
@@ -83,7 +84,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         step.sigma.copy(Σ)
         step.prior.copy(prior)
         step.data.copy(data)
-        step.posterior.copy(posterior)
+        # recompute posterior with updated beta
+        step.computePosterior()
 
         # and return it
         return step
@@ -223,6 +225,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # no need to symmetrize it since it is symmetric by construction
         # NYI: check the eigenvalues to verify positive definiteness
+
+        # altar.libaltar.matrix_condition(Σ.data)
         # all done
         return Σ
 
