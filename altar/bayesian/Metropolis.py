@@ -51,7 +51,7 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         rng = application.rng.rng
         # set up the distribution for building the sample multiplicities; use a strictly
         # positive distribution to avoid generating candidates with zero displacement
-        self.uniform = altar.pdf.uniform_pos(support=(0,1), rng=rng)
+        self.uniform = altar.pdf.uniform_pos(rng=rng)
         # set up the distribution for the random walk displacement vectors
         self.uninormal = altar.pdf.ugaussian(rng=rng)
 
