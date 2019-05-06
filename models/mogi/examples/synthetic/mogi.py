@@ -34,7 +34,7 @@ class Mogi(altar.application, family="altar.applications.mogi"):
     d = altar.properties.float(default=3000)
     d.doc = "the depth of the Mogi source"
 
-    dV = altar.properties.float(default=10e10)
+    dV = altar.properties.float(default=1.e10)
     dV.doc = "the strength of the Mogi source"
 
     nu = altar.properties.float(default=.25)

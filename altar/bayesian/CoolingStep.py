@@ -176,7 +176,7 @@ class CoolingStep:
 
         # print statistics (axis=0 average over samples)
         mean, sd = θ.mean_sd(axis=0)
-        channel.line(f"{indent}parameters (<40) (mean, sd):")
+        channel.line(f"{indent}parameters (mean, sd):")
         for i in range(min(40, parameters)):
             channel.line(f"{indent} ({mean[i]}, {sd[i]})")
 

@@ -106,7 +106,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         median = dataLikelihood.clone().sort().median()
 
         # compute {δβ} and the normalized {w}
-        β, self.cov = altar.libaltar.dbeta(self.minimizer, dataLikelihood.data, median, self.w.data)
+        β, self.cov = altar.libaltar.dbeta_grid(self.minimizer, dataLikelihood.data, median, self.w.data)
 
         # and return the new temperature
         return β
@@ -226,7 +226,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         # no need to symmetrize it since it is symmetric by construction
         # NYI: check the eigenvalues to verify positive definiteness
 
-        # altar.libaltar.matrix_condition(Σ.data)
+        #altar.libaltar.matrix_condition(Σ.data, 0.001)
         # all done
         return Σ
 
