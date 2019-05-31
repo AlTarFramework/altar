@@ -55,13 +55,13 @@ class Native:
         xIdx = model.xIdx
         yIdx = model.yIdx
         dIdx = model.dIdx
+        openingIdx = model.openingIdx
         aXIdx = model.aXIdx
         aYIdx = model.aYIdx
         aZIdx = model.aZIdx
         omegaXIdx = model.omegaXIdx
         omegaYIdx = model.omegaYIdx
         omegaZIdx = model.omegaZIdx
-        openingIdx = model.openingIdx
         offsetIdx = model.offsetIdx
 
         # get the observations
@@ -91,9 +91,9 @@ class Native:
             omegaZ = parameters[omegaZIdx]
 
             # make a source using the sample parameters
-            cdm = source(x=x, y=y, d=d,
+            cdm = source(x=x, y=y, d=d, opening=opening,
                          ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
-                         opening=opening, v=model.nu)
+                         v=model.nu)
             # compute the expected displacement
             u = cdm.displacements(locations=locations, los=los)
 
@@ -105,9 +105,9 @@ class Native:
                 u[obs] -= parameters[offsetIdx + oid[obs]]
 
             # compute the norm of the displacements
-            residual = norm.eval(v=u, sigma_inv=cd_inv)
+            nrm = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
-            dataLLK[sample] = normalization - residual/2
+            dataLLK[sample] = normalization - nrm**2 /2
 
         # all done
         return self
