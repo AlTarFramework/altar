@@ -35,7 +35,7 @@ def norm(v):
     return numpy.sqrt(v.dot(v))
 
 
-def CDM(X, Y, X0, Y0, depth, omegaX, omegaY, omegaZ, ax, ay, az, opening, nu):
+def CDM(X, Y, X0, Y0, depth, ax, ay, az, omegaX, omegaY, omegaZ, opening, nu):
     """
     CDM
     calculates the surface displacements and potency associated with a CDM
