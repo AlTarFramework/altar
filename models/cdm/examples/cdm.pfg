@@ -5,8 +5,8 @@
 ;
 
 cdm:
-    ; shell
-    ; shell = mpi.shells.mpirun ; for running with mpi
+    ; for running with MPI
+    ; shell = mpi.mpirun
 
     controller:
         ; saving the results of the calculation
@@ -17,9 +17,10 @@ cdm:
 
     ; job layout
     job:
+        hosts = 1       ; number of MPI hosts
         tasks = 1       ; number of tasks per host
         gpus = 0        ; number of gpus per task
-        chains = 2**2  ; number of chains per task
+        chains = 2**12  ; number of chains per task
         steps = 20      ; the length of each chain
 
     ; event handlers
@@ -92,6 +93,7 @@ cdm:
 
 ; for parallel runs
 mpi.shells.mpirun # altar.plexus.shell:
+    hostfile = localhost
     extra = -mca btl self,tcp
 
 ; end of file
