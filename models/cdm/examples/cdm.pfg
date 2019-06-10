@@ -92,7 +92,7 @@ cdm:
 
 
 ; for parallel runs
-mpi.shells.mpirun # altar.plexus.shell:
+mpi.shells.mpirun # cdm.shell:
     hostfile = localhost
     extra = -mca btl self,tcp
 
