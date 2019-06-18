@@ -46,13 +46,13 @@ class CDM(altar.application, family="altar.applications.cdm"):
     omegaX = altar.properties.float(default=0)
     omegaX.doc = "the CDM rotation about the x axis"
 
-    omegaY = altar.properties.float(default=0)
+    omegaY = altar.properties.float(default=-45)
     omegaY.doc = "the CDM rotation about the y axis"
 
     omegaZ = altar.properties.float(default=0)
     omegaZ.doc = "the CDM rotation about the z axis"
 
-    opening = altar.properties.float(default=1e-3)
+    opening = altar.properties.float(default=1e2)
     opening.doc = "the tensile component of the Burgers vector of the dislocation"
 
     nu = altar.properties.float(default=.25)
@@ -158,7 +158,7 @@ class CDM(altar.application, family="altar.applications.cdm"):
         # go through the observations
         for idx, observation in enumerate(data):
             # set the covariance to a fraction of the "observed" displacement
-            correlation[idx,idx] = 1.0 #.01 * observation.d
+            correlation[idx,idx] = 1e-4
 
         # all done
         return data, correlation

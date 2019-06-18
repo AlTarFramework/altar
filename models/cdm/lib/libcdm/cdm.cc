@@ -364,9 +364,9 @@ inline static
 altar::models::cdm::mat_t
 altar::models::cdm::
 operator*(const mat_t & m1, const mat_t & m2) {
-    return { m1[0]*m2[0] + m1[2]*m2[3] + m1[2]*m2[6],
-             m1[0]*m2[1] + m1[2]*m2[4] + m1[2]*m2[7],
-             m1[0]*m2[2] + m1[2]*m2[5] + m1[2]*m2[8],
+    return { m1[0]*m2[0] + m1[1]*m2[3] + m1[2]*m2[6],
+             m1[0]*m2[1] + m1[1]*m2[4] + m1[2]*m2[7],
+             m1[0]*m2[2] + m1[1]*m2[5] + m1[2]*m2[8],
 
              m1[3]*m2[0] + m1[4]*m2[3] + m1[5]*m2[6],
              m1[3]*m2[1] + m1[4]*m2[4] + m1[5]*m2[7],
@@ -411,9 +411,9 @@ inline static
 altar::models::cdm::vec_t
 altar::models::cdm::
 xform(const mat_t & m, const vec_t & v) {
-    return {m[0]*v[0] + m[1]*v[2] + m[2]*v[3],
-            m[3]*v[0] + m[4]*v[2] + m[5]*v[3],
-            m[6]*v[0] + m[7]*v[2] + m[8]*v[3]};
+    return {m[0]*v[0] + m[1]*v[1] + m[2]*v[2],
+            m[3]*v[0] + m[4]*v[1] + m[5]*v[2],
+            m[6]*v[0] + m[7]*v[1] + m[8]*v[2]};
 };
 
 // trig
@@ -421,14 +421,14 @@ inline
 double
 altar::models::cdm::
 sin(double omega) {
-    return std::sin(omega * 180/pi);
+    return std::sin(omega * pi/180);
 };
 
 inline
 double
 altar::models::cdm::
 cos(double omega) {
-    return std::cos(omega * 180/pi);
+    return std::cos(omega * pi/180);
 };
 
 // end-of-file
