@@ -36,6 +36,10 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
     psets = altar.properties.dict(schema=altar.models.parameters())
     psets.doc = "the model parameter meta-data"
 
+    # order of parameters
+    psets_list = altar.properties.list(default=None)
+    psets_list.doc = "the list serving as the parameter orders"
+
     # data
     observations = altar.properties.int()
     observations.doc = "the number of model degrees of freedom"
@@ -231,11 +235,18 @@ class Mogi(altar.models.bayesian, family="altar.models.mogi"):
         psets = self.psets
         # initialize the offset
         offset = 0
-        # go through my parameter sets
-        for name, pset in psets.items():
-            # initialize the parameter set
-            offset += pset.initialize(model=self, offset=offset)
-        # the total number of parameters is now known, so record it
+        # check whether the order of parameters is provided/important
+        if self.psets_list is None: # not important
+            # go through my parameter sets
+            for name, pset in psets.items():
+                # initialize the parameter set
+                offset += pset.initialize(model=self, offset=offset)
+            # the total number of parameters is now known, so record it
+        else: # important, use psets_list as orders
+            for name in self.psets_list:
+                pset = psets[name]
+                offset += pset.initialize(model=self, offset=offset)
+        # record the total number of parameters
         self.parameters = offset
 
         # record the layout of the sample vector

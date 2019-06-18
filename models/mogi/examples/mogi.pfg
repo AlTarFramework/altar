@@ -31,6 +31,9 @@ mogi:
         ; the mogi engine: native or fast
         mode = fast
 
+        ; order of parameter sets
+        psets_list = [location, depth, source, offsets]
+
         ; parameter sets
         psets:
             location = contiguous
