@@ -224,7 +224,6 @@ def CDM(X, Y, X0, Y0, depth, ax, ay, az, omegaX, omegaY, omegaZ, opening, nu):
         print('Half-space solution: The CDM must be under the free surface!' +
                          ' VertVec={}'.format(VertVec))
 
-
     if ax == 0 and ay == 0 and az == 0:
         ue = numpy.zeros(numpy.shape(X))
         un = numpy.zeros(numpy.shape(X))
