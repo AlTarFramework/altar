@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2013-2018 parasim inc
-# (c) 2010-2018 california institute of technology
+# (c) 2013-2019 parasim inc
+# (c) 2010-2019 california institute of technology
 # all rights reserved
 #
 
@@ -78,9 +78,11 @@ class Source:
         # allocate space for the result
         u = altar.vector(shape=len(locations))
         # compute the displacements
-        ue, un, uv =  CDM(Xf, Yf, x_src, y_src, d_src, opening,
-                          ax_src, ay_src, az_src, omegaX_src, omegaY_src, omegaZ_src,
-                          v)
+        ue, un, uv =  CDM(X=Xf, Y=Yf, X0=x_src, Y0=y_src, depth=d_src, opening=opening,
+                          ax=ax_src, ay=ay_src, az=az_src,
+                          omegaX=omegaX_src, omegaY=omegaY_src, omegaZ=omegaZ_src,
+                          nu=v)
+
         # go through each observation location
         for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
             # project the expected displacement along LOS and store
@@ -93,6 +95,7 @@ class Source:
     # meta-methods
     def __init__(self, x=x, y=y, d=d, opening=opening, ax=ax, ay=ay, az=az,
                  omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ, v=v, **kwds):
+        
         # chain up
         super().__init__(**kwds)
         # store the location

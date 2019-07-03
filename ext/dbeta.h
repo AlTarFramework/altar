@@ -2,8 +2,8 @@
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 //
-// (c) 2013-2018 parasim inc
-// (c) 2010-2018 california institute of technology
+// (c) 2013-2019 parasim inc
+// (c) 2010-2019 california institute of technology
 // all rights reserved
 //
 
@@ -24,6 +24,11 @@ namespace altar {
         extern const char * const dbeta__name__;
         extern const char * const dbeta__doc__;
         PyObject * dbeta(PyObject *, PyObject *);
+
+        // dbeta_gsl
+        extern const char * const dbeta_grid__name__;
+        extern const char * const dbeta_grid__doc__;
+        PyObject * dbeta_grid(PyObject *, PyObject *);
 
     } // of namespace extensions
 } // of namespace altar

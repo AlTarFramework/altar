@@ -2,8 +2,8 @@
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 //
-// (c) 2013-2018 parasim inc
-// (c) 2010-2018 california institute of technology
+// (c) 2013-2019 parasim inc
+// (c) 2010-2019 california institute of technology
 // all rights reserved
 //
 
@@ -95,6 +95,69 @@ altar::extensions::dbeta(PyObject *, PyObject * args) {
     return answer;
 }
 
+// dbeta
+const char * const altar::extensions::dbeta_grid__name__ = "dbeta_grid";
+const char * const altar::extensions::dbeta_grid__doc__ =
+    "compute the next increment to the annealing temperature";
+
+PyObject *
+altar::extensions::dbeta_grid(PyObject *, PyObject * args) {
+    // the arguments
+    PyObject * covCapsule;
+    PyObject * llkCapsule;
+    double llkMedian;
+    PyObject * wCapsule;
+
+    // build my debugging channel
+    pyre::journal::debug_t debug("altar.beta");
+
+    // unpack the argument tuple
+    int status = PyArg_ParseTuple(
+                                  args, "O!O!dO!:dbeta_grid",
+                                  &PyCapsule_Type, &covCapsule,
+                                  &PyCapsule_Type, &llkCapsule,
+                                  &llkMedian,
+                                  &PyCapsule_Type, &wCapsule
+                                  );
+    // if something went wrong
+    if (!status) return 0;
+    // bail out if the {cov} capsule is not valid
+    if (!PyCapsule_IsValid(covCapsule, altar::extensions::capsule_t)) {
+        PyErr_SetString(PyExc_TypeError, "invalid vector capsule for cov");
+        return 0;
+    }
+    // bail out if the {llk} capsule is not valid
+    if (!PyCapsule_IsValid(llkCapsule, altar::vector::capsule_t)) {
+        PyErr_SetString(PyExc_TypeError, "invalid vector capsule for llk");
+        return 0;
+    }
+    // bail out if the {w} capsule is not valid
+    if (!PyCapsule_IsValid(wCapsule, altar::vector::capsule_t)) {
+        PyErr_SetString(PyExc_TypeError, "invalid vector capsule for w");
+        return 0;
+    }
+
+    // get the {cov}
+    altar::bayesian::COV * cov =
+        static_cast<altar::bayesian::COV *>
+        (PyCapsule_GetPointer(covCapsule, altar::extensions::capsule_t));
+    // get the {w} vector
+    gsl_vector * w =
+        static_cast<gsl_vector *>(PyCapsule_GetPointer(wCapsule, altar::vector::capsule_t));
+    // get the {llk} vector
+    gsl_vector * llk =
+        static_cast<gsl_vector *>(PyCapsule_GetPointer(llkCapsule, altar::vector::capsule_t));
+
+    // update
+    cov->dbeta_grid(llk, llkMedian, w);
+
+    // build a tuple for the result
+    PyObject * answer = PyTuple_New(2);
+    PyTuple_SET_ITEM(answer, 0, PyFloat_FromDouble(cov->beta()));
+    PyTuple_SET_ITEM(answer, 1, PyFloat_FromDouble(cov->cov()));
+    // all done
+    return answer;
+}
 
 // dbeta
 const char * const altar::extensions::cov__name__ = "cov";

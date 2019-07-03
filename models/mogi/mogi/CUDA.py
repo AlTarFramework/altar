@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2013-2018 parasim inc
-# (c) 2010-2018 california institute of technology
+# (c) 2013-2019 parasim inc
+# (c) 2010-2019 california institute of technology
 # all rights reserved
 #
 
@@ -98,6 +98,7 @@ class CUDA:
             # compute the norm, and normalize it
             normeval = norm.eval(v=residuals, sigma_inv=cd_inv)
             llk = normalization - normeval**2.0 / 2.0
+            
             # store it
             dataLLK[sample] = llk
 

@@ -29,6 +29,11 @@ namespace altar {
 
             // local helpers
             static void
+            // RDdispSurf(int sample,
+            //            const gsl_matrix * locations, const gsl_matrix * los,
+            //            const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
+            //            double opening, double nu,
+            //            gsl_matrix * results);
             RDdispSurf(const gsl_matrix * locations,
                        const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
                        double opening, double nu,
@@ -82,19 +87,27 @@ cdm(const gsl_matrix * locations,
     double omegaX, double omegaY, double omegaZ,
     double nu,
     gsl_matrix * predicted)
+// cdm(int sample,
+//     const gsl_matrix * locations, const gsl_matrix * los,
+//     double x, double y, double depth,
+//     double aX, double aY, double aZ,
+//     double omegaX, double omegaY, double omegaZ,
+//     double opening,
+//     double nu,
+//     gsl_matrix * predicted)
 {
-//    printf("%f ", aX);
-//    printf("%f ", aY);
-//    printf("%f ", aZ);
-//    printf("%f ", omegaX);
-//    printf("%f ", omegaY);
-//    printf("%f\n", omegaZ);
-//    getchar();
-    
     // convert semi-axes to axes
     aX *= 2;
     aY *= 2;
     aZ *= 2;
+
+    // short circuit the trivial case
+    // if (std::abs(aX) < eps && std::abs(aY) < eps && std::abs(aZ) < eps) {
+    //     // no displacements
+    //     gsl_matrix_set_zero(predicted);
+    //     // all done
+    //     return;
+    // }
 
     // the axis specific coordinate matrices
     mat_t Rx = {1.,  0.,          0.,
@@ -108,10 +121,9 @@ cdm(const gsl_matrix * locations,
     mat_t Rz = { cos(omegaZ), sin(omegaZ), 0.,
                 -sin(omegaZ), cos(omegaZ), 0.,
                  0.,         0.,           1.};
-    
+
     // the coordinate rotation matrix
     mat_t R  = Rz * (Ry * Rx);
-    
     // extract its three columns
     vec_t R_0 = { R[0],   R[3],   R[6] };
     vec_t R_1 = { R[0+1], R[3+1], R[6+1] };
@@ -119,30 +131,44 @@ cdm(const gsl_matrix * locations,
 
     // the centroid
     vec_t P0 = { x, y, -depth };
-    vec_t P1 = P0 + aY*R_1/2 + aZ*R_2/2;
+
+    vec_t P1 = P0 + (aY*R_1 + aZ*R_2)/2;
     vec_t P2 = P1 - aY*R_1;
     vec_t P3 = P2 - aZ*R_2;
     vec_t P4 = P1 - aZ*R_2;
-    
-    vec_t Q1 = P0 - aX*R_0/2 + aZ*R_2/2;
+
+    vec_t Q1 = P0 + (aZ*R_2 - aX*R_0)/2;
     vec_t Q2 = Q1 + aX*R_0;
     vec_t Q3 = Q2 - aZ*R_2;
     vec_t Q4 = Q1 - aZ*R_2;
 
-    vec_t R1 = P0 + aX*R_0/2 + aY*R_1/2;
+    vec_t R1 = P0 + (aX*R_0 + aY*R_1)/2;
     vec_t R2 = R1 - aX*R_0;
     vec_t R3 = R2 - aY*R_1;
     vec_t R4 = R1 - aY*R_1;
-    
+
     // check that all z components are negative
     if (P1[2] > 0 || P2[2] > 0 || P3[2] > 0 || P4[2] > 0 ||
         Q1[2] > 0 || Q2[2] > 0 || Q3[2] > 0 || Q4[2] > 0 ||
         R1[2] > 0 || R2[2] > 0 || R3[2] > 0 || R4[2] > 0) {
         // complain...
-        //throw std::domain_error("the CDM must be below the surface");
+        // throw std::domain_error("the CDM must be below the surface");
         printf("WARNING: The CDM must be below the surface \n");
     }
-    
+
+    // // dispatch the various cases
+    // if (std::abs(aX) < eps && std::abs(aY) > eps && std::abs(aZ) > eps) {
+    //     RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
+    // } else if (std::abs(aX) > eps && std::abs(aY) < eps && std::abs(aZ) > eps) {
+    //     RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
+    // } else if (std::abs(aX) > eps && std::abs(aY) > eps && std::abs(aZ) < eps) {
+    //     RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
+    // } else {
+    //     RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
+    //     RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
+    //     RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
+    // }
+
     // dispatch the various cases
     // short circuit the trivial case
     if (std::abs(aX) == 0 && std::abs(aY) == 0 && std::abs(aZ) == 0) {
@@ -179,31 +205,13 @@ cdm(const gsl_matrix * locations,
                     gsl_matrix_get(P, loc, axis) +
                     gsl_matrix_get(Q, loc, axis) +
                     gsl_matrix_get(R, loc, axis);
-                
+
                 // assign
                 gsl_matrix_set(predicted, loc, axis, result);
             }
         }
-        // Release memory allocations
-        free(P);
-        free(Q);
-        free(R);
     }
 
-    P1 = {};
-    P2 = {};
-    P3 = {};
-    P4 = {};
-
-    Q1 = {};
-    Q2 = {};
-    Q3 = {};
-    Q4 = {};
-
-    R1 = {};
-    R2 = {};
-    R3 = {};
-    R4 = {};
 
     // all done
     return;
@@ -212,14 +220,20 @@ cdm(const gsl_matrix * locations,
 // implementations
 static void
 altar::models::cdm::
+// RDdispSurf(int sample,
+//            const gsl_matrix * locations, const gsl_matrix * los,
+//            const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
+//            double opening, double nu,
+//            gsl_matrix * results) {
 RDdispSurf(const gsl_matrix * locations,
            const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
            double opening, double nu,
            gsl_matrix * results) {
+
     // cross
     auto V = cross(P2-P1, P4-P1);
     auto b = opening * V/norm(V);
-    
+
     // go through each location
     for (auto loc=0; loc<locations->size1; ++loc) {
         // unpack the observation point coordinates
@@ -231,16 +245,30 @@ RDdispSurf(const gsl_matrix * locations,
         auto u3 = AngSetupFSC(x,y, b, P3, P4, nu);
         auto u4 = AngSetupFSC(x,y, b, P4, P1, nu);
 
+    //     // assemble
+    //     auto u = u1 + u2 + u3 + u4;
+    //     // compute the unit LOS vector
+    //     vec_t n = { gsl_matrix_get(los, loc, 0),
+    //                 gsl_matrix_get(los, loc, 1),
+    //                 gsl_matrix_get(los, loc, 2) };
+
+    //     // project the displacement to the LOS
+    //     auto uLOS = dot(u, n);
+    //     // save by accumulating my contribution to the slot
+    //     // N.B.: note the "+=": the general case call this function three times
+    //     // get the current value
+    //     auto current = gsl_matrix_get(results, sample, loc);
+    //     // update
+    //     current += uLOS;
+    //     // save
+    //     gsl_matrix_set(results, sample, loc, current);
+    // }
+
         // assemble
         for (auto axis=0; axis<3; ++axis) {
             auto u = u1[axis] + u2[axis] + u3[axis] + u4[axis];
             gsl_matrix_set(results, loc, axis, u);
         }
-        
-        u1 = {};
-        u2 = {};
-        u3 = {};
-        u4 = {};
     }
 
     // all done
@@ -253,52 +281,52 @@ altar::models::cdm::
 AngSetupFSC(double x, double y,
             const vec_t & b, const vec_t & PA, const vec_t & PB,
             double nu) {
-
     vec_t SideVec = PB - PA;
     vec_t eZ = {0, 0, 1};
+    // auto beta = std::acos(dot(SideVec, eZ) / norm(SideVec));
     auto beta = std::acos(dot(-SideVec, eZ) / norm(SideVec));
 
     if (std::abs(beta) < eps || std::abs(pi - beta) < eps) {
         return { 0,0,0 };
     }
 
-    else {
-        vec_t ey1 = { SideVec[0], SideVec[1], 0 };
-        ey1 = ey1 / norm(ey1);
-        vec_t ey3 = -eZ;
-        vec_t ey2 = cross(ey3, ey1);
-        
-        mat_t A = { ey1[0], ey1[1], ey1[2],
-                    ey2[0], ey2[1], ey2[2],
-                    ey3[0], ey3[1], ey3[2]};
+    vec_t ey1 = { SideVec[0], SideVec[1], 0 };
+    ey1 = ey1 / norm(ey1);
+    vec_t ey3 = -eZ;
+    vec_t ey2 = cross(ey3, ey1);
 
-        vec_t adcsA = xform(A, {x-PA[0], y-PA[1], -PA[2]});
-        vec_t adcsAB = xform(A, SideVec);
-        vec_t adcsB = adcsA - adcsAB;
-      
-        // transform the slip vector
-        vec_t bADCS = xform(A, b);
-        vec_t vA, vB;
+    mat_t A = { ey1[0], ey1[1], ey1[2],
+                ey2[0], ey2[1], ey2[2],
+                ey3[0], ey3[1], ey3[2]};
 
-        // distinguish the two configurations
-        if (beta*adcsA[0] >= 0) {
-            // configuration I
-            vA = AngDisDispSurf(adcsA, -pi+beta, bADCS, nu, -PA[2]);
-            vB = AngDisDispSurf(adcsB, -pi+beta, bADCS, nu, -PB[2]);
-        } else {
-            // configuration II
-            vA = AngDisDispSurf(adcsA, beta, bADCS, nu, -PA[2]);
-            vB = AngDisDispSurf(adcsB, beta, bADCS, nu, -PB[2]);
-        }
+    vec_t adcsA = xform(A, {x-PA[0], y-PA[1], -PA[2]});
+    vec_t adcsAB = xform(A, SideVec);
+    vec_t adcsB = adcsA - adcsAB;
 
-        vec_t v = xform(transpose(A), vB - vA);
-        
-        A = {};
-        vA = {};
-        vB = {};
-        
-        return v;
+    // transform the slip vector
+    vec_t bADCS = xform(A, b);
+
+    vec_t vA, vB;
+    // distinguish the two configurations
+    // if (beta*adcsA[0] > 0) {
+    if (beta*adcsA[0] >= 0) {
+        // configuration I
+        // vA = AngDisDispSurf(adcsA, -pi+beta, b, nu, -PA[2]);
+        // vB = AngDisDispSurf(adcsB, -pi+beta, b, nu, -PB[2]);
+        vA = AngDisDispSurf(adcsA, -pi+beta, bADCS, nu, -PA[2]);
+        vB = AngDisDispSurf(adcsB, -pi+beta, bADCS, nu, -PB[2]);
+
+    } else {
+        // configuration II
+        // vA = AngDisDispSurf(adcsA, beta, b, nu, -PB[2]);
+        // vB = AngDisDispSurf(adcsB, beta, b, nu, -PB[2]);
+        vA = AngDisDispSurf(adcsA, beta, bADCS, nu, -PA[2]);
+        vB = AngDisDispSurf(adcsB, beta, bADCS, nu, -PB[2]);
     }
+
+    vec_t v = xform(transpose(A), vB - vA);
+
+    return v;
 }
 
 static
@@ -325,21 +353,21 @@ AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
     // the Burgers function
     auto Fi = 2*std::atan2(y2, (r+a)/std::tan(beta/2) - y1);
 
-    auto v1b1 = b1/2/pi*((1-(1-2*nu)*(cotB*cotB))*Fi +
+    auto v1b1 = b1/2/pi*((1-(1-2*nu)*cotB*cotB)*Fi +
                          y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
                          y2*(r*sinB-y1)*cosB/r/(r-z3));
 
-    auto v2b1 = b1/2/pi*((1-2*nu)*((.5+(cotB*cotB))*std::log(r+a)-cotB/sinB*std::log(r-z3)) -
-                         1./(r+a)*((1-2*nu)*(y1*cotB-a/2-(y2*y2)/2/(r+a))+(y2*y2)/r) +
-                         (y2*y2)*cosB/r/(r-z3));
+    auto v2b1 = b1/2/pi*((1-2*nu)*((.5+cotB*cotB)*std::log(r+a)-cotB/sinB*std::log(r-z3)) -
+                         1./(r+a)*((1-2*nu)*(y1*cotB-a/2-y2*y2/2/(r+a))+y2*y2/r) +
+                         y2*y2*cosB/r/(r-z3));
 
     auto v3b1 = b1/2/pi*((1-2*nu)*Fi*cotB+y2/(r+a)*(2*nu+a/r) - y2*cosB/(r-z3)*(cosB+a/r));
 
-    auto v1b2 = b2/2/pi*(-(1-2*nu)*((.5-(cotB*cotB))*std::log(r+a) + (cotB*cotB)*cosB*std::log(r-z3) ) -
-                         1/(r+a)*((1-2*nu)*(y1*cotB+.5*a+(y1*y1)/2/(r+a)) - (y1*y1)/r) +
+    auto v1b2 = b2/2/pi*(-(1-2*nu)*((.5-cotB*cotB)*std::log(r+a) + cotB*cotB*cosB*std::log(r-z3) ) -
+                         1/(r+a)*((1-2*nu)*(y1*cotB+.5*a+y1*y1/2/(r+a)) - y1*y1/r) +
                          z1*(r*sinB-y1)/r/(r-z3));
 
-    auto v2b2 = b2/2/pi*((1+(1-2*nu)*(cotB*cotB))*Fi -
+    auto v2b2 = b2/2/pi*((1+(1-2*nu)*cotB*cotB)*Fi -
                          y2/(r+a)*((1-2*nu)*(cotB+y1/2/(r+a))-y1/r) -
                          y2*z1/r/(r-z3));
 
@@ -347,23 +375,13 @@ AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
                          y1/(r+a)*(2*nu+a/r) + z1/(r-z3)*(cosB+a/r));
 
     auto v1b3 = b3/2/pi*(y2*(r*sinB-y1)*sinB/r/(r-z3));
-    auto v2b3 = b3/2/pi*(-(y2*y2)*sinB/r/(r-z3));
+    auto v2b3 = b3/2/pi*(-y2*y2*sinB/r/(r-z3));
     auto v3b3 = b3/2/pi*(Fi + y2*(r*cosB+a)*sinB/r/(r-z3));
 
     auto v1 = v1b1 + v1b2 + v1b3;
     auto v2 = v2b1 + v2b2 + v2b3;
     auto v3 = v3b1 + v3b2 + v3b3;
 
-    v1b1 = {};
-    v1b2 = {};
-    v1b3 = {};
-    v2b1 = {};
-    v2b2 = {};
-    v2b3 = {};
-    v3b1 = {};
-    v3b2 = {};
-    v3b3 = {};
-    
     return {v1, v2, v3};
 }
 
@@ -489,3 +507,4 @@ cos(double omega) {
 };
 
 // end-of-file
+

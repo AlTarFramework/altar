@@ -2,8 +2,8 @@
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 //
-// (c) 2013-2018 parasim inc
-// (c) 2010-2018 california institute of technology
+// (c) 2013-2019 parasim inc
+// (c) 2010-2019 california institute of technology
 // all rights reserved
 //
 
@@ -17,6 +17,7 @@
 #include "exceptions.h"
 #include "metadata.h"
 #include "dbeta.h"
+#include "condition.h"
 
 
 // put everything in my private namespace
@@ -35,6 +36,10 @@ namespace altar {
             // annealing schedule
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta__name__, dbeta, METH_VARARGS, dbeta__doc__},
+            { dbeta_grid__name__, dbeta_grid, METH_VARARGS, dbeta_grid__doc__},
+
+            // matrix condition for positive definite
+            { matrix_condition__name__, matrix_condition, METH_VARARGS, matrix_condition__doc__},
 
             // sentinel
             {0, 0, 0, 0}

@@ -2,8 +2,8 @@
 //
 // michael a.g. aïvázis <michael.aivazis@para-sim.com>
 //
-// (c) 2013-2018 parasim inc
-// (c) 2010-2018 california institute of technology
+// (c) 2013-2019 parasim inc
+// (c) 2010-2019 california institute of technology
 // all rights reserved
 //
 
@@ -50,6 +50,7 @@ public:
     // lower level interface
 public:
     virtual double dbeta(vector_t * llk, double llkMedian, vector_t * w);
+    virtual double dbeta_grid(vector_t * llk, double llkMedian, vector_t * w);
 
     // meta-methods
 public:
@@ -62,7 +63,7 @@ public:
     // implementation details
 protected:
     void computeCovariance(state_t & state, vector_t * weights) const;
-    void conditionCovariance(matrix_t * sigma) const;
+    void conditionCovariance(matrix_t * sigma, double eval_ratio_min=0.001) const;
     void rankAndShuffle(state_t & state, vector_t * weights) const;
 
     // data

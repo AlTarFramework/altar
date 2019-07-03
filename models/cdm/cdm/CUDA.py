@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2013-2018 parasim inc
-# (c) 2010-2018 california institute of technology
+# (c) 2013-2019 parasim inc
+# (c) 2010-2019 california institute of technology
 # all rights reserved
 #
 
@@ -56,7 +56,10 @@ class CUDA:
         # attach the map of observations to their set
         libcudacdm.oid(source, oid)
         # inform the source about the parameter layout; assumes contiguous parameter sets
-        libcudacdm.layout(source, model.xIdx, model.dIdx, model.sIdx, model.offsetIdx)
+        libcudacdm.layout(source,
+                          model.xIdx, model.dIdx,
+                          model.openingIdx, model.aXIdx, model.omegaXIdx,
+                          model.offsetIdx)
 
         # if all went well, attach the calculator
         self.source = source

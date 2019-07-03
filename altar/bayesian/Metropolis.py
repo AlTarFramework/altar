@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2013-2018 parasim inc
-# (c) 2010-2018 california institute of technology
+# (c) 2013-2019 parasim inc
+# (c) 2010-2019 california institute of technology
 # all rights reserved
 #
 
@@ -50,7 +50,8 @@ class Metropolis(altar.component, family="altar.samplers.metropolis", implements
         self.steps = application.job.steps
         # get the capsule of the random number generator
         rng = application.rng.rng
-        # set up the distribution for building the sample multiplicities
+        # set up the distribution for building the sample multiplicities; use a strictly
+        # positive distribution to avoid generating candidates with zero displacement
         self.uniform = altar.pdf.uniform_pos(rng=rng)
         # set up the distribution for the random walk displacement vectors
         self.uninormal = altar.pdf.ugaussian(rng=rng)

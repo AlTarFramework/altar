@@ -3,8 +3,8 @@
 #
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 #
-# (c) 2013-2018 parasim inc
-# (c) 2010-2018 california institute of technology
+# (c) 2013-2019 parasim inc
+# (c) 2010-2019 california institute of technology
 # all rights reserved
 #
 
@@ -70,6 +70,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         Push {step} forward along the annealing schedule
         """
+
         # get the new temperature and store it
         β = self.updateTemperature(step=step)
         # compute the new parameter covariance matrix
@@ -83,7 +84,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         step.sigma.copy(Σ)
         step.prior.copy(prior)
         step.data.copy(data)
-        step.posterior.copy(posterior)
+        # recompute posterior with updated beta
+        step.computePosterior()
 
         # and return it
         return step
@@ -104,7 +106,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         median = dataLikelihood.clone().sort().median()
 
         # compute {δβ} and the normalized {w}
-        β, self.cov = altar.libaltar.dbeta(self.minimizer, dataLikelihood.data, median, self.w.data)
+        β, self.cov = altar.libaltar.dbeta_grid(self.minimizer, dataLikelihood.data, median, self.w.data)
 
         # and return the new temperature
         return β
@@ -223,6 +225,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # no need to symmetrize it since it is symmetric by construction
         # NYI: check the eigenvalues to verify positive definiteness
+
+        #altar.libaltar.matrix_condition(Σ.data, 0.001)
         # all done
         return Σ
 
