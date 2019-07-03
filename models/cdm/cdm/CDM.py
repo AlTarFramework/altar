@@ -16,6 +16,7 @@ import altar
 # the encapsulation of the layout of the data in a file
 from .Data import Data as datasheet
 
+import gc
 
 # declaration
 class CDM(altar.models.bayesian, family="altar.models.cdm"):
@@ -63,7 +64,8 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     parameters = 0 # adjusted during model initialization
     strategy = None # the strategy for computing the data log likelihood
 
-
+    print('Garbage collected (CDM.py--top): ', gc.collect())
+    
     # protocol obligations
     @altar.export
     def initialize(self, application):
@@ -237,12 +239,18 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
         self.yIdx = self.xIdx + 1
         self.dIdx = psets["depth"].offset
         self.openingIdx = psets["opening"].offset
-        self.aXIdx = psets["a"].offset
-        self.aYIdx = self.aXIdx + 1
-        self.aZIdx = self.aXIdx + 2
-        self.omegaXIdx = psets["omega"].offset
-        self.omegaYIdx = self.omegaXIdx + 1
-        self.omegaZIdx = self.omegaXIdx + 2
+#        self.aXIdx = psets["a"].offset
+#        self.aYIdx = self.aXIdx + 1
+#        self.aZIdx = self.aXIdx + 2
+        self.aXIdx = psets["aX"].offset
+        self.aYIdx = psets["aY"].offset
+        self.aZIdx = psets["aZ"].offset
+#        self.omegaXIdx = psets["omega"].offset
+#        self.omegaYIdx = self.omegaXIdx + 1
+#        self.omegaZIdx = self.omegaXIdx + 2
+        self.omegaXIdx = psets["omegaX"].offset
+        self.omegaYIdx = psets["omegaY"].offset
+        self.omegaZIdx = psets["omegaZ"].offset
         self.offsetIdx = psets["offsets"].offset
 
         # all done
@@ -452,6 +460,8 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     # computed
     cd_inv = None # the inverse of my data covariance matrix
     normalization = 1 # the normalization of the L2 norm
+
+    print('Garbage collected (CDM.py--bottom): ', gc.collect())
 
 
 # end of file

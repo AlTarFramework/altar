@@ -90,6 +90,7 @@ class Native:
             omegaY = parameters[omegaYIdx]
             omegaZ = parameters[omegaZIdx]
 
+            #print(x,' ',y,' ',d,' ',opening,' ',aX,' ',aY,' ',aZ,' ',omegaX,' ',omegaY,' ',omegaZ)
             # make a source using the sample parameters
             cdm = source(x=x, y=y, d=d, opening=opening,
                          ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
@@ -109,6 +110,7 @@ class Native:
             normeval = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
             dataLLK[sample] = normalization - normeval**2.0 /2
+        #print(normeval**2.0/2)
 
         # all done
         return self

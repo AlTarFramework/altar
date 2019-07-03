@@ -83,6 +83,13 @@ cdm(const gsl_matrix * locations,
     double nu,
     gsl_matrix * predicted)
 {
+//    printf("%f ", aX);
+//    printf("%f ", aY);
+//    printf("%f ", aZ);
+//    printf("%f ", omegaX);
+//    printf("%f ", omegaY);
+//    printf("%f\n", omegaZ);
+//    getchar();
     
     // convert semi-axes to axes
     aX *= 2;
@@ -172,12 +179,31 @@ cdm(const gsl_matrix * locations,
                     gsl_matrix_get(P, loc, axis) +
                     gsl_matrix_get(Q, loc, axis) +
                     gsl_matrix_get(R, loc, axis);
-
+                
                 // assign
                 gsl_matrix_set(predicted, loc, axis, result);
             }
         }
+        // Release memory allocations
+        free(P);
+        free(Q);
+        free(R);
     }
+
+    P1 = {};
+    P2 = {};
+    P3 = {};
+    P4 = {};
+
+    Q1 = {};
+    Q2 = {};
+    Q3 = {};
+    Q4 = {};
+
+    R1 = {};
+    R2 = {};
+    R3 = {};
+    R4 = {};
 
     // all done
     return;
@@ -210,6 +236,11 @@ RDdispSurf(const gsl_matrix * locations,
             auto u = u1[axis] + u2[axis] + u3[axis] + u4[axis];
             gsl_matrix_set(results, loc, axis, u);
         }
+        
+        u1 = {};
+        u2 = {};
+        u3 = {};
+        u4 = {};
     }
 
     // all done
@@ -261,6 +292,10 @@ AngSetupFSC(double x, double y,
         }
 
         vec_t v = xform(transpose(A), vB - vA);
+        
+        A = {};
+        vA = {};
+        vB = {};
         
         return v;
     }
@@ -318,7 +353,17 @@ AngDisDispSurf(const vec_t & y, double beta, const vec_t & b,
     auto v1 = v1b1 + v1b2 + v1b3;
     auto v2 = v2b1 + v2b2 + v2b3;
     auto v3 = v3b1 + v3b2 + v3b3;
- 
+
+    v1b1 = {};
+    v1b2 = {};
+    v1b3 = {};
+    v2b1 = {};
+    v2b2 = {};
+    v2b3 = {};
+    v3b1 = {};
+    v3b2 = {};
+    v3b3 = {};
+    
     return {v1, v2, v3};
 }
 

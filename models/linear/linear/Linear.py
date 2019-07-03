@@ -173,14 +173,15 @@ class Linear(altar.models.bayesian, family="altar.models.linear"):
         # we must transpose θ because its shape is (samples x parameters)
         # while the shape of G is (observations x parameters)
         residuals = altar.blas.dgemm(G.opNoTrans, θ.opTrans, 1.0, G, θ, -1.0, residuals)
-
+        
         # go through the residual of each sample
         for idx in range(residuals.columns):
             # extract it
             residual = residuals.getColumn(idx)
+          
             # compute its norm, normalize, and store it as the data log likelihood
             dataLLK[idx] = normalization - self.norm.eval(v=residual, sigma_inv=Cd_inv)/2
-
+        
         # all done
         return self
 
