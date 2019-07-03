@@ -110,7 +110,7 @@ class Native:
             normeval = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
             dataLLK[sample] = normalization - normeval**2.0 /2
-        #print(normeval**2.0/2)
+            #print(dataLLK[sample])
 
         # all done
         return self

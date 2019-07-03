@@ -267,7 +267,4 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     uniform = None
     minimizer = None
 
-    import gc
-    print('Garbage collected (COV.py): ', gc.collect())
-
 # end of file

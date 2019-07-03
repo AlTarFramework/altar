@@ -63,8 +63,6 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     # public data
     parameters = 0 # adjusted during model initialization
     strategy = None # the strategy for computing the data log likelihood
-
-    print('Garbage collected (CDM.py--top): ', gc.collect())
     
     # protocol obligations
     @altar.export
@@ -460,8 +458,6 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     # computed
     cd_inv = None # the inverse of my data covariance matrix
     normalization = 1 # the normalization of the L2 norm
-
-    print('Garbage collected (CDM.py--bottom): ', gc.collect())
 
 
 # end of file

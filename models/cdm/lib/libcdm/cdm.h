@@ -12,10 +12,18 @@
 namespace altar {
     namespace models {
         namespace cdm {
-            void cdm(int sample,
-                     const gsl_matrix * locations, const gsl_matrix * los,
-                     double X0, double Y0, double depth,
+            // void cdm(int sample,
+            //          const gsl_matrix * locations, const gsl_matrix * los,
+            //          double X0, double Y0, double depth,
+            //          double ax, double ay, double az,
+            //          double omegaX, double omegaY, double omegaZ,
+            //          double opening,
+            //          double nu,
+            //          gsl_matrix * predicted
+            //          );
+            void cdm(const gsl_matrix * locations, 
                      double opening,
+                     double X0, double Y0, double depth,
                      double ax, double ay, double az,
                      double omegaX, double omegaY, double omegaZ,
                      double nu,
@@ -28,3 +36,4 @@ namespace altar {
 #endif
 
 // end of file
+
