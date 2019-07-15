@@ -11,6 +11,7 @@ __pycache__
 
 # the synthetic data from the mogi model
 /models/mogi/examples/
+/models/mogi/examples_old/
 
 # the synthetic data from the cdm model
 /models/cdm/examples/
