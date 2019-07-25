@@ -43,6 +43,10 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     maxiter = altar.properties.int(default=10**3)
     maxiter.doc = 'the maximum number of iterations while looking for a δβ'
 
+    dbeta_solver_method = altar.properties.str(default='grid')
+    dbeta_solver_method.doc = 'the solver for beta increment: grid(grid search) or gsl(gsl minimizer)'
+    dbeta_solver_method.validators = altar.constraints.isMember("grid", "gsl")
+
 
     # public data
     w = None # the vector of re-sampling weights
@@ -59,6 +63,12 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         rng = application.rng.rng
         # instantiate my COV calculator; {beta.cov} needs the {rng} capsule
         self.minimizer = altar.libaltar.cov(rng.rng, self.maxiter, self.tolerance, self.target)
+        # instantiate my dbeta solver
+        if self.dbeta_solver_method == 'grid':
+            self.dbeta_solver = altar.libaltar.dbeta_grid
+        else:
+            self.dbeta_solver = altar.libaltar.dbeta_gsl
+        print(self.dbeta_solver)
         # set up the distribution for building the sample multiplicities
         self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
         # all done
@@ -105,7 +115,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         median = dataLikelihood.clone().sort().median()
 
         # compute {δβ} and the normalized {w}
-        β, self.cov = altar.libaltar.dbeta(self.minimizer, dataLikelihood.data, median, self.w.data)
+        β, self.cov = self.dbeta_solver(self.minimizer, dataLikelihood.data, median, self.w.data)
 
         # and return the new temperature
         return β
@@ -263,6 +273,7 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     # private data
     uniform = None
     minimizer = None
+    dbeta_solver = None
 
 
 # end of file
