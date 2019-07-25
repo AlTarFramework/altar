@@ -17,6 +17,7 @@
 #include "exceptions.h"
 #include "metadata.h"
 #include "dbeta.h"
+#include "condition.h"
 
 
 // put everything in my private namespace
@@ -35,6 +36,9 @@ namespace altar {
             // annealing schedule
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta__name__, dbeta, METH_VARARGS, dbeta__doc__},
+
+            // matrix_condition for positive definite
+            { matrix_condition__name__, matrix_condition, METH_VARARGS, matrix_condition__doc__},
 
             // sentinel
             {0, 0, 0, 0}
