@@ -100,6 +100,18 @@ class CoolingStep:
         # make one and return it
         return type(self)(beta=beta, theta=theta, likelihoods=likelihoods, sigma=sigma)
 
+    def computePosterior(self):
+        """
+        (Re-)Compute the posterior from prior, data, and (updated) beta
+        """
+        # in their log form, posterior = prior + beta * datalikelihood
+        # make a copy of prior at first
+        self.posterior.copy(self.prior)
+        # add the data likelihood
+        altar.blas.daxpy(self.beta, self.data, self.posterior)
+        # all done
+        return self
+
 
     # meta-methods
     def __init__(self, beta, theta, likelihoods, sigma=None, **kwds):
