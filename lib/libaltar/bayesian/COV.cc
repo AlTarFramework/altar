@@ -52,48 +52,10 @@ namespace cov {
 }
 
 // interface
-void
-altar::bayesian::COV::
-update(state_t & state)
-{
-    // get the problem size
-    const size_t samples = state.samples();
-    // grab the data likelihood vector
-    vector_t * dataLLK = state.data();
-    // make a vector for the weights
-    vector_t * w = gsl_vector_alloc(samples);
-
-    // first, let's use it to find the median sample
-    gsl_vector_memcpy(w, dataLLK);
-    // sort it
-    gsl_sort_vector(w);
-    // find the median
-    double median = gsl_stats_median_from_sorted_data(w->data, w->stride, w->size);
-
-    // ok, now zero out w
-    gsl_vector_set_zero(w);
-    // compute the temperature increment
-    dbeta(dataLLK, median, w);
-    // save the new temperature
-    state.beta(_beta);
-
-    // compute the covariance
-    computeCovariance(state, w);
-
-    // rank and reorder the samples according to their likelihoods
-    rankAndShuffle(state, w);
-
-    // free the temporaries
-    gsl_vector_free(w);
-
-    // all done
-    return;
-}
-
-
+// calculate the beta increment with gsl minimizer
 double
 altar::bayesian::COV::
-dbeta(vector_t *llk, double llkMedian, vector_t *w)
+dbeta_gsl(vector_t *llk, double llkMedian, vector_t *w)
 {
     // build my debugging channel
     pyre::journal::debug_t debug("altar.beta");
@@ -240,6 +202,115 @@ dbeta(vector_t *llk, double llkMedian, vector_t *w)
     return dbeta;
 }
 
+// calculate the new annealing temperature by iterative grid-based searching
+double
+altar::bayesian::COV::
+dbeta_grid(vector_t *llk, double llkMedian, vector_t *w)
+{
+    // build my debugging channel
+    pyre::journal::debug_t debug("altar.beta");
+
+    // turn off the err_handler
+    gsl_error_handler_t * gsl_hdl = gsl_set_error_handler_off ();
+
+    // consistency checks
+    assert(_betaMin == 0);
+    assert(_betaMax == 1);
+
+    // the beta search region
+    double beta_low = 0;
+    double beta_high = _betaMax - _beta;
+    double beta_guess = _betaMin + 5.0e-5;
+
+    assert(beta_high >= beta_low);
+    assert(beta_high >= beta_guess);
+    assert(beta_guess >= beta_low);
+
+    // allocate space for the parameters
+    cov::args covargs;
+    // attach the two vectors
+    covargs.w = w;
+    covargs.llk = llk;
+    // store our initial guess
+    covargs.dbeta = beta_guess;
+    // initialize the COV target
+    covargs.target = _target;
+    // initialize the median of the log-likelihoods
+    covargs.llkMedian = llkMedian;
+
+    // search bounds and initial guess
+    double f_beta_high = cov::cov(beta_high, &covargs);
+
+    // check whether we can skip straight to beta = 1
+    if (covargs.cov < _target || std::abs(covargs.cov-_target) < _tolerance) {
+        debug
+            << pyre::journal::at(__HERE__)
+            << " ** skipping to beta = " << _betaMax << " **"
+            << pyre::journal::endl;
+        // save my state
+        _beta = _betaMax;
+        _cov = covargs.cov;
+        // all done
+        return beta_high;
+    }
+
+    double f_beta_low = cov::cov(beta_low, &covargs);
+    // do this last so our first printout reflects the values at out guess
+    double f_beta_guess = cov::cov(beta_guess, &covargs);
+
+    // iterative grid searching
+    //double beta_grid_tolerance=1.E-6;
+    const int Nbeta=10;
+    int nbeta = 0;
+    double dbeta, beta_step;
+    int Nloop = 0;
+    if (debug) std::cout<<"dbeta minimization based on iterative grid searching:"<<std::endl;
+    bool Qfind = false;
+    do
+    {
+        ++Nloop;
+        beta_step = (beta_high-beta_low)/Nbeta;
+        int count=0;
+        for (beta_guess=beta_low, nbeta=0; nbeta<=Nbeta; beta_guess+=beta_step, ++nbeta)
+        {
+            f_beta_guess = cov::cov(beta_guess, &covargs);
+            if (std::abs(covargs.cov-_target) < _tolerance)
+            {
+                Qfind = true;
+                break;
+            }
+            if (covargs.cov >= _target)
+            {
+               if (nbeta==0) Qfind = true;
+               break;
+            }
+        }
+        if (nbeta>Nbeta) beta_guess -= beta_step;
+        if (debug){
+            std::cout
+                <<"      dbeta_low: "<<std::setw(11)<<std::setprecision(8)<<beta_low
+                <<"      dbeta_high: "<<std::setw(11)<<beta_high
+                <<"      dbeta_guess: "<<std::setw(11)<<beta_guess
+                <<"      cov: "<<std::setw(15)<<covargs.cov
+                << std::endl;
+        }
+        beta_high = beta_guess;
+        beta_low = beta_guess-beta_step;
+    }
+    while (Nloop<=Nbeta && !Qfind);
+
+    // assign dbeta
+    dbeta = beta_guess;
+
+    // make sure that we are left with the COV and weights evaluated for this guess
+    cov::cov(dbeta, &covargs);
+
+    // adjust my state
+    _cov = covargs.cov;
+    _beta += dbeta;
+    // return the beta update
+    return dbeta;
+}
 
 // meta-methods
 altar::bayesian::COV::

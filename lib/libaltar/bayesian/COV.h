@@ -45,11 +45,8 @@ public:
 
     // interface
 public:
-    virtual void update(state_t & state);
-
-    // lower level interface
-public:
-    virtual double dbeta(vector_t * llk, double llkMedian, vector_t * w);
+    virtual double dbeta_grid(vector_t * llk, double llkMedian, vector_t * w);
+    virtual double dbeta_gsl(vector_t * llk, double llkMedian, vector_t * w);
 
     // meta-methods
 public:

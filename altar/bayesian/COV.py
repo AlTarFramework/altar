@@ -43,6 +43,9 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     maxiter = altar.properties.int(default=10**3)
     maxiter.doc = 'the maximum number of iterations while looking for a δβ'
 
+    dbetasolver = altar.bayesian.dbetasolver()
+    dbetasolver.doc = 'the δβ solver'
+
 
     # public data
     w = None # the vector of re-sampling weights
@@ -100,12 +103,9 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
 
         # initialize the vector of weights
         self.w = altar.vector(shape=step.samples).zero()
-        # compute the median data log-likelihood; clone the source vector first, since the
-        # sorting happens in place
-        median = dataLikelihood.clone().sort().median()
 
         # compute {δβ} and the normalized {w}
-        β, self.cov = altar.libaltar.dbeta(self.minimizer, dataLikelihood.data, median, self.w.data)
+        β, self.cov = self.dbetasolver.solve(self.minimizer, dataLikelihood, self.w)
 
         # and return the new temperature
         return β

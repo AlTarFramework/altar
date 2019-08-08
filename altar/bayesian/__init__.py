@@ -15,6 +15,7 @@ import altar
 from .Controller import Controller as controller
 from .Sampler import Sampler as sampler
 from .Scheduler import Scheduler as scheduler
+from .DbetaSolver import DbetaSolver as dbetasolver
 
 
 # implementations
@@ -39,6 +40,23 @@ def cov():
     # and return it
     return cov
 
+@altar.foundry(implements=dbetasolver, tip="The δβ Solver based on GSL minimizer")
+def gsldbetasolver():
+    # grab the factory
+    from .GSLDbetaSolver import GSLDbetaSolver as gsldbetasolver
+    # attach its docstring
+    __doc__ = gsldbetasolver.__doc__
+    # and return it
+    return gsldbetasolver
+
+@altar.foundry(implements=dbetasolver, tip="The δβ Solver based on Grid searching")
+def griddbetasolver():
+    # grab the factory
+    from .GridDbetaSolver import GridDbetaSolver as griddbetasolver
+    # attach its docstring
+    __doc__ = griddbetasolver.__doc__
+    # and return it
+    return griddbetasolver
 
 @altar.foundry(implements=sampler, tip="the Metropolis algorithm as a Bayesian sampler")
 def metropolis():
