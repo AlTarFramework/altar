@@ -102,7 +102,7 @@ class CoolingStep:
 
     def computePosterior(self):
         """
-        (Re-)Compute the posterior from prior, data, and (updated) beta
+        Compute the posterior from prior, data, and beta
         """
         # in their log form, posterior = prior + beta * datalikelihood
         # make a copy of prior at first
