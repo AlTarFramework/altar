@@ -32,12 +32,12 @@
 
 
 // dbeta
-const char * const altar::extensions::dbeta_gsl__name__ = "dbeta_gsl";
-const char * const altar::extensions::dbeta_gsl__doc__ =
-    "compute the next increment to the annealing temperature (gsl minimizer)";
+const char * const altar::extensions::dbeta_brent__name__ = "dbeta_brent";
+const char * const altar::extensions::dbeta_brent__doc__ =
+    "compute the next increment to the annealing temperature using the Brent algorithm from GSL";
 
 PyObject *
-altar::extensions::dbeta_gsl(PyObject *, PyObject * args) {
+altar::extensions::dbeta_brent(PyObject *, PyObject * args) {
     // the arguments
     PyObject * covCapsule;
     PyObject * llkCapsule;
@@ -49,7 +49,7 @@ altar::extensions::dbeta_gsl(PyObject *, PyObject * args) {
 
     // unpack the argument tuple
     int status = PyArg_ParseTuple(
-                                  args, "O!O!dO!:dbeta_gsl",
+                                  args, "O!O!dO!:dbeta_brent",
                                   &PyCapsule_Type, &covCapsule,
                                   &PyCapsule_Type, &llkCapsule,
                                   &llkMedian,
@@ -85,7 +85,7 @@ altar::extensions::dbeta_gsl(PyObject *, PyObject * args) {
         static_cast<gsl_vector *>(PyCapsule_GetPointer(llkCapsule, altar::vector::capsule_t));
 
     // update
-    cov->dbeta_gsl(llk, llkMedian, w);
+    cov->dbeta_brent(llk, llkMedian, w);
 
     // build a tuple for the result
     PyObject * answer = PyTuple_New(2);
@@ -97,7 +97,7 @@ altar::extensions::dbeta_gsl(PyObject *, PyObject * args) {
 
 const char * const altar::extensions::dbeta_grid__name__ = "dbeta_grid";
 const char * const altar::extensions::dbeta_grid__doc__ =
-    "compute the next increment to the annealing temperature (iterative grid searching)";
+    "compute the next increment to the annealing temperature using an iterative grid search";
 
 PyObject *
 altar::extensions::dbeta_grid(PyObject *, PyObject * args) {

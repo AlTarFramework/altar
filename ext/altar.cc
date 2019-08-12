@@ -35,7 +35,7 @@ namespace altar {
             // annealing schedule
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta_grid__name__, dbeta_grid, METH_VARARGS, dbeta_grid__doc__},
-            { dbeta_gsl__name__, dbeta_gsl, METH_VARARGS, dbeta_gsl__doc__},
+            { dbeta_brent__name__, dbeta_brent, METH_VARARGS, dbeta_brent__doc__},
 
             // sentinel
             {0, 0, 0, 0}

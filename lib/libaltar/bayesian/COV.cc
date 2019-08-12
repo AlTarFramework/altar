@@ -57,7 +57,7 @@ namespace cov {
 // calculate the beta increment with gsl minimizer
 double
 altar::bayesian::COV::
-dbeta_gsl(vector_t *llk, double llkMedian, vector_t *w)
+dbeta_brent(vector_t *llk, double llkMedian, vector_t *w)
 {
     // build my debugging channel
     pyre::journal::debug_t debug("altar.beta");
