@@ -56,12 +56,6 @@ public:
                double tolerance=.001, size_t maxIterations=1000, double target=1.0
                );
 
-    // implementation details
-protected:
-    void computeCovariance(state_t & state, vector_t * weights) const;
-    void conditionCovariance(matrix_t * sigma) const;
-    void rankAndShuffle(state_t & state, vector_t * weights) const;
-
     // data
 private:
     const double _betaMin;

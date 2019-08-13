@@ -33,7 +33,7 @@ class Solver(altar.protocol, family="altar.bayesian.solvers"):
         """
 
     @altar.provides
-    def solve(self, minimizer, llk, weight):
+    def solve(self, llk, weight):
         """
         Compute the next temperature in the cooling schedule
         """
@@ -46,7 +46,7 @@ class Solver(altar.protocol, family="altar.bayesian.solvers"):
         Provide a default implementation
         """
         # by default, use the naive grid solver
-        from .Brent import Brent as default
+        from .Grid import Grid as default
         # and return it
         return default
 

@@ -47,9 +47,8 @@ class Grid(altar.component, family="altar.bayesian.solvers.grid", implements=sol
     def solve(self, llk, weight):
         """
         Compute the next temperature in the cooling schedule
-        :param minimizer: the calculator for quantity to be minimized
         :param llk: data log-likelihood
-        :param weight: the normalized weight, vector (samples)
+        :param weight: the normalized weight
         :return: β, cov
         """
         # compute the median data log-likelihood; clone the source vector first, since the

@@ -47,7 +47,6 @@ class Brent(altar.component, family="altar.bayesian.solvers.brent", implements=s
     def solve(self, llk, weight):
         """
         Compute the next temperature in the cooling schedule
-        :param minimizer: the calculator for quantity to be minimized
         :param llk: data log-likelihood
         :param weight: the normalized weight, vector (samples)
         :return: β, cov
@@ -57,7 +56,6 @@ class Brent(altar.component, family="altar.bayesian.solvers.brent", implements=s
         median = llk.clone().sort().median()
         # call gsl dbeta_solver, return β, cov
         return altar.libaltar.dbeta_brent(self.cov, llk.data, median, weight.data)
-
 
     # private data
     cov = None # the COV calculator
