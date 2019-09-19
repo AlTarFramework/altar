@@ -93,19 +93,29 @@ def losmat(Hs, Hd, gammas, gammad, x, y, G, a_s, a_d, v, theta, phi):
 
     return H
 
-def analytic(t, mu, G, g, Hc, gammas, gammad, k, a_s, ac, dPd0, dPs0, drho, Qin):
-    # Analytic solution
-    # Calculate the characteristic time constant: tau = 1/ξ eq. (10)
-    tau = (8.0*mu*Hc**gammas*gammad*k*a_s**3)/(G*ac**4*(gammas+gammad*k))
+def overpressures(t, mu, G, g, Hc, gammas, gammad, k, a_s, a_c, dPd0, dPs0, drho, Qin):
+    # Analytic solution equations (10)-(12), Reverso (2014)
+    # t = time vector
+    # the exponential time scale: tau = 1/ξ, after eq. (10)
+    tau = (8.0*mu*Hc**gammas*gammad*k*a_s**3)/(G*a_c**4*(gammas+gammad*k))
 
+    # The A coefficient of the exponential in the solution, eq. (11)
     A =  gammad*k/(gammas + gammad*k)
-    A *= dPd0 - dPs0 + drho*g*Hc - 8.*gammas*mu*Qin*Hc/(numpy.pi*ac**4*(gammas+gammad*k))
+    A *= dPd0 - dPs0 + drho*g*Hc - 8.*gammas*mu*Qin*Hc/(numpy.pi*a_c**4*(gammas+gammad*k))
 
+    # the exponential in time term in the solution
     f0 = A*(1. - numpy.exp(-t/tau))
+    # the secular linear in time term
     f1 = G*Qin*t/(numpy.pi*a_s**3*(gammas+gammad*k))
-    dPs_anal = f0 + f1 + dPs0
-    dPd_anal = -f0*gammas/(gammad*k) + f1 + dPd0
-    return dPs_anal, dPd_anal
+
+    # dPs = △ Ps eq. (11)
+    dPs = f0 + f1 + dPs0
+
+    # dPd = △ Pd  eq. (12)
+    dPd = -f0*gammas/(gammad*k) + f1 + dPd0
+
+    # return the shallow and deep overpressures
+    return dPs, dPd
 
 
 def main(plot=False):
@@ -132,7 +142,7 @@ def main(plot=False):
 
     # Geometry
     # radius of the hydraulic pipe
-    ac = 1.5
+    a_c = 1.5
     # radius of the shallow reservoir
     a_s = 2.0e3
     # radius of the deep reservoir
@@ -168,7 +178,7 @@ def main(plot=False):
 
     # Simplifying the equations
     # Eq. (10) 1/ξ = *γ_d*k/(γ_s+γ_d*k)
-    C1 = (G*ac**4)/(8*mu*Hc*a_s**3*gammas)
+    C1 = (G*a_c**4)/(8*mu*Hc*a_s**3*gammas)
     # A in eq (11) modified to incorporate initial overpressures
     A1 = drho*g*Hc + dPd0 - dPs0
     A2 = G*Qin / (gammad*numpy.pi*a_d**3)
@@ -187,20 +197,8 @@ def main(plot=False):
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.show()
 
-    if 1:
-        # Analytic solution
-        dPs_anal, dPd_anal = analytic(t, mu, G, g, Hc, gammas, gammad, k, a_s, ac, dPd0, dPs0, drho, Qin)
-    else:
-        # Calculate the characteristic time constant: tau = 1/ξ eq. (10)
-        tau = (8.0*mu*Hc**gammas*gammad*k*a_s**3)/(G*ac**4*(gammas+gammad*k))
-
-        A =  gammad*k/(gammas + gammad*k)
-        A *= dPd0 - dPs0 + drho*g*Hc - 8.*gammas*mu*Qin*Hc/(numpy.pi*ac**4*(gammas+gammad*k))
-
-        f0 = A*(1. - numpy.exp(-t/tau))
-        f1 = G*Qin*t/(numpy.pi*a_s**3*(gammas+gammad*k))
-        dPs_anal = f0 + f1 + dPs0
-        dPd_anal = -f0*gammas/(gammad*k) + f1 + dPd0
+    # Analytic solution
+    dPs_anal, dPd_anal = overpressures(t, mu, G, g, Hc, gammas, gammad, k, a_s, a_c, dPd0, dPs0, drho, Qin)
 
     # Comparing Analytical solution with the differential equation
     if plot:
@@ -233,8 +231,6 @@ def main(plot=False):
     # H-matrix for the radial displacement
     Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[dPs[i]], [dPd[i]]]) for i in range(nt)])
     Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[dPs[i]], [dPd[i]]]) for i in range(nt)])
-    print("Ur = {}".format(Ur))
-    print("Uz = {}".format(Uz))
 
     if plot:
         #Plot radial displacement
