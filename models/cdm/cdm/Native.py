@@ -50,7 +50,7 @@ class Native:
         samples = θ.rows
         # get the parameter sets
         psets = model.psets
-
+        
         # get the offsets of the various parameter sets
         xIdx = model.xIdx
         yIdx = model.yIdx
@@ -63,7 +63,7 @@ class Native:
         omegaYIdx = model.omegaYIdx
         omegaZIdx = model.omegaZIdx
         offsetIdx = model.offsetIdx
-
+        
         # get the observations
         los = model.los
         oid = model.oid
@@ -90,10 +90,12 @@ class Native:
             omegaY = parameters[omegaYIdx]
             omegaZ = parameters[omegaZIdx]
 
+            #print(x,' ',y,' ',d,' ',opening,' ',aX,' ',aY,' ',aZ,' ',omegaX,' ',omegaY,' ',omegaZ)
             # make a source using the sample parameters
             cdm = source(x=x, y=y, d=d, opening=opening,
                          ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
                          v=model.nu)
+            
             # compute the expected displacement
             u = cdm.displacements(locations=locations, los=los)
 
@@ -103,11 +105,12 @@ class Native:
             for obs in range(observations):
                 # appropriate for the corresponding dataset
                 u[obs] -= parameters[offsetIdx + oid[obs]]
-
+           
             # compute the norm of the displacements
-            nrm = norm.eval(v=u, sigma_inv=cd_inv)
+            normeval = norm.eval(v=u, sigma_inv=cd_inv)
             # normalize and store it as the data log likelihood
-            dataLLK[sample] = normalization - nrm**2 /2
+            dataLLK[sample] = normalization - normeval**2.0 /2
+            #print(dataLLK[sample])
 
         # all done
         return self
