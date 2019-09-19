@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# eric m. gurrola (eric.m.gurrola@jpl.nasa.gov)
+#
+# (c) 2010-2019 california institute of technology
+# all rights reserved
+#
+
+
+# get the package
+import altar
+
+
+# make a specialized app that uses this model by default
+class Reverso(altar.shells.application, family='altar.applications.reverso'):
+    """
+    A specialized AlTar application that exercises the Reverso 2-chamber volcano model
+    """
+
+    # user configurable state
+    model = altar.models.model(default='reverso')
+    model.doc = "the AlTar model to sample"
+
+
+# bootstrap
+if __name__ == "__main__":
+    # build an instance of the default app
+    app = Reverso(name="reverso")
+    # invoke the main entry point
+    status = app.run()
+    # share
+    raise SystemExit(status)
+
+
+# end of file

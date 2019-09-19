@@ -1,0 +1,143 @@
+// -*- C++ -*-
+//
+// eric m. gurrola <eric.m.gurrola@jpl.nasa.gov>
+// (c) 2013
+// all rights reserved
+//
+
+// code guard
+#if !defined(altar_models_reverso_Source_icc)
+#error This header file contains implementation details of class altar::models::reverso::Source
+#endif
+
+
+// meta-methods
+// constructor
+altar::models::reverso::Source::
+Source(double g, double Gsm, double nu, double mu, double drho):
+    _data(0),
+    _locations(0),
+    _los(0),
+    _oids(0),
+    _g(g),
+    _Gsm(Gsm),
+    _nu(nu),
+    _mu(mu),
+    _drho(drho),
+    _x0Idx,
+    _y0Idx,
+    _t0Idx,
+    _asIdx(0),
+    _acIdx(0),
+    _adIdx(0),
+    _hsIdx(0),
+    _hdIdx(0),
+    _qinIdx(0)
+{}
+
+
+// interface
+void
+altar::models::reverso::Source::
+data(gsl_vector * data) {
+    // attach; the vector belongs to the caller, we are just borrowing it
+    _data = data;
+    // make a channel
+    pyre::journal::debug_t channel("reverso.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached data from " << _data
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+void
+altar::models::reverso::Source::
+locations(gsl_matrix * locations) {
+    // attach and assume ownership
+    _locations = locations;
+    // make a channel
+    pyre::journal::debug_t channel("reverso.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached locations from " << _locations
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+void
+altar::models::reverso::Source::
+los(gsl_matrix * los) {
+    // attach and assume ownership
+    _los = los;
+    // make a channel
+    pyre::journal::debug_t channel("reverso.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached LOS matrix from " << _los
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+void
+altar::models::reverso::Source::
+oids(const oids_type & oids) {
+    // assign
+    _oids.assign(oids.begin(), oids.end());
+    // make a channel
+    pyre::journal::debug_t channel("reverso.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached data set ids to the observations"
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+void
+altar::models::reverso::Source::
+layout(size_type xIdx, size_type dIdx,
+       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+       size_type offsetIdx) {
+    // assign
+    _xIdx = xIdx;
+    _yIdx = xIdx + 1;
+    _dIdx = dIdx;
+    _openingIdx = openingIdx;
+    _aXIdx = aXIdx;
+    _aYIdx = aXIdx + 1;
+    _aZIdx = aXIdx + 2;
+    _omegaXIdx = omegaXIdx;
+    _omegaYIdx = omegaXIdx + 1;
+    _omegaZIdx = omegaXIdx + 2;
+    _offsetIdx = offsetIdx;
+
+    // make a channel
+    pyre::journal::debug_t channel("reverso.source");
+    // tell me
+    channel
+        << pyre::journal::at(__HERE__)
+        << "attached the parameter set layout"
+        << pyre::journal::endl;
+
+    // all done
+    return;
+}
+
+
+// end of file
