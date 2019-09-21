@@ -6,7 +6,7 @@
 #
 
 # project meta-data
-altar.major := 1
+altar.major := 2
 altar.minor := 0
 
 # altar consists of a python package
