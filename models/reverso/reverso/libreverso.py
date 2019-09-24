@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# THIS FILE SHOULD CONTAIN THE ORIGINAL WORKING VERSION IN PLAIN PYTHON.  IT IS THE TEST CASE
+# AGAINST WHICH THE REVERSO.PY OUTPUT WILL BE COMPARED.  IT IS NOT THE VERSION THAT IMPORTS
+# ALTAR, datasheet, etc.
+
 # The Two-Reservoir Model
 # This model assumes an elastic half-space and incompressible magma. The two magma
 # reservoirs comprise a deep reservoir connected to a shallow reservoir by an
@@ -9,117 +13,208 @@
 import numpy
 from matplotlib import pyplot
 
-def Urmat(Hs, Hd, gammas, gammad, r, G, a_s, a_d, v):
-    # distance from the shallow reservoir to the surface displacement observation station
-    Rs = numpy.sqrt(r**2 + Hs**2)
-    # distance from the deep reservoir to the surface displacement observation station
-    Rd = numpy.sqrt(r**2 + Hd**2)
+class Reverso:
+    """
+    A two-magma chamber model as a source of deformation at Grimsvotn Volcano, Iceland
+    Thomas Reverso etal.  Journal of Geophysical Research, AGU, 2014, 119, pp. 4666-4683
+    """
+    def __init__(self, H_s, H_d, a_s, a_d, a_c, Qin, dPs0=0., dPd0=0., g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
+        # the reverso model geometry:
+        # H_s = depth to the shallow resevoir (meters)
+        self.H_s = H_s
+        # H_d = depth to the deep reservoir (meters)
+        self.H_d = H_d
+        # a_s = radius of shallow reservoir (meters)
+        self.a_s = a_s
+        # a_d = radius of deep reservoir (meters)
+        self.a_d = a_d
+        # a_c = radius of the tube connecting the two reservoirs (meters)
+        self.a_c = a_c
+        # Qin = constant magma flux input to the deep reservoir (meters**3/sec)
+        self.Qin = Qin
+        # dPs0, dPd0 = initial overpressures in shallow and deep chambers
+        self.dPs0 = dPs0
+        self.dPd0 = dPd0
+        # acceleration due to gravity (m/s**2)
+        self.g = g
+        # G   = the rigidity (or shear) modulus (kg/m/s**2)
+        self.G = G
+        # nu  = the Poisson ratio (dimensionless)
+        self.nu = nu
+        # mu  = the magma viscosity (kg/m/s**2)
+        self.mu = mu
+        # drho = the difference in rock-density and magma-density kg/m**3
+        self.drho = drho
+        # shape of the magma chambers ('sill' or 'sphere')
+        if shape == 'sill':
+            self.shape = 'sill'
+        elif shape == 'sphere':
+            self.shape = 'sphere'
+        else:
+            print("The chamber shapes must be either 'sill' or 'sphere'")
+            raise
 
-    if gammas == 1.0:
-        # setting if shallow reservoir is spherical
-        alphas = 1.0
-    else:
-        # setting if shallow reservoir is sill-like reservoir [Reverso p.9]
-        alphas = 4.*Hs**2/(numpy.pi*Rs**2)
+        # derived quantities
+        # ratio of deep/shallow radii cubed
+        self.k = (self.a_d/self.a_s)**3
+        self.H_c = 0.
+        if self.shape == 'sphere':
+            # length of tube between the shallow and deep reservoirs
+            self.H_c = (self.H_d - self.a_d) - (self.H_s - self.a_s)
+            # dimensionless shape factors for "spherical" reservoirs (Reverso, eq. 9)
+            self.gamma_s = 1.0
+            self.gamma_d = 1.0
+        elif self.shape == 'sill':
+            # length of tube between the shallow and deep reservoirs
+            # the height of the two "sill" (oblate) reservoirs is assumed to be negligible here
+            self.H_c = self.H_d - self.H_s
+            # dimensionless shape factors for "sill" reservoirs (Reverso, eq. 9)
+            self.gamma_s = 8.0*(1.0-self.nu)/(3.*numpy.pi)
+            self.gamma_d = 8.0*(1.0-self.nu)/(3.*numpy.pi)
+        else:
+            print("Unknown magma chamber shape.  Use either 'sill' or 'sphere'")
+        return
 
-    if gammad == 1.0:
-        # setting if deep reservoir is spherical
-        alphad = 1.0
-    else:
-        # setting if deep reservoir is sill-like reservoir [Reverso p.9]
-        alphad = 4.*Hd**2/(numpy.pi*Rd**2)
+    def alpha_sd(self, Rs, Rd):
+        """
+        Compute the [shallow, deep] chamber alpha ratios in Reverso eq. (19).
+        """
+        if self.shape == 'sphere':
+            return [1.0, 1.0]
+        elif self.shape == 'sill':
+            # alpha = [alpha_s, alpha_d]
+            return [4.0*self.H_s**2/(numpy.pi*Rs**2),
+                    4.0*self.H_d**2/(numpy.pi*Rd**2)]
+        else:
+            print("Unkown magma chamber shape.  Use either 'sill' or 'sphere'")
 
-    # eq. (17) for Ur(t): the horizontal surface displacement of a point at
-    # (cylindrical) radius r from the pipe connecting the reservoirs to the
-    # observation point.  R = (Hs**2 + r**2)**(0.5)
-    H = ([
-          [r*a_s**3*alphas*(1-v)/(G*(Hs**2+r**2)**1.5),
-           r*a_d**3*alphad*(1-v)/(G*(Hd**2+r**2)**1.5)]
-         ])
+        return
 
-    return H
+    def Urmat(self, r):
+        """
+        The horizontal surface displacement at distance r radial to the source
+        (i.e., radial in the plane of the observed displacements).
+        """
+        # distance from the shallow reservoir to the surface displacement observation station
+        R_s = numpy.sqrt(r**2 + self.H_s**2)
+        # distance from the deep reservoir to the surface displacement observation station
+        R_d = numpy.sqrt(r**2 + self.H_d**2)
 
-def Uzmat(Hs, Hd, gammas, gammad, r, G, a_s, a_d, v):
-    Rs = numpy.sqrt(r**2 + Hs**2)
-    Rd = numpy.sqrt(r**2 + Hd**2)
+        alphas, alphad = self.alpha_sd(R_s, R_d)
 
-    if gammas == 1.0:
-        alphas = 1.0
-    else:
-        alphas = 4.*Hs**2/(numpy.pi*Rs**2)
+        # eq. (17) for Ur(t): the horizontal surface displacement of a point at
+        # (cylindrical) radius r from the pipe connecting the reservoirs to the
+        # observation point.
+        # Distance from shallow reservoir = (H_s**2 + r**2)**(0.5)
+        # Distance from deep    reservoir = (H_d**2 + r**2)**(0.5)
+        H = ([
+              [r*self.a_s**3*alphas*(1-self.nu)/(self.G*(self.H_s**2+r**2)**1.5),
+               r*self.a_d**3*alphad*(1-self.nu)/(self.G*(self.H_d**2+r**2)**1.5)]
+             ])
 
-    if gammad == 1.0:
-        alphad = 1.0
-    else:
-        alphad = 4.*Hd**2/(numpy.pi*Rd**2)
+        return H
 
-    H = ([
-          [Hs*a_s**3*alphas*(1-v)/(G*(Hs**2+r**2)**1.5),
-           Hd*a_d**3*alphad*(1-v)/(G*(Hd**2+r**2)**1.5)]
-         ])
+    def Uzmat(self, r):
+        R_s = numpy.sqrt(r**2 + self.H_s**2)
+        R_d = numpy.sqrt(r**2 + self.H_d**2)
 
-    return H
+        alphas, alphad = self.alpha_sd(R_s, R_d)
 
-def losmat(Hs, Hd, gammas, gammad, x, y, G, a_s, a_d, v, theta, phi):
-    r = numpy.sqrt(x**2 + y**2)
-    Rs = numpy.sqrt(r**2 + Hs**2)
-    Rd = numpy.sqrt(r**2 + Hd**2)
+        if self.gamma_s == 1.0:
+            alphas = 1.0
+        else:
+            alphas = 4.*self.H_s**2/(numpy.pi*R_s**2)
 
-    if gammas == 1.0:
-        alhpas = 1.0
-    else:
-        alphas = (4.0*Hs**2)/(numpy.pi*Rs**2)
+        if self.gamma_d == 1.0:
+            alphad = 1.0
+        else:
+            alphad = 4.*self.H_d**2/(numpy.pi*R_d**2)
 
-    if gammad == 1.0:
-        alhpad = 1.0
-    else:
-        alphad = (4.0*Hd**2)/(numpy.pi*Rd**2)
+        H = ([
+              [self.H_s*self.a_s**3*alphas*(1-self.nu)/(self.G*(self.H_s**2+r**2)**1.5),
+               self.H_d*self.a_d**3*alphad*(1-self.nu)/(self.G*(self.H_d**2+r**2)**1.5)]
+             ])
 
-    # Constants
-    GAMMA = (1.0-v)/G
-    Ds = alphas * (a_s/Rs)**3
-    Dd = alphad * (a_d/Rd)**3
+        return H
 
-    H = ([
-           [GAMMA*Ds*(numpy.sin(theta)*(numpy.sin(phi)*y -
-                      numpy.sin(theta)*numpy.cos(phi)*x) +
-                      numpy.cos(theta)*Hs)               ,
-            GAMMA*Dd*(numpy.sin(theta)*(numpy.sin(phi)*y -
-                     numpy.sin(theta)*numpy.cos(phi)*x)  +
-                      numpy.cos(theta)*Hd)
-           ]
-         ]
-        )
+    def losmat(self, x, y, theta, phi):
+        r = numpy.sqrt(x**2 + y**2)
+        R_s = numpy.sqrt(r**2 + self.H_s**2)
+        R_d = numpy.sqrt(r**2 + self.H_d**2)
 
-    return H
+        if self.gamma_s == 1.0:
+            alhpas = 1.0
+        else:
+            alphas = (4.0*self.H_s**2)/(numpy.pi*R_s**2)
 
-def overpressures(t, mu, G, g, Hc, gammas, gammad, k, a_s, a_c, dPd0, dPs0, drho, Qin):
-    # Analytic solution equations (10)-(12), Reverso (2014)
-    # t = time vector
-    # the exponential time scale: tau = 1/ξ, after eq. (10)
-    tau = (8.0*mu*Hc**gammas*gammad*k*a_s**3)/(G*a_c**4*(gammas+gammad*k))
+        if self.gamma_d == 1.0:
+            alhpad = 1.0
+        else:
+            alphad = (4.0*self.H_d**2)/(numpy.pi*R_d**2)
 
-    # The A coefficient of the exponential in the solution, eq. (11)
-    A =  gammad*k/(gammas + gammad*k)
-    A *= dPd0 - dPs0 + drho*g*Hc - 8.*gammas*mu*Qin*Hc/(numpy.pi*a_c**4*(gammas+gammad*k))
+        # Constants
+        GAMMA = (1.0-self.nu)/self.G
+        Ds = alphas * (self.a_s/R_s)**3
+        Dd = alphad * (self.a_d/R_d)**3
 
-    # the exponential in time term in the solution
-    f0 = A*(1. - numpy.exp(-t/tau))
-    # the secular linear in time term
-    f1 = G*Qin*t/(numpy.pi*a_s**3*(gammas+gammad*k))
+        H = ([
+              [GAMMA*Ds*(numpy.sin(theta)*(numpy.sin(phi)*y -
+                  numpy.sin(theta)*numpy.cos(phi)*x) +
+                  numpy.cos(theta)*self.H_s),
+               GAMMA*Dd*(numpy.sin(theta)*(numpy.sin(phi)*y -
+                  numpy.sin(theta)*numpy.cos(phi)*x)  +
+                  numpy.cos(theta)*self.H_d)
+               ]
+             ]
+            )
 
-    # dPs = △ Ps eq. (11)
-    dPs = f0 + f1 + dPs0
+        return H
 
-    # dPd = △ Pd  eq. (12)
-    dPd = -f0*gammas/(gammad*k) + f1 + dPd0
+    def overpressures(self, t):
+        # Compute the overpressures in the shallow and deep reservoirs
+        # Analytic solution equations (10)-(12), Reverso (2014)
+        # t = time vector
+        # mu = viscosity
+        #
+        # the exponential time scale: tau = 1/ξ, after eq. (10)
+        print("overpressures")
+        print("self.mu = {}".format(self.mu))
+        print("self.H_c = {}".format(self.H_c))
+        print("self.gamma_s = {}".format(self.gamma_s))
+        print("self.gamma_d = {}".format(self.gamma_d))
+        print("self.k = {}".format(self.k))
+        print("self.a_c = {}".format(self.a_c))
+        print("self.a_s = {}".format(self.a_s))
+        print("self.G = {}".format(self.G))
+        tau = ((8.0*self.mu*self.H_c**self.gamma_s*self.gamma_d*self.k*self.a_s**3)/
+              (self.G*self.a_c**4*(self.gamma_s+self.gamma_d*self.k)))
+        print("tau = {}".format(tau))
+        # The A coefficient of the exponential in the solution, eq. (11)
+        A =  self.gamma_d*self.k/(self.gamma_s + self.gamma_d*self.k)
+        print("A = {}".format(A))
+        A *= (self.dPd0 - self.dPs0 +
+              self.drho*self.g*self.H_c -
+              8.*self.gamma_s*self.mu*self.Qin*self.H_c/(
+                  numpy.pi*self.a_c**4*(self.gamma_s+self.gamma_d*self.k))
+             )
+        print("A = {}".format(A))
+        # the exponential in time term in the solution
+        f0 = A*(1. - numpy.exp(-t/tau))
+        # the secular linear in time term
+        f1 = self.G*self.Qin*t/(numpy.pi*self.a_s**3*(self.gamma_s+self.gamma_d*self.k))
 
-    # return the shallow and deep overpressures
-    return dPs, dPd
+        # dPs = △ Ps eq. (11)
+        self.dPs_analytic = f0 + f1 + self.dPs0
+
+        # dPd = △ Pd  eq. (12)
+        self.dPd_analytic = -f0*self.gamma_s/(self.gamma_d*self.k) + f1 + self.dPd0
+
+        # return
+        return
 
 
 def main(plot=False):
-    ## Physical parameters
+    # Physical parameters
     # shear modulus, [Pa, kg-m/s**2]
     G = 20.0E9
     # Poisson's ratio
@@ -147,69 +242,51 @@ def main(plot=False):
     a_s = 2.0e3
     # radius of the deep reservoir
     a_d = 2.2e3
-    # ratio of the reservoir volumes
-    k = (a_d/a_s)**3
     # depth of the deep reservoir
-    Hd = 4.0e3
+    H_d = 4.0e3
     # depth of the shallow reservoir
-    Hs = 3.0e3
-    # length of the hydraulic connection (no vertical extensions of the reservoirs? Fig 6.)
-    Hc = Hd - Hs
-    gammas = 8.0*(1.0-nu)/(3.*numpy.pi)
-    gammad = 8.0*(1.0-nu)/(3.*numpy.pi)
+    H_s = 3.0e3
+    reverso = Reverso(H_s, H_d, a_s, a_d, a_c, Qin, dPs0, dPd0, g, G, nu, mu, drho, shape='sill')
+
+    print("Configuration of the Reverso class object:")
+    print("The shape of the magma chambers:   reverso.shape = {}".format(reverso.shape))
+    print("The depth to the magma chambers:   reverso.H_s = {},  reverso.H_d = {}".format(reverso.H_s, reverso.H_d))
+    print("The radii of the magma chambers:   reverso.a_s = {},  reverso.a_d = {}".format(reverso.a_s, reverso.a_d))
+    print("The radius of the connecting tube: reverso.a_c = {}".format(reverso.a_c))
+    print("The input magma flow from below:   reverso.Qin = {}".format(reverso.Qin))
+    print("The initial overpressures:         reverso.dPs0 = {}, reverso.dPd0 = {}".format(reverso.dPs0, reverso.dPd0))
+    print("The physical parameters: ")
+    print("The shear modulus:                 reverso.G = {}".format(reverso.G))
+    print("The Poisson ratio:                 reverso.nu = {}".format(reverso.nu))
+    print("The magma viscocity:               reverso.mu = {}".format(reverso.mu))
+    print("The density difference rock-magma: reverso.drho = {}".format(reverso.drho))
 
     # time-step in seconds (1 day)
     dt = 86400.0
     # max time (1 year) in seconds
     tmax = dt*365.0 *1.0
 
-    ## differential equation
+    # differential equation
     # the time array in seconds
     t = numpy.arange(0, tmax, dt)
     # the time array as fraction of total duration
     tfrac = t/tmax
     nt = len(t)
     print("Number of time samples = {}".format(nt))
-    ## Initialization
-    dPs = numpy.zeros(nt)
-    dPs[0] = dPs0
-    dPd = numpy.zeros(nt)
-    dPd[0] = dPd0
 
-    # Simplifying the equations
-    # Eq. (10) 1/ξ = *γ_d*k/(γ_s+γ_d*k)
-    C1 = (G*a_c**4)/(8*mu*Hc*a_s**3*gammas)
-    # A in eq (11) modified to incorporate initial overpressures
-    A1 = drho*g*Hc + dPd0 - dPs0
-    A2 = G*Qin / (gammad*numpy.pi*a_d**3)
-    C2 = gammas / (gammad*k)
-
-    for i in range(1, nt):
-        dPs[i] = dt*C1*(A1 + dPd[i-1] - dPs[i-1]) + dPs[i-1]
-        dPd[i] = A2*dt - C2*(dPs[i] - dPs[i-1])  + dPd[i-1]
-
-    if plot:
-        pyplot.plot(tfrac, dPs/1.0e6, label='Differential')
-        pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
-        pyplot.show()
-
-        pyplot.plot(tfrac, dPd/1.e6, label='Differential')
-        pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
-        pyplot.show()
-
-    # Analytic solution
-    dPs_anal, dPd_anal = overpressures(t, mu, G, g, Hc, gammas, gammad, k, a_s, a_c, dPd0, dPs0, drho, Qin)
+    # Analytic solution.  Computes members dPs_analytic(r,t), dPd_analytic(r,t)
+    reverso.overpressures(t)
 
     # Comparing Analytical solution with the differential equation
     if plot:
-        pyplot.plot(tfrac, dPs/1.0e6, label='Differential')
-        pyplot.plot(tfrac, dPs_anal/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
+#        pyplot.plot(tfrac, dPs/1.0e6, label='Differential')
+        pyplot.plot(tfrac, reverso.dPs_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Shallow Overpressure (MPa)')
         pyplot.show()
 
-        pyplot.plot(tfrac, dPd/1.0e6, label='Differential')
-        pyplot.plot(tfrac, dPd_anal/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
+#        pyplot.plot(tfrac, dPd/1.0e6, label='Differential')
+        pyplot.plot(tfrac, reverso.dPd_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Deep Overpressure (MPa)')
         pyplot.show()
@@ -223,14 +300,14 @@ def main(plot=False):
     nObs = len(rr)
     print("Number of spacial observations = {}".format(nObs))
     # H-matrix for the radial displacement
-    H_Ur = numpy.squeeze([Urmat(Hs, Hd, gammas, gammad, r, G, a_s, a_d, nu) for i, r in enumerate(rr)])
+    H_Ur = numpy.squeeze([reverso.Urmat(r) for i, r in enumerate(rr)])
     # H-matrix for the vertical displacement
-    H_Uz = numpy.squeeze([Uzmat(Hs, Hd, gammas, gammad, r, G, a_s, a_d, nu) for i, r in enumerate(rr)])
+    H_Uz = numpy.squeeze([reverso.Uzmat(r) for i, r in enumerate(rr)])
 
     # Generate the corresponding displacements
     # H-matrix for the radial displacement
-    Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[dPs[i]], [dPd[i]]]) for i in range(nt)])
-    Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[dPs[i]], [dPd[i]]]) for i in range(nt)])
+    Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[reverso.dPs_analytic[i]], [reverso.dPd_analytic[i]]]) for i in range(nt)])
+    Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[reverso.dPs_analytic[i]], [reverso.dPd_analytic[i]]]) for i in range(nt)])
 
     if plot:
         #Plot radial displacement
@@ -257,8 +334,10 @@ def main(plot=False):
     x = numpy.arange(-5000, 5100, 1000)
     y = x
     X, Y = numpy.meshgrid(x, y)
-    H_los = [losmat(Hs, Hd, gammas, gammad, x, y, G, a_s, a_d, nu, theta, phi)]
+    H_los = [reverso.losmat(x, y, theta, phi)]
 
+    # that's all
+    return
 
 if __name__ == "__main__":
     import sys
