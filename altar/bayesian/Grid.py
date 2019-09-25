@@ -21,6 +21,7 @@ class Grid(altar.component, family="altar.bayesian.solvers.grid", implements=sol
     A δβ solver based on a naive grid search
     """
 
+
     # user configurable state
     tolerance = altar.properties.float(default=.01)
     tolerance.doc = 'the fractional tolerance for achieving convergence'

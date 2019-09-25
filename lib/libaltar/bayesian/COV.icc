@@ -36,8 +36,7 @@ COV(rng_t * rng, double tolerance, size_t maxIterations, double target) :
     _rng(rng),
     _tolerance(tolerance), _maxIterations(maxIterations), _target(target),
     _beta(0), _cov(0)
-{
-}
+{}
 
 
 // end of file

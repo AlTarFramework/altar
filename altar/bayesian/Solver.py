@@ -20,6 +20,7 @@ class Solver(altar.protocol, family="altar.bayesian.solvers"):
     The protocol that all δβ solvers must implement
     """
 
+
     # user configurable state
     tolerance = altar.properties.float()
     tolerance.doc = 'the fractional tolerance for achieving convergence'
@@ -31,6 +32,7 @@ class Solver(altar.protocol, family="altar.bayesian.solvers"):
         """
         Initialize me and my parts given an {application} context and a {scheduler}
         """
+
 
     @altar.provides
     def solve(self, llk, weight):
@@ -46,9 +48,9 @@ class Solver(altar.protocol, family="altar.bayesian.solvers"):
         Provide a default implementation
         """
         # by default, use the naive grid solver
-        from .Grid import Grid as default
+        from .Grid import Grid
         # and return it
-        return default
+        return Grid
 
 
 # end of file

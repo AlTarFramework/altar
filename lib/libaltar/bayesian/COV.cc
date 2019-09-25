@@ -63,6 +63,15 @@ dbeta_brent(vector_t *llk, double llkMedian, vector_t *w)
     pyre::journal::debug_t debug("altar.beta");
 
     // turn off the err_handler, return previous handler
+
+    // MGA 20190925:
+    //   i'm not sure i like shutting down the GSL error reporting mechanism; it's true that
+    //   the previous behavior, i.e. letting the GSL errors surface all the way up to the user,
+    //   was also bad, but it was meant to be a reminder that something sensible has to happen
+    //   while observing the behavior of the solver with real models. we need to think this
+    //   through and put together a mechanism for handling and propagating errors through to
+    //   the python layer where they can be handled in a user friendly way
+    //
     gsl_error_handler_t * gsl_hdl = gsl_set_error_handler_off();
 
     // consistency checks
@@ -343,7 +352,7 @@ double cov::cov(double dbeta, void * parameters)
     double sdev = gsl_stats_sd_m(p.w->data, p.w->stride, p.w->size, mean);
     double cov = sdev / mean;
 
-    // if the COV is not well-defined
+    // if the COV is not well defined
     if (gsl_isinf(cov) || gsl_isnan(cov)) {
         // set our metric to some big value
         p.metric = 1e100;

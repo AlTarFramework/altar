@@ -51,10 +51,7 @@ public:
     // meta-methods
 public:
     virtual ~COV();
-    inline COV(
-               rng_t * rng,
-               double tolerance=.001, size_t maxIterations=1000, double target=1.0
-               );
+    inline COV(rng_t * rng, double tolerance=.001, size_t maxIterations=1000, double target=1.0);
 
     // data
 private:

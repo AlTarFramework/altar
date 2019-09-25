@@ -21,6 +21,7 @@ class Brent(altar.component, family="altar.bayesian.solvers.brent", implements=s
     A δβ solver based on the GSL implementation of the Brent algorithm
     """
 
+
     # user configurable state
     tolerance = altar.properties.float(default=.01)
     tolerance.doc = 'the fractional tolerance for achieving convergence'
@@ -48,7 +49,7 @@ class Brent(altar.component, family="altar.bayesian.solvers.brent", implements=s
         """
         Compute the next temperature in the cooling schedule
         :param llk: data log-likelihood
-        :param weight: the normalized weight, vector (samples)
+        :param weight: the normalized weight
         :return: β, cov
         """
         # compute the median data log-likelihood; clone the source vector first, since the
@@ -56,6 +57,7 @@ class Brent(altar.component, family="altar.bayesian.solvers.brent", implements=s
         median = llk.clone().sort().median()
         # call gsl dbeta_solver, return β, cov
         return altar.libaltar.dbeta_brent(self.cov, llk.data, median, weight.data)
+
 
     # private data
     cov = None # the COV calculator
