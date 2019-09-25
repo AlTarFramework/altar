@@ -15,6 +15,7 @@ import altar
 from .Controller import Controller as controller
 from .Sampler import Sampler as sampler
 from .Scheduler import Scheduler as scheduler
+from .Solver import Solver as solver
 
 
 # implementations
@@ -23,41 +24,71 @@ from .Scheduler import Scheduler as scheduler
     tip="a Bayesian controller that implements simulated annealing")
 def annealer():
     # grab the factory
-    from .Annealer import Annealer as annealer
+    from .Annealer import Annealer
     # attach its docstring
-    __doc__ = annealer.__doc__
+    __doc__ = Annealer.__doc__
     # and return it
-    return annealer
+    return Annealer
 
 
-@altar.foundry(implements=scheduler, tip="the COV algorithm as a Bayesian scheduler")
+@altar.foundry(
+    implements=scheduler,
+    tip="a Bayesian scheduler based on the COV algorithm")
 def cov():
     # grab the factory
-    from .COV import COV as cov
+    from .COV import COV
     # attach its docstring
-    __doc__ = cov.__doc__
+    __doc__ = COV.__doc__
     # and return it
-    return cov
+    return COV
 
 
-@altar.foundry(implements=sampler, tip="the Metropolis algorithm as a Bayesian sampler")
+@altar.foundry(
+    implements=solver,
+    tip="a solver for δβ based on a Brent minimizer from gsl")
+def brent():
+    # grab the factory
+    from .Brent import Brent
+    # attach its docstring
+    __doc__ = Brent.__doc__
+    # and return it
+    return Brent
+
+
+@altar.foundry(
+    implements=solver,
+    tip="a solver for δβ based on a naive grid search")
+def grid():
+    # grab the factory
+    from .Grid import Grid
+    # attach its docstring
+    __doc__ = Grid.__doc__
+    # and return it
+    return Grid
+
+
+@altar.foundry(
+    implements=sampler,
+    tip="a Bayesian sampler based on the Metropolis algorithm")
 def metropolis():
     # grab the factory
-    from .Metropolis import Metropolis as metropolis
+    from .Metropolis import Metropolis
     # attach its docstring
-    __doc__ = metropolis.__doc__
+    __doc__ = Metropolis.__doc__
     # and return it
-    return metropolis
+    return Metropolis
 
 
-@altar.foundry(implements=sampler, tip="a monitor that times the various simulation phases")
+@altar.foundry(
+    implements=altar.simulations.monitor,
+    tip="a monitor that times the various simulation phases")
 def profiler():
     # grab the factory
-    from .Profiler import Profiler as profiler
+    from .Profiler import Profiler
     # attach its docstring
-    __doc__ = profiler.__doc__
+    __doc__ = Profiler.__doc__
     # and return it
-    return profiler
+    return Profiler
 
 
 # end of file
