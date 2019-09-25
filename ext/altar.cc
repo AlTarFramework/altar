@@ -17,6 +17,7 @@
 #include "exceptions.h"
 #include "metadata.h"
 #include "dbeta.h"
+#include "condition.h"
 
 
 // put everything in my private namespace
@@ -36,6 +37,9 @@ namespace altar {
             { cov__name__, cov, METH_VARARGS, cov__doc__},
             { dbeta_grid__name__, dbeta_grid, METH_VARARGS, dbeta_grid__doc__},
             { dbeta_brent__name__, dbeta_brent, METH_VARARGS, dbeta_brent__doc__},
+
+            // matrix_condition for positive definite
+            { matrix_condition__name__, matrix_condition, METH_VARARGS, matrix_condition__doc__},
 
             // sentinel
             {0, 0, 0, 0}

@@ -40,6 +40,11 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     solver = altar.bayesian.solver()
     solver.doc = 'the δβ solver'
 
+    check_positive_definiteness = altar.properties.bool(default=True)
+    check_positive_definiteness.doc = 'whether to check the positive definiteness of Σ matrix and condition it accordingly'
+
+    min_eigenvalue_ratio = altar.properties.float(default=0.001)
+    min_eigenvalue_ratio.doc = 'the desired minimal eigenvalue of Σ matrix, as a ratio to the max eigenvalue'
 
     # public data
     w = None # the vector of re-sampling weights
@@ -150,7 +155,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
                 Σ[j,i] = Σ[i,j]
 
         # condition the covariance matrix
-        self.conditionCovariance(Σ=Σ)
+        if self.check_positive_definiteness:
+            self.conditionCovariance(Σ=Σ)
 
         # all done
         return Σ
@@ -213,8 +219,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         Make sure the covariance matrix Σ is symmetric and positive definite
         """
-        # no need to symmetrize it since it is symmetric by construction
-        # NYI: check the eigenvalues to verify positive definiteness
+        # replaces negative or small eigenvalues with min_eigenvalue_ratio*max_eigenvalue
+        altar.libaltar.matrix_condition(Σ.data, self.min_eigenvalue_ratio)
         # all done
         return Σ
 
