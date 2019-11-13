@@ -17,7 +17,8 @@ Test for CDM: Compound Dislocation Model
 
 import sys
 import numpy
-from altar.models.cdm.libcdm import CDM
+#from altar.models.cdm.libcdm import CDM
+from altar.models.cdm.ext import libcdm
 
 # Matlab test coordinates and displacements in EFCS (East, North, Vertical).
 # Sampled from computed output from original Matlab code.

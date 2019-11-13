@@ -44,10 +44,14 @@ public:
     inline void locations(gsl_matrix * locations);
     inline void los(gsl_matrix * los);
     inline void oids(const oids_type & oids);
+//    inline void layout(size_type xIdx, size_type dIdx,
+//                       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+//                       size_type offsetIdx);
     inline void layout(size_type xIdx, size_type dIdx,
-                       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
-                       size_type offsetIdx);
+                       size_type openingIdx, size_type aXIdx, size_type aYIdx, size_type aZIdx,
+                       size_type omegaXIdx, size_type omegaYIdx, size_type omegaZIdx, size_type offsetIdx);
 
+    
     void displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const;
     void residuals(gsl_matrix * predicted) const;
 

@@ -13,7 +13,7 @@
 import altar
 # the pure python implementation of the CDM source
 from altar.models.cdm.ext import libcdm
-
+import gc
 
 # declaration
 class Fast:
@@ -48,11 +48,13 @@ class Fast:
         # attach the map of observations to their set
         libcdm.oid(source, oid)
         # inform the source about the parameter layout; assumes contiguous parameter sets
+#        libcdm.layout(source,
+#                      model.xIdx, model.dIdx, model.openingIdx, model.aXIdx, model.omegaXIdx,
+#                      model.offsetIdx)
         libcdm.layout(source,
-                      model.xIdx, model.dIdx,
-                      model.openingIdx, model.aXIdx, model.omegaXIdx,
-                      model.offsetIdx)
-
+                      model.xIdx, model.dIdx, model.openingIdx, model.aXIdx, model.aYIdx, model.aZIdx,
+                      model.omegaXIdx, model.omegaYIdx, model.omegaZIdx, model.offsetIdx)
+        
         # nothing to do
         return self
 
@@ -89,19 +91,24 @@ class Fast:
         for sample in range(samples):
             # get the residuals
             residuals = predicted.getRow(sample)
-            # compute the norm
-            nrm = norm.eval(v=residuals, sigma_inv=cd_inv)
-            # and normalize it
-            llk = normalization - nrm**2 / 2
+            
+            # compute the norm, and normalize it
+            normeval = norm.eval(v=residuals, sigma_inv=cd_inv)
+            llk = normalization - normeval**2.0 / 2.0
+            
             # store it
             dataLLK[sample] = llk
-
+            llk = None      #
+            residuals = None    #
+            normeval = None     #
+        
+        cd_inv = None   #
+        normalization = None    #
         # all done
         return self
 
-
     # private data
     source = None
-
+    print('Garbage collected (Fast.py--bottom): ', gc.collect())
 
 # end of file
