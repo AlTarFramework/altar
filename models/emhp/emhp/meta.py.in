@@ -9,14 +9,15 @@
 #
 
 # expansion placeholders
-date = "TODAY"
-major = MAJOR
-minor = MINOR
-revision = "REVISION"
+date = "@TODAY@"
+major = @MAJOR@
+minor = @MINOR@
+micro = @MICRO@
+revision = "@REVISION@"
 
 
 # assemble the version tuple
-version = (major, minor, revision)
+version = (major, minor, micro, revision)
 
 
 # decorations for the help system
@@ -33,14 +34,6 @@ banner = f"""
 header = banner + """
 authors:
     Michael Aïvázis     <michael.aivazis@para-sim.com>
-    Zacharie Duputel    <zacharie.duputel@unistra.fr>
-    Junle Jiang
-    Romain Jolivet      <jolivetr@biotite.ens.fr>
-    Sarah Minson        <sminson@usgs.gov>
-    Bryan Riel          <bryan.v.riel@jpl.nasa.gov>
-    Leif Strand
-    Hailiang Zhang
-    Lijun Zhu           <ljzhu@caltech.edu>
 """
 
 license = header + """
