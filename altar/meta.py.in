@@ -22,13 +22,13 @@ version = (major, minor, micro, revision)
 
 # decorations for the help system
 copyright = """
-    (c) 2013-YEAR ParaSim Inc.
-    (c) 2010-YEAR California Institute of Technology
+    (c) 2013-@YEAR@ ParaSim Inc.
+    (c) 2010-@YEAR@ California Institute of Technology
     ALL RIGHTS RESERVED
 """
 
 banner = f"""
-    altar {major}.{minor} revision {revision}
+    altar {major}.{minor}.{micro} revision {revision}
 """ + copyright
 
 header = banner + """
