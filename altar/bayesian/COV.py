@@ -23,10 +23,10 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     Annealing schedule based on attaining a particular value for the coefficient of variation
     (COV) of the data likelihood; after Ching[2007].
 
-    The goal is to compute a proposed update Δβ_m to the temperature β_m such that the vector
+    The goal is to compute a proposed update δβ_m to the temperature β_m such that the vector
     of weights w_m given by
 
-        w_m := π(D|θ_m)^{Δβ_m}
+        w_m := π(D|θ_m)^{δβ_m}
 
     has a particular target value for
 
@@ -37,11 +37,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
     target = altar.properties.float(default=1.0)
     target.doc = 'the target value for COV'
 
-    tolerance = altar.properties.float(default=.01)
-    tolerance.doc = 'the fractional tolerance for achieving the {target} COV value'
-
-    maxiter = altar.properties.int(default=10**3)
-    maxiter.doc = 'the maximum number of iterations while looking for a δβ'
+    solver = altar.bayesian.solver()
+    solver.doc = 'the δβ solver'
 
 
     # public data
@@ -57,8 +54,8 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # get the rng wrapper
         rng = application.rng.rng
-        # instantiate my COV calculator; {beta.cov} needs the {rng} capsule
-        self.minimizer = altar.libaltar.cov(rng.rng, self.maxiter, self.tolerance, self.target)
+        # initialize my solver
+        self.solver.initialize(application=application, scheduler=self)
         # set up the distribution for building the sample multiplicities
         self.uniform = altar.pdf.uniform(support=(0,1), rng=rng)
         # all done
@@ -97,16 +94,10 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
         """
         # grab the data log-likelihood
         dataLikelihood  = step.data
-
         # initialize the vector of weights
         self.w = altar.vector(shape=step.samples).zero()
-        # compute the median data log-likelihood; clone the source vector first, since the
-        # sorting happens in place
-        median = dataLikelihood.clone().sort().median()
-
         # compute {δβ} and the normalized {w}
-        β, self.cov = altar.libaltar.dbeta(self.minimizer, dataLikelihood.data, median, self.w.data)
-
+        β, self.cov = self.solver.solve(dataLikelihood, self.w)
         # and return the new temperature
         return β
 
@@ -262,7 +253,6 @@ class COV(altar.component, family="altar.schedulers.cov", implements=scheduler):
 
     # private data
     uniform = None
-    minimizer = None
 
 
 # end of file
