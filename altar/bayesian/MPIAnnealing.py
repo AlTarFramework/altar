@@ -114,14 +114,13 @@ class MPIAnnealing(AnnealingMethod):
         accepted, rejected, unlikely = statistics
 
         # add up the acceptance/rejection statistics from all the nodes
-        accepted = self.communicator.sum(accepted, destination=manager)
-        rejected = self.communicator.sum(rejected, destination=manager)
-        unlikely = self.communicator.sum(unlikely, destination=manager)
+        # and distribute the results back to all processes
+        accepted = self.communicator.sum(item=accepted)
+        rejected = self.communicator.sum(item=rejected)
+        unlikely = self.communicator.sum(item=unlikely)
 
-        # if I am the boss
-        if self.rank == manager:
-            # chain up
-            super().resample(annealer=annealer, statistics=(accepted,rejected,unlikely))
+        # chain up
+        super().resample(annealer=annealer, statistics=(accepted,rejected,unlikely))
 
         # all done
         return self
