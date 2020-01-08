@@ -24,15 +24,15 @@ Source(double g, double Gsm, double nu, double mu, double drho):
     _nu(nu),
     _mu(mu),
     _drho(drho),
-    _x0Idx,
-    _y0Idx,
-    _t0Idx,
+    _x0Idx(0),
+    _y0Idx(0),
+    _t0Idx(0),
     _asIdx(0),
     _acIdx(0),
     _adIdx(0),
     _hsIdx(0),
     _hdIdx(0),
-    _qinIdx(0)
+    _qIdx(0)
 {}
 
 
@@ -111,20 +111,18 @@ oids(const oids_type & oids) {
 
 void
 altar::models::reverso::Source::
-layout(size_type xIdx, size_type dIdx,
-       size_type openingIdx, size_type aXIdx, size_type omegaXIdx,
+layout(size_type x0Idx, size_type asIdx, size_type hsIdx, size_type qIdx,
        size_type offsetIdx) {
     // assign
-    _xIdx = xIdx;
-    _yIdx = xIdx + 1;
-    _dIdx = dIdx;
-    _openingIdx = openingIdx;
-    _aXIdx = aXIdx;
-    _aYIdx = aXIdx + 1;
-    _aZIdx = aXIdx + 2;
-    _omegaXIdx = omegaXIdx;
-    _omegaYIdx = omegaXIdx + 1;
-    _omegaZIdx = omegaXIdx + 2;
+    _x0Idx = x0Idx;
+    _y0Idx = x0Idx + 1;
+    _t0Idx = x0Idx + 2;
+    _asIdx = asIdx;
+    _acIdx = asIdx + 1;
+    _adIdx = asIdx + 2;
+    _hsIdx = hsIdx;
+    _hdIdx = hsIdx + 1;
+    _qIdx  = qIdx;
     _offsetIdx = offsetIdx;
 
     // make a channel

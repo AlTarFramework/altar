@@ -75,18 +75,18 @@ class Native:
             # extract the parameters
             parameters = θ.getRow(sample)
             # get the radius and depth of the shallow reservoir
-            as = parameters[asIdx]
-            hs = parameters[hsIdx]
+            a_s = parameters[a_sIdx]
+            h_s = parameters[h_sIdx]
             # get the radius and depth of the deep reservoir
-            ad = parameters[adIdx]
-            hd = parameters[hdIdx]
+            a_d = parameters[a_dIdx]
+            h_d = parameters[h_dIdx]
             # get the radius of the hydraulic pipe connecting the two reservoirs
-            ac = parameters[acIdx]
+            a_c = parameters[a_cIdx]
             # get the basal magma inflow rate
             q  = parameters[qIdx]
 
             # make a source using the sample parameters
-            reverso = source(as=as, hs=hs, ad=ad, hd=hd,
+            reverso = source(a_s=a_s, h_s=h_s, a_d=a_d, h_d=h_d, a_c=a_c,
                          ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
                          v=model.nu)
             # compute the expected displacement

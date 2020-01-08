@@ -23,7 +23,6 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
     """
 
 
-
     # user configurable state
     # parameters
     psets = altar.properties.dict(schema=altar.models.parameters())

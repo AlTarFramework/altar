@@ -44,9 +44,8 @@ public:
     inline void locations(gsl_matrix * locations);
     inline void los(gsl_matrix * los);
     inline void oids(const oids_type & oids);
-    inline void layout(size_type asIdx, size_type adIdx,
-                       size_type acIdx, size_type hsIdx, size_type hdIdx,
-                       size_type qIdx);
+    inline void layout(size_type x0Idx, size_type asIdx, size_type hsIdx,
+                       size_type qIdx, size_type offsetIdx);
 
     void displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const;
     void residuals(gsl_matrix * predicted) const;
@@ -81,16 +80,18 @@ private:
     size_type _t0Idx;
     // radius of the shallow reservoir (circular sill)
     size_type _asIdx;
-    // depth of the shallow reservoir
-    size_type _hsIdx;
     // radius of the connecting pipe between the two reservoirs
     size_type _acIdx;
     // radius of the deep reservoir (circular sill)
     size_type _adIdx;
+    // depth of the shallow reservoir
+    size_type _hsIdx;
     // depth of the deep reservoir
     size_type _hdIdx;
     // base magma inflow rate
     size_type _qIdx;
+    // offset
+    size_type _offsetIdx;
 };
 
 // the implementations of the inline methods

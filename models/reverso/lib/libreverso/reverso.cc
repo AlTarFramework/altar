@@ -29,10 +29,13 @@ namespace altar {
 
             // local helpers
             static void
-            (int sample,
+            reverso(int sample,
                        const gsl_matrix * locations, const gsl_matrix * los,
-                       const vec_t & P1, const vec_t & P2, const vec_t & P3, const vec_t & P4,
-                       double opening, double nu,
+                       double dPs0, double dPd0,
+                       double x0, double y0, double t0,
+                       double as, double ac, double ad,
+                       double hs, double hd, double qin,
+                       double g, double Gsm, double nu, double mu, double drho,
                        gsl_matrix * results);
 
             static vec_t
@@ -50,85 +53,27 @@ void
 altar::models::reverso::
 reverso(int sample,
     const gsl_matrix * locations, const gsl_matrix * los,
-    double g, double Gsm, double nu, double mu, double drho,
     double dPs0, double dPd0,
     double x0, double y0, double t0,
     double as, double ac, double ad,
     double hs, double hd, double qin,
+    double g, double Gsm, double nu, double mu, double drho,
     gsl_matrix * predicted)
 {
     // Initial conditions: shallow and deep reservoirs overpressure in Pa at t=0
     dPs[0] = dPs0;
     dPd[0] = dPd0;
-    aY *= 2;
-    aZ *= 2;
 
     // short circuit the trivial case
-    if (std::abs(aX) < eps && std::abs(aY) < eps && std::abs(aZ) < eps) {
-        // no displacements
+    if (as < eps || ac < eps || ad < eps ||
+        hs < eps || hd < eps || qin < eps) {
+        // at least one of the reservoirs or connecting tube or their depths or the
+        // input magma flux is too small or negative
         gsl_matrix_set_zero(predicted);
         // all done
         return;
     }
 
-    // the axis specific coordinate matrices
-    mat_t Rx = {1.,  0.,          0.,
-                0.,  cos(omegaX), sin(omegaX),
-                0., -sin(omegaX), cos(omegaX) };
-
-    mat_t Ry = {cos(omegaY), 0., -sin(omegaY),
-                0.,          1.,  0.,
-                sin(omegaY), 0.,  cos(omegaY) };
-
-    mat_t Rz = { cos(omegaZ), sin(omegaZ), 0.,
-                -sin(omegaZ), cos(omegaZ), 0.,
-                 0.,         0.,           1.};
-
-    // the coordinate rotation matrix
-    mat_t R  = Rz * (Ry * Rx);
-    // extract its three columns
-    vec_t R_0 = { R[0],   R[3],   R[6] };
-    vec_t R_1 = { R[0+1], R[3+1], R[6+1] };
-    vec_t R_2 = { R[0+2], R[3+2], R[6+2] };
-
-    // the centroid
-    vec_t P0 = { x, y, -depth };
-
-    vec_t P1 = P0 + (aY*R_1 + aZ*R_2)/2;
-    vec_t P2 = P1 - aY*R_1;
-    vec_t P3 = P2 - aZ*R_2;
-    vec_t P4 = P1 - aZ*R_2;
-
-    vec_t Q1 = P0 + (aZ*R_2 - aX*R_0)/2;
-    vec_t Q2 = Q1 + aX*R_0;
-    vec_t Q3 = Q2 - aZ*R_2;
-    vec_t Q4 = Q1 - aZ*R_2;
-
-    vec_t R1 = P0 + (aX*R_0 + aY*R_1)/2;
-    vec_t R2 = R1 - aX*R_0;
-    vec_t R3 = R2 - aY*R_1;
-    vec_t R4 = R1 - aY*R_1;
-
-    // check that all z components are negative
-    if (P1[2] > 0 || P2[2] > 0 || P3[2] > 0 || P4[2] > 0 ||
-        Q1[2] > 0 || Q2[2] > 0 || Q3[2] > 0 || Q4[2] > 0 ||
-        R1[2] > 0 || R2[2] > 0 || R3[2] > 0 || R4[2] > 0) {
-        // complain...
-        throw std::domain_error("the CDM must be below the surface");
-    }
-
-    // dispatch the various cases
-    if (std::abs(aX) < eps && std::abs(aY) > eps && std::abs(aZ) > eps) {
-        RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
-    } else if (std::abs(aX) > eps && std::abs(aY) < eps && std::abs(aZ) > eps) {
-        RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
-    } else if (std::abs(aX) > eps && std::abs(aY) > eps && std::abs(aZ) < eps) {
-        RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
-    } else {
-        RDdispSurf(sample, locations, los, P1, P2, P3, P4, opening, nu, predicted);
-        RDdispSurf(sample, locations, los, Q1, Q2, Q3, Q4, opening, nu, predicted);
-        RDdispSurf(sample, locations, los, R1, R2, R3, R4, opening, nu, predicted);
-    }
 
     // all done
     return;

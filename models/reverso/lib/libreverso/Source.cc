@@ -92,14 +92,7 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         // base magma inflow rate from below the deep reservoir
         auto qSrc  = gsl_matrix_get(&samples->matrix, sample, _qIdx);
 
-        //compute the displacements
-        reverso(sample, _locations, _los,
-                x0Src, y0Src, t0Src,
-                hsSrc, asSrc,
-                hdSrc, adSrc,
-                acSrc, qSrc,
-                _nu, _mu,
-        // apply the location specific projection to LOS vector and dataset shift
+        // go through the locations
         for (auto loc=0; loc<_locations->size1; ++loc) {
             // get the current value
             auto u = gsl_matrix_get(predicted, sample, loc);

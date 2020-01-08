@@ -11,7 +11,7 @@
 
 // my definitions
 const char *
-altar::models::cdm::
+altar::models::reverso::
 version() {
     return "2.0";
 }

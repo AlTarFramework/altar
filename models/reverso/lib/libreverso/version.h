@@ -7,7 +7,7 @@
 
 // code guard
 #if !defined(altar_models_reverso_version_h)
-#define altar_models_cdm_version_h
+#define altar_models_reverso_version_h
 
 namespace altar {
     namespace models {

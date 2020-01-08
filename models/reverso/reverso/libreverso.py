@@ -13,13 +13,18 @@
 import numpy
 from matplotlib import pyplot
 
-class Reverso:
+class ReversoModel:
     """
     A two-magma chamber model as a source of deformation at Grimsvotn Volcano, Iceland
     Thomas Reverso etal.  Journal of Geophysical Research, AGU, 2014, 119, pp. 4666-4683
     """
-    def __init__(self, H_s, H_d, a_s, a_d, a_c, Qin, dPs0=0., dPd0=0., g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
-        # the reverso model geometry:
+    def __init__(self, locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0=0., dPd0=0., g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
+        # observation locations
+        self.locations = locations
+        # observation line of sight at each location
+        self.los = los
+
+        # the reverso source model geometry and physical parameters:
         # H_s = depth to the shallow resevoir (meters)
         self.H_s = H_s
         # H_d = depth to the deep reservoir (meters)
@@ -73,6 +78,8 @@ class Reverso:
             self.gamma_d = 8.0*(1.0-self.nu)/(3.*numpy.pi)
         else:
             print("Unknown magma chamber shape.  Use either 'sill' or 'sphere'")
+
+
         return
 
     def alpha_sd(self, Rs, Rd):
@@ -137,7 +144,7 @@ class Reverso:
 
         return H
 
-    def losmat(self, x, y, theta, phi):
+    def losmat(self, x, y):
         r = numpy.sqrt(x**2 + y**2)
         R_s = numpy.sqrt(r**2 + self.H_s**2)
         R_d = numpy.sqrt(r**2 + self.H_d**2)
@@ -158,19 +165,19 @@ class Reverso:
         Dd = alphad * (self.a_d/R_d)**3
 
         H = ([
-              [GAMMA*Ds*(numpy.sin(theta)*(numpy.sin(phi)*y -
-                  numpy.sin(theta)*numpy.cos(phi)*x) +
-                  numpy.cos(theta)*self.H_s),
-               GAMMA*Dd*(numpy.sin(theta)*(numpy.sin(phi)*y -
-                  numpy.sin(theta)*numpy.cos(phi)*x)  +
-                  numpy.cos(theta)*self.H_d)
+              [GAMMA*Ds*(numpy.sin(self.theta)*(numpy.sin(self.self.phi)*y -
+                  numpy.sin(self.theta)*numpy.cos(self.phi)*x) +
+                  numpy.cos(self.theta)*self.H_s),
+               GAMMA*Dd*(numpy.sin(self.theta)*(numpy.sin(self.phi)*y -
+                  numpy.sin(self.theta)*numpy.cos(self.phi)*x)  +
+                  numpy.cos(self.theta)*self.H_d)
                ]
              ]
             )
 
         return H
 
-    def overpressures(self, t):
+    def overpressures(self):
         # Compute the overpressures in the shallow and deep reservoirs
         # Analytic solution equations (10)-(12), Reverso (2014)
         # t = time vector
@@ -199,9 +206,9 @@ class Reverso:
              )
         print("A = {}".format(A))
         # the exponential in time term in the solution
-        f0 = A*(1. - numpy.exp(-t/tau))
+        f0 = A*(1. - numpy.exp(-self.t/tau))
         # the secular linear in time term
-        f1 = self.G*self.Qin*t/(numpy.pi*self.a_s**3*(self.gamma_s+self.gamma_d*self.k))
+        f1 = self.G*self.Qin*self.t/(numpy.pi*self.a_s**3*(self.gamma_s+self.gamma_d*self.k))
 
         # dPs = △ Ps eq. (11)
         self.dPs_analytic = f0 + f1 + self.dPs0
@@ -212,8 +219,22 @@ class Reverso:
         # return
         return
 
+    def displacements(self):
+        print("Number of spacial observations = {}".format(len(self.r)))
+        # H-matrix for the radial displacement
+        H_Ur = numpy.squeeze([reverso.Urmat(r) for i, r in enumerate(self.r)])
+        # H-matrix for the vertical displacement
+        H_Uz = numpy.squeeze([reverso.Uzmat(r) for i, r in enumerate(self.r)])
 
-def main(plot=False):
+        # Generate the corresponding displacements
+        # H-matrix for the radial displacement
+        self.Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[reverso.dPs_analytic[i]],
+                                [reverso.dPd_analytic[i]]]) for i in range(nt)])
+        self.Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[reverso.dPs_analytic[i]],
+                                [reverso.dPd_analytic[i]]]) for i in range(nt)])
+        return
+
+def runReverso(plot=False):
     # Physical parameters
     # shear modulus, [Pa, kg-m/s**2]
     G = 20.0E9
@@ -246,7 +267,46 @@ def main(plot=False):
     H_d = 4.0e3
     # depth of the shallow reservoir
     H_s = 3.0e3
-    reverso = Reverso(H_s, H_d, a_s, a_d, a_c, Qin, dPs0, dPd0, g, G, nu, mu, drho, shape='sill')
+
+    # observation locations (x, y, t)
+    # the observation points at radius r = sqrt(x**2+y**2) in the z=0 plane and at time t
+    # create meshgrid of observation positions in the z=0 plane
+    x = numpy.arange(-5100, 0, 1000)
+    x = numpy.append(x, -numpy.flip(x))
+    y = x
+    # time-step -1 day in seconds
+    dt = 86400.0
+    # max time
+    tmax = dt*365.0
+    # the time array in seconds
+    t = numpy.arange(0, tmax, dt)
+    # the time array as fraction of total duration
+    tfrac = t/tmax
+    nt = len(tfrac)
+    print("Number of time samples = {}".format(nt))
+
+    # meshgrids
+    X, Y, T = numpy.meshgrid(x, y, t)
+    # flatten
+    xx = X.flatten()
+    yy = Y.flatten()
+    tt = T.flatten()
+    # locations of observations at (x,y,t)
+    locations = [(xxx, yyy, ttt) for (xxx, yyy, ttt) in zip(xx, yy, tt)]
+    # radii of the observation in the z=0 plane
+    # r = numpy.sqrt(x**2 + y**2)
+
+    # Synthetic InSAR dataset
+    # Incidence angle, theta
+    theta = numpy.pi * (41./180.)
+    # Azimuth angle, phi
+    phi = numpy.pi * (-169./180.)
+
+    # observation los vector (at corresponding index in locations)
+    los = []
+    # set the observation locations in space and time
+    # run the Reverso Model
+    reverso = ReversoModel(locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0, dPd0, g, G, nu, mu, drho, shape='sill')
 
     print("Configuration of the Reverso class object:")
     print("The shape of the magma chambers:   reverso.shape = {}".format(reverso.shape))
@@ -261,21 +321,11 @@ def main(plot=False):
     print("The magma viscocity:               reverso.mu = {}".format(reverso.mu))
     print("The density difference rock-magma: reverso.drho = {}".format(reverso.drho))
 
-    # time-step in seconds (1 day)
-    dt = 86400.0
-    # max time (1 year) in seconds
-    tmax = dt*365.0 *1.0
+    # Analytic solution for overpressures.  Computes members dPs_analytic(r,t), dPd_analytic(r,t)
+    reverso.overpressures()
 
-    # differential equation
-    # the time array in seconds
-    t = numpy.arange(0, tmax, dt)
-    # the time array as fraction of total duration
-    tfrac = t/tmax
-    nt = len(t)
-    print("Number of time samples = {}".format(nt))
-
-    # Analytic solution.  Computes members dPs_analytic(r,t), dPd_analytic(r,t)
-    reverso.overpressures(t)
+    # The surface displacements in r=sqrt(x**2+y**2), z at point (x,y,z,t) = (x,y,0,t)
+    reverso.displacements()
 
     # Comparing Analytical solution with the differential equation
     if plot:
@@ -290,24 +340,6 @@ def main(plot=False):
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Deep Overpressure (MPa)')
         pyplot.show()
-
-
-    # Generate r-array of GNSS stations.
-    # r is the distance from the center of the volcano and the GNSS station (or InSAR points)
-    rr = numpy.arange(1000, 6000, 1000)
-
-    # Number of observations
-    nObs = len(rr)
-    print("Number of spacial observations = {}".format(nObs))
-    # H-matrix for the radial displacement
-    H_Ur = numpy.squeeze([reverso.Urmat(r) for i, r in enumerate(rr)])
-    # H-matrix for the vertical displacement
-    H_Uz = numpy.squeeze([reverso.Uzmat(r) for i, r in enumerate(rr)])
-
-    # Generate the corresponding displacements
-    # H-matrix for the radial displacement
-    Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[reverso.dPs_analytic[i]], [reverso.dPd_analytic[i]]]) for i in range(nt)])
-    Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[reverso.dPs_analytic[i]], [reverso.dPd_analytic[i]]]) for i in range(nt)])
 
     if plot:
         #Plot radial displacement
@@ -324,18 +356,10 @@ def main(plot=False):
         pyplot.title('Vertical Displacement (m)')
         pyplot.show()
 
-    # Synthetic InSAR dataset
-    # Incidence angle, theta
-    theta = numpy.pi * (41./180.)
-    # Azimuth angle, phi
-    phi = numpy.pi * (-169./180.)
-
-    # create meshgrid
-    x = numpy.arange(-5000, 5100, 1000)
-    y = x
-    X, Y = numpy.meshgrid(x, y)
-    H_los = [reverso.losmat(x, y, theta, phi)]
-
+    H_los = [reverso.losmat(x, y)]
+    print()
+    print("H_los")
+    print(H_los)
     # that's all
     return
 
@@ -345,5 +369,5 @@ if __name__ == "__main__":
         plot = True
     else:
         plot = False
-    status = main(plot)
+    status = runReverso(plot)
     raise SystemExit(status)

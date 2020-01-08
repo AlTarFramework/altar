@@ -26,22 +26,26 @@ class Source:
 
 
     # public data
-    # radius of the hydraulic pipe connecting two magma reservoirs
-    ac = 0
+    # location
+    x = 0
+    y = 0
     # radius of the shallow magma reservoir
-    as = 0
+    a_s = 0
+    # radius of the hydraulic pipe connecting two magma reservoirs
+    a_c = 0
     # radius of the deep magma reservoir
-    ad = 0
+    a_d = 0
     # depth of the shallow reservoir
-    hs = 0
+    h_s = 0
     # depth of the deep reservoir
-    hd = 0
+    h_d = 0
     # basal magma inflow rate from below the deep chamber
-    q = 0
+    qin = 0
 
     # material properties
-    v = .25 # Poisson ratio
-
+    g  = 9.8 # acceleration due to gravity at sea level (m/sec**2)
+    nu = .25 # Poisson ratio (dimensionless)
+#    mu =
 
     # interface
     def displacements(self, locations, los):
@@ -50,23 +54,37 @@ class Source:
         two magma chamber (reverso) volcano model
         """
         # the radius of the shallow reservoir
-        as_src = self.as
+        a_s_src = self.a_s
         # the radius of the deep reservoir
-        ad_src = self.ad
+        a_d_src = self.a_d
         # the radius of the connecting pipe between the two reservoirs
-        ac_src = self.ac
+        a_c_src = self.a_c
         # depth of the shallow reservoir
-        hs_src = self.hs
+        h_s_src = self.h_s
         # depth of the deep reservoir
-        hd_src = self.hd
-        # the basal magma inflow rate
-        q_src  = self.q
+        h_d_src = self.h_d
+        # the basal magma inflow rate from below the deep reservoir (assumed contant)
+        q_in_src  = self.q_in
+        # the initial overpressure of the shallow source
+        dPs0_src = self.dPs0
+        # the initial overpressure of the deep source
+        dPd0_src = self.dPd0
+        # get the physical/material properties
+        # local acceleration due to gravity (m/s**2)
+        g = self.g
+        # the rigidity (or shear) modulus (kg/m/s**2)
+        Gsm = self.Gsm
+        # Poisson's ratio (dimensionless)
+        nu = self.nu
+        # the magma viscosity (kg/m/s**2)
+        mu = self.mu
+        # the difference in rock density and magma-density (kg/m**3)
+        drho = self.drho
+        # the shape of the magma chambers ('sill' or 'sphere')
+        shape = self.shape
 
-        # get the material properties
-        v = self.v
-
-        # from locations, a vector of (x,y) tuples, create the flattened vectors Xf, Yf required by
-        # CDM
+        # from locations, a vector of (x,y) tuples, create the flattened vectors Xf, Yf
+        # required by the Reverso model. (The Zf=0 plane is assumed to be the
         Xf = numpy.zeros(len(locations), dtype=float)
         Yf = numpy.zeros(len(locations), dtype=float)
         for i, loc in enumerate(locations):
@@ -76,10 +94,10 @@ class Source:
         # allocate space for the result
         u = altar.vector(shape=len(locations))
         # compute the displacements
-        ue, un, uv =  Reverso(X=Xf, Y=Yf, X0=x_src, Y0=y_src, depth=d_src,
-                          ax=ax_src, ay=ay_src, az=az_src,
-                          omegaX=omegaX_src, omegaY=omegaY_src, omegaZ=omegaZ_src,
-                          opening=opening, nu=v)
+        ue, un, uv =  Reverso(X=Xf, Y=Yf, X0=x_src, Y0=y_src, H_s=h_s_src, H_d=h_d_src,
+                          a_s=a_s_src, a_d=a_d_src, a_c=a_c_src, q_c=q_in_src,
+                          dPs0=dPs0_src, dPd0=dPd0_src,
+                          g=g, Gsm=Gsm, nu=nu, mu=mu, drho=drho, shape=shape)
         # go through each observation location
         for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
             # project the expected displacement along LOS and store
@@ -116,5 +134,9 @@ class Source:
         # all done
         return
 
+        ue, un, uv =  Reverso(X=Xf, Y=Yf, X0=x_src, Y0=y_src, H_s=h_s_src, H_d=h_d_src,
+                          a_s=a_s_src, a_d=a_d_src, a_c=a_c_src, q_in=q_in_src,
+                          dPs0=dPs0_src, dPd0=dPd0_src,
+                          g=g, Gsm=Gsm, nu=nu, mu=mu, drho=drho, shape=shape)
 
 # end of file
