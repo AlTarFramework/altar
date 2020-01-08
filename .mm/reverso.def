@@ -1,0 +1,71 @@
+# -*- Makefile -*-
+#
+# eric m. gurrola
+#
+# (c) 2019 california institute of technology, NASA Jet Propulsion Lab
+# all rights reserved
+#
+
+# add me to the pile
+projects += reverso
+
+# project meta-data
+reverso.major := 1
+reverso.minor := 0
+
+# use the altar area for build temporaries
+reverso.tmpdir = ${builder.dest.staging}altar/models/reverso/
+
+# reverso consists of a python package
+reverso.packages := reverso.pkg
+# a library
+reverso.libraries = reverso.lib ${if ${value cuda.dir},reverso.cudalib}
+# and an extension
+reverso.extensions := reverso.ext ${if ${value cuda.dir},reverso.cudaext}
+
+# the reverso package meta-data
+reverso.pkg.stem := reverso
+reverso.pkg.root := models/reverso/reverso/
+reverso.pkg.bin := models/reverso/bin/
+reverso.pkg.pycdir := $(builder.dest.pyc)altar/models/reverso/
+reverso.pkg.drivers := reverso
+
+# the reverso library metadata
+reverso.lib.stem := reverso
+reverso.lib.root := models/reverso/lib/libreverso/
+reverso.lib.incdir := $(builder.dest.inc)altar/models/reverso/
+reverso.lib.extern := gsl pyre
+reverso.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the reverso extension meta-data
+reverso.ext.stem := reverso
+reverso.ext.root := models/reverso/ext/reverso/
+reverso.ext.pkg := reverso.pkg
+reverso.ext.wraps := reverso.lib
+reverso.ext.extern := reverso.lib gsl pyre python
+# compile options for the sources
+reverso.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the reverso CUDA library metadata
+reverso.cudalib.stem := cudareverso
+reverso.cudalib.root := models/reverso/lib/libcudareverso/
+reverso.cudalib.incdir := $(builder.dest.inc)altar/models/cudareverso/
+reverso.cudalib.extern := gsl pyre cuda
+# compile options for the sources
+reverso.cudalib.c++.flags += $($(compiler.c++).std.c++17)
+reverso.cudalib.cuda.flags += $(nvcc.std.c++14)
+
+# the reverso CUDA extension meta-data
+reverso.cudaext.stem := cudareverso
+reverso.cudaext.root := models/reverso/ext/cudareverso/
+reverso.cudaext.pkg := reverso.pkg
+reverso.cudaext.wraps := reverso.cudalib
+reverso.cudaext.extern := reverso.cudalib gsl pyre python cuda
+# compile options for the sources
+reverso.cudaext.lib.c++.flags += $($(compiler.c++).std.c++17)
+reverso.cudaext.lib.cuda.flags += $(nvcc.std.c++14)
+
+# specify the CUDA libraries
+cuda.libraries += cudart cudadevrt
+
+# end of file
