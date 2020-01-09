@@ -17,17 +17,11 @@
 #include "source.h"
 
 // put everything in my private namespace
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace reverso {
-                // the module method table
-                extern PyMethodDef module_methods[];
-                extern PyModuleDef module_definition;
-            } // of namespace reverso
-        } // of namespace models
-    } // of namespace extensions
-} // of namespace altar
+namespace altar:: extensions:: models:: reverso {
+    // the module method table
+    extern PyMethodDef module_methods[];
+    extern PyModuleDef module_definition;
+}
 
 PyMethodDef
 altar::extensions::models::reverso::
