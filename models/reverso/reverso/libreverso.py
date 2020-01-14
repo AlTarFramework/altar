@@ -18,9 +18,18 @@ class ReversoModel:
     A two-magma chamber model as a source of deformation at Grimsvotn Volcano, Iceland
     Thomas Reverso etal.  Journal of Geophysical Research, AGU, 2014, 119, pp. 4666-4683
     """
-    def __init__(self, locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0=0., dPd0=0., g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
+    def __init__(self, locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0=0., dPd0=0.,
+        g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
         # observation locations
         self.locations = locations
+        self.x = []
+        self.y = []
+        self.t = []
+        for xyt in locations:
+            self.x.append(xyt[0])
+            self.y.append(xyt[1])
+            self.t.append(xyt[2])
+
         # observation line of sight at each location
         self.los = los
 
@@ -165,7 +174,7 @@ class ReversoModel:
         Dd = alphad * (self.a_d/R_d)**3
 
         H = ([
-              [GAMMA*Ds*(numpy.sin(self.theta)*(numpy.sin(self.self.phi)*y -
+              [GAMMA*Ds*(numpy.sin(self.theta)*(numpy.sin(self.phi)*y -
                   numpy.sin(self.theta)*numpy.cos(self.phi)*x) +
                   numpy.cos(self.theta)*self.H_s),
                GAMMA*Dd*(numpy.sin(self.theta)*(numpy.sin(self.phi)*y -
@@ -205,33 +214,34 @@ class ReversoModel:
                   numpy.pi*self.a_c**4*(self.gamma_s+self.gamma_d*self.k))
              )
         print("A = {}".format(A))
+
         # the exponential in time term in the solution
-        f0 = A*(1. - numpy.exp(-self.t/tau))
-        # the secular linear in time term
-        f1 = self.G*self.Qin*self.t/(numpy.pi*self.a_s**3*(self.gamma_s+self.gamma_d*self.k))
+        self.dPs_analytic = []
+        self.dPd_analytic = []
+        for t in self.t:
+            f0 = A*(1. - numpy.exp(-t/tau))
+            # the secular linear in time term
+            f1 = self.G*self.Qin*t/(numpy.pi*self.a_s**3*(self.gamma_s+self.gamma_d*self.k))
 
-        # dPs = △ Ps eq. (11)
-        self.dPs_analytic = f0 + f1 + self.dPs0
+            # dPs = △ Ps eq. (11)
+            self.dPs_analytic.append(f0 + f1 + self.dPs0)
 
-        # dPd = △ Pd  eq. (12)
-        self.dPd_analytic = -f0*self.gamma_s/(self.gamma_d*self.k) + f1 + self.dPd0
+            # dPd = △ Pd  eq. (12)
+            self.dPd_analytic.append(-f0*self.gamma_s/(self.gamma_d*self.k) + f1 + self.dPd0)
 
         # return
         return
 
     def displacements(self):
-        print("Number of spacial observations = {}".format(len(self.r)))
+        print("Number of spacial observations = {}".format(len(self.x)))
         # H-matrix for the radial displacement
-        H_Ur = numpy.squeeze([reverso.Urmat(r) for i, r in enumerate(self.r)])
+        H_Ur = numpy.squeeze([self.Urmat(r) for i, r in enumerate(self.x)])
         # H-matrix for the vertical displacement
-        H_Uz = numpy.squeeze([reverso.Uzmat(r) for i, r in enumerate(self.r)])
-
-        # Generate the corresponding displacements
-        # H-matrix for the radial displacement
-        self.Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[reverso.dPs_analytic[i]],
-                                [reverso.dPd_analytic[i]]]) for i in range(nt)])
-        self.Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[reverso.dPs_analytic[i]],
-                                [reverso.dPd_analytic[i]]]) for i in range(nt)])
+        H_Uz = numpy.squeeze([self.Uzmat(r) for i, r in enumerate(self.x)])
+        self.Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[self.dPs_analytic[i]],
+                                [self.dPd_analytic[i]]]) for i in range(len(self.t))])
+        self.Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[self.dPs_analytic[i]],
+                                [self.dPd_analytic[i]]]) for i in range(len(self.t))])
         return
 
 def runReverso(plot=False):
@@ -303,18 +313,22 @@ def runReverso(plot=False):
     phi = numpy.pi * (-169./180.)
 
     # observation los vector (at corresponding index in locations)
-    los = []
+    los = [numpy.sin(theta)*numpy.cos(phi), numpy.sin(theta)*numpy.sin(phi), numpy.cos(theta)]
     # set the observation locations in space and time
     # run the Reverso Model
-    reverso = ReversoModel(locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0, dPd0, g, G, nu, mu, drho, shape='sill')
+    reverso = ReversoModel(locations, los, H_s, H_d, a_s, a_d, a_c, Qin, dPs0, dPd0, g, G, nu, mu,
+                           drho, shape='sill')
 
     print("Configuration of the Reverso class object:")
     print("The shape of the magma chambers:   reverso.shape = {}".format(reverso.shape))
-    print("The depth to the magma chambers:   reverso.H_s = {},  reverso.H_d = {}".format(reverso.H_s, reverso.H_d))
-    print("The radii of the magma chambers:   reverso.a_s = {},  reverso.a_d = {}".format(reverso.a_s, reverso.a_d))
+    print("The depth to the magma chambers:   reverso.H_s = {},  reverso.H_d = {}".format(
+          reverso.H_s, reverso.H_d))
+    print("The radii of the magma chambers:   reverso.a_s = {},  reverso.a_d = {}".format(
+          reverso.a_s, reverso.a_d))
     print("The radius of the connecting tube: reverso.a_c = {}".format(reverso.a_c))
     print("The input magma flow from below:   reverso.Qin = {}".format(reverso.Qin))
-    print("The initial overpressures:         reverso.dPs0 = {}, reverso.dPd0 = {}".format(reverso.dPs0, reverso.dPd0))
+    print("The initial overpressures:         reverso.dPs0 = {}, reverso.dPd0 = {}".format(
+          reverso.dPs0, reverso.dPd0))
     print("The physical parameters: ")
     print("The shear modulus:                 reverso.G = {}".format(reverso.G))
     print("The Poisson ratio:                 reverso.nu = {}".format(reverso.nu))
@@ -330,13 +344,13 @@ def runReverso(plot=False):
     # Comparing Analytical solution with the differential equation
     if plot:
 #        pyplot.plot(tfrac, dPs/1.0e6, label='Differential')
-        pyplot.plot(tfrac, reverso.dPs_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
+        pyplot.plot(tfrac, reverso.dPs_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytic')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Shallow Overpressure (MPa)')
         pyplot.show()
 
 #        pyplot.plot(tfrac, dPd/1.0e6, label='Differential')
-        pyplot.plot(tfrac, reverso.dPd_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytical')
+        pyplot.plot(tfrac, reverso.dPd_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytic')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Deep Overpressure (MPa)')
         pyplot.show()
@@ -356,10 +370,10 @@ def runReverso(plot=False):
         pyplot.title('Vertical Displacement (m)')
         pyplot.show()
 
-    H_los = [reverso.losmat(x, y)]
-    print()
-    print("H_los")
-    print(H_los)
+#    H_los = [reverso.losmat(x, y)]
+#    print()
+#    print("H_los")
+#    print(H_los)
     # that's all
     return
 
