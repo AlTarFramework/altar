@@ -51,12 +51,21 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
     # the material properties
     nu = altar.properties.float(default=0.25)
     nu.doc = 'the Poisson ratio'
-    mu = altar.properties.float(default=2000.)
+    mu = altar.properties.float(default=2000.0)
     mu.doc = 'the magma viscosity in kg/m/s'
-    G = altar.properties.float(default=20.e9)
+    G = altar.properties.float(default=20.0e9)
     G.doc = 'the shear modulus in kg/m/s**2'
-    drho = altar.properties.float(default=300.)
+    drho = altar.properties.float(default=300.0)
     drho.doc = 'the difference in rock-denisty and magma-denisty in kg/m**3'
+    g = altar.properties.float(default=9.81)
+    g.doc = 'the acceleration due to gravity'
+
+    Qin = altar.properties.float(default=0.6)
+    Qin.doc = 'the basal magma inflow rate in m**3/s'
+    dPs0 = 0.0
+    dPs0.doc = 'the shallow reservoir overpressure at t=0 in Pa=kg*m/s**2'
+    dPd0 = 0.0
+    dPd0.doc = 'the deep reservoir overpressure at t=0 in Pa=kg*m/s**2'
 
     # operating strategies
     mode = altar.properties.str(default="fast")
@@ -248,6 +257,9 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
         self.hdIdx = psets['depth of deep reservoir (m)'].offset
         # the basal magma inflow rate
         self.qIdx  = psets['basal magma inflow rate in (m**3/s)'].offset
+        # ?
+        self.offsetIdx = psets["offsets"].offset
+
         # all done
         return
 

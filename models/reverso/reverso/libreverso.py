@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 
-# THIS FILE SHOULD CONTAIN THE ORIGINAL WORKING VERSION IN PLAIN PYTHON.  IT IS THE TEST CASE
-# AGAINST WHICH THE REVERSO.PY OUTPUT WILL BE COMPARED.  IT IS NOT THE VERSION THAT IMPORTS
-# ALTAR, datasheet, etc.
+# eric m. gurrola <eric.m.gurrola@jpl.nasa.gov>
+# (c) 2019 nasa jet propulsion laboratory, california institute of technology
+# all rights reserved
 
+# United States Government Sponsorship acknowledged. Any commercial use must be negotiated with
+# the Office of Technology Transfer at the California Institute of Technology.
+#
+# This software may be subject to U.S. export control laws. By accepting this software, the user
+# agrees to comply with all applicable U.S. export laws and regulations. User has the
+# responsibility to obtain export licenses, or other export authority as may be required before
+# exporting such information to foreign countries or providing access to foreign persons.
+#
 # The Two-Reservoir Model
 # This model assumes an elastic half-space and incompressible magma. The two magma
 # reservoirs comprise a deep reservoir connected to a shallow reservoir by an
 # hydraulic pipe ["A two-magma chamber model as a source of deformation at Grimvsvotn
 # Volcano, Iceland by Reverso etal (2014) Journal of Geophysical Research: Solid Earth
+#
 
 import numpy
 from matplotlib import pyplot
@@ -22,12 +31,10 @@ class ReversoModel:
         g=9.8, G=20.0e9, nu=0.25, mu=2000.0, drho=300.0, shape='sill'):
         # observation locations
         self.locations = locations
-        self.x = []
-        self.y = []
+        self.r = []
         self.t = []
-        for xyt in locations:
-            self.x.append(xyt[0])
-            self.y.append(xyt[1])
+        for xyt in locations[0:10]:
+            self.r.append(numpy.sqrt(xyt[0]**2 + xyt[1]**2))
             self.t.append(xyt[2])
 
         # observation line of sight at each location
@@ -218,6 +225,7 @@ class ReversoModel:
         # the exponential in time term in the solution
         self.dPs_analytic = []
         self.dPd_analytic = []
+        print("len(self.t) = {}".format(len(self.t)))
         for t in self.t:
             f0 = A*(1. - numpy.exp(-t/tau))
             # the secular linear in time term
@@ -233,11 +241,18 @@ class ReversoModel:
         return
 
     def displacements(self):
-        print("Number of spacial observations = {}".format(len(self.x)))
+        print("Number of spacial observations = {}".format(len(self.r)))
+        print("Number of time observations = {}".format(len(self.t)))
         # H-matrix for the radial displacement
-        H_Ur = numpy.squeeze([self.Urmat(r) for i, r in enumerate(self.x)])
+        H_Ur = numpy.squeeze([self.Urmat(r) for i, r in enumerate(self.r)])
+        for i, r in enumerate(self.r):
+            print("i, r, self.Urmat(r) = {}, {}, {}".format(i, r, self.Urmat(r)))
+        print("H_Ur, H_Ur.shape = ", H_Ur, H_Ur.shape)
         # H-matrix for the vertical displacement
-        H_Uz = numpy.squeeze([self.Uzmat(r) for i, r in enumerate(self.x)])
+        H_Uz = numpy.squeeze([self.Uzmat(r) for i, r in enumerate(self.r)])
+        for i, r in enumerate(self.r):
+            print("i, r, self.Uzmat(r) = {}, {}, {}".format(i, r, self.Uzmat(r)))
+        print(" = ", H_Ur, H_Ur.shape)
         self.Ur = numpy.squeeze([numpy.mat(H_Ur) * numpy.mat([[self.dPs_analytic[i]],
                                 [self.dPd_analytic[i]]]) for i in range(len(self.t))])
         self.Uz = numpy.squeeze([numpy.mat(H_Uz) * numpy.mat([[self.dPs_analytic[i]],
@@ -284,13 +299,14 @@ def runReverso(plot=False):
     x = numpy.arange(-5100, 0, 1000)
     x = numpy.append(x, -numpy.flip(x))
     y = x
-    # time-step -1 day in seconds
+    # time-step: 1 day in seconds
     dt = 86400.0
-    # max time
-    tmax = dt*365.0
+    # max time: 1 year
+#    tmax = dt*365.0
+    tmax = dt*2
     # the time array in seconds
     t = numpy.arange(0, tmax, dt)
-    # the time array as fraction of total duration
+    # the time array as fraction of total duration (t[0] = 0.0)
     tfrac = t/tmax
     nt = len(tfrac)
     print("Number of time samples = {}".format(nt))
@@ -303,6 +319,7 @@ def runReverso(plot=False):
     tt = T.flatten()
     # locations of observations at (x,y,t)
     locations = [(xxx, yyy, ttt) for (xxx, yyy, ttt) in zip(xx, yy, tt)]
+    print("locations = {}".format(locations))
     # radii of the observation in the z=0 plane
     # r = numpy.sqrt(x**2 + y**2)
 
@@ -344,13 +361,15 @@ def runReverso(plot=False):
     # Comparing Analytical solution with the differential equation
     if plot:
 #        pyplot.plot(tfrac, dPs/1.0e6, label='Differential')
-        pyplot.plot(tfrac, reverso.dPs_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytic')
+#        pyplot.plot(tfrac, reverso.dPs_analytic, ls='--', lw=6, alpha=0.6, label='Analytic')
+        pyplot.plot(reverso.dPs_analytic, ls='--', lw=6, alpha=0.6, label='Analytic')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Shallow Overpressure (MPa)')
         pyplot.show()
 
 #        pyplot.plot(tfrac, dPd/1.0e6, label='Differential')
-        pyplot.plot(tfrac, reverso.dPd_analytic/1.0e6, ls='--', lw=6, alpha=0.6, label='Analytic')
+        print("len(tfrac) = {}, len(reverso.dPd_analytic) = {}".format(len(tfrac), len(reverso.dPd_analytic)))
+        pyplot.plot(tfrac, reverso.dPd_analytic[0:len(tfrac)], ls='--', lw=6, alpha=0.6, label='Analytic')
         pyplot.legend(loc=2, prop={'size':14}, framealpha=0.5)
         pyplot.title('Deep Overpressure (MPa)')
         pyplot.show()
