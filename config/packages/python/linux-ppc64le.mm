@@ -2,7 +2,7 @@
 #
 # michael a.g. aïvázis
 # parasim
-# (c) 1998-2019 all rights reserved
+# (c) 1998-2020 all rights reserved
 #
 
 # on linux, there are additional dependencies

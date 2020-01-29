@@ -3,7 +3,7 @@
 #
 # eric.m.gurrola <eric.m.gurrola@jpl.nasa.gov>
 #
-# (c) 2010-2019 california institute of technology
+# (c) 2010-2020 california institute of technology
 # all rights reserved
 #
 
