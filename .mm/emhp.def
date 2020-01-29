@@ -9,8 +9,13 @@
 projects += emhp
 
 # project meta-data
-emhp.major := 1
-emhp.minor := 0
+emhp.major := $(repo.major)
+emhp.minor := $(repo.minor)
+emhp.micro := $(repo.micro)
+emhp.revision := $(repo.revision)
+
+# the top level directory
+emhp.home := $(project.home)/models/emhp
 
 # use the altar area for build temporaries
 emhp.tmpdir = ${builder.dest.staging}altar/models/emhp/
@@ -19,9 +24,7 @@ emhp.tmpdir = ${builder.dest.staging}altar/models/emhp/
 emhp.packages := emhp.pkg
 
 # the emhp package meta-data
-emhp.pkg.stem := emhp
-emhp.pkg.root := models/emhp/emhp/
-emhp.pkg.bin := models/emhp/bin/
+emhp.pkg.root := emhp/
 emhp.pkg.pycdir := $(builder.dest.pyc)altar/models/emhp/
 emhp.pkg.drivers := emhp
 

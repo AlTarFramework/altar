@@ -28,7 +28,7 @@ copyright = """
 """
 
 banner = f"""
-    PROJECT {major}.{minor}.{micro} revision {revision}
+    emhp {major}.{minor}.{micro} revision {revision}
 """ + copyright
 
 header = banner + """
