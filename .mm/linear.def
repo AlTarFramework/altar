@@ -9,8 +9,13 @@
 projects += linear
 
 # project meta-data
-linear.major := 1
-linear.minor := 0
+linear.major := $(repo.major)
+linear.minor := $(repo.minor)
+linear.micro := $(repo.micro)
+linear.revision := $(repo.revision)
+
+# the top level directory
+linear.home := $(project.home)/models/linear
 
 # use the altar area for build temporaries
 linear.tmpdir = ${builder.dest.staging}altar/models/linear/
@@ -19,9 +24,7 @@ linear.tmpdir = ${builder.dest.staging}altar/models/linear/
 linear.packages := linear.pkg
 
 # the linear package meta-data
-linear.pkg.stem := linear
-linear.pkg.root := models/linear/linear/
-linear.pkg.bin := models/linear/bin/
+linear.pkg.root := linear/
 linear.pkg.pycdir := $(builder.dest.pyc)altar/models/linear/
 linear.pkg.drivers := linear
 

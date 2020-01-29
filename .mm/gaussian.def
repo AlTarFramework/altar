@@ -9,8 +9,14 @@
 projects += gaussian
 
 # project meta-data
-gaussian.major := 1
-gaussian.minor := 0
+gaussian.major := $(repo.major)
+gaussian.minor := $(repo.minor)
+gaussian.micro := $(repo.micro)
+gaussian.revision := $(repo.revision)
+
+# the top level directory
+gaussian.home := $(project.home)/models/gaussian
+
 
 # use the altar area for build temporaries
 gaussian.tmpdir = ${builder.dest.staging}altar/models/gaussian/
@@ -19,9 +25,7 @@ gaussian.tmpdir = ${builder.dest.staging}altar/models/gaussian/
 gaussian.packages := gaussian.pkg
 
 # the gaussian package meta-data
-gaussian.pkg.stem := gaussian
-gaussian.pkg.root := models/gaussian/gaussian/
-gaussian.pkg.bin := models/gaussian/bin/
+gaussian.pkg.root := gaussian/
 gaussian.pkg.pycdir := $(builder.dest.pyc)altar/models/gaussian/
 gaussian.pkg.drivers := gaussian
 

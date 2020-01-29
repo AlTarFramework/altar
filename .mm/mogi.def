@@ -9,8 +9,13 @@
 projects += mogi
 
 # project meta-data
-mogi.major := 1
-mogi.minor := 0
+mogi.major := $(repo.major)
+mogi.minor := $(repo.minor)
+mogi.micro := $(repo.micro)
+mogi.revision := $(repo.revision)
+
+# the top level directory
+mogi.home := $(project.home)/models/mogi
 
 # use the altar area for build temporaries
 mogi.tmpdir = ${builder.dest.staging}altar/models/mogi/
@@ -23,22 +28,18 @@ mogi.libraries = mogi.lib ${if ${value cuda.dir},mogi.cudalib}
 mogi.extensions = mogi.ext ${if ${value cuda.dir},mogi.cudaext}
 
 # the mogi package meta-data
-mogi.pkg.stem := mogi
-mogi.pkg.root := models/mogi/mogi/
-mogi.pkg.bin := models/mogi/bin/
+mogi.pkg.root := mogi/
 mogi.pkg.pycdir := $(builder.dest.pyc)altar/models/mogi/
 mogi.pkg.drivers := mogi
 
 # the mogi library metadata
-mogi.lib.stem := mogi
-mogi.lib.root := models/mogi/lib/libmogi/
+mogi.lib.root := lib/libmogi/
 mogi.lib.incdir := $(builder.dest.inc)altar/models/mogi/
 mogi.lib.extern := gsl pyre
 mogi.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # the mogi extension meta-data
-mogi.ext.stem := mogi
-mogi.ext.root := models/mogi/ext/mogi/
+mogi.ext.root := ext/mogi/
 mogi.ext.pkg := mogi.pkg
 mogi.ext.wraps := mogi.lib
 mogi.ext.extern := mogi.lib gsl pyre python
@@ -47,7 +48,7 @@ mogi.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # the mogi CUDA library metadata
 mogi.cudalib.stem := cudamogi
-mogi.cudalib.root := models/mogi/lib/libcudamogi/
+mogi.cudalib.root := lib/libcudamogi/
 mogi.cudalib.incdir := $(builder.dest.inc)altar/models/cudamogi/
 mogi.cudalib.extern := gsl pyre cuda
 # compile options for the sources
@@ -56,7 +57,7 @@ mogi.cudalib.cuda.flags += $(nvcc.std.c++14)
 
 # the mogi CUDA extension meta-data
 mogi.cudaext.stem := cudamogi
-mogi.cudaext.root := models/mogi/ext/cudamogi/
+mogi.cudaext.root := ext/cudamogi/
 mogi.cudaext.pkg := mogi.pkg
 mogi.cudaext.wraps := mogi.cudalib
 mogi.cudaext.extern := mogi.cudalib gsl pyre python cuda
