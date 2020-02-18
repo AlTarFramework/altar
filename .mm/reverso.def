@@ -1,0 +1,30 @@
+# -*- Makefile -*-
+#
+# michael a.g. aïvázis (michael.aivazis@para-sim.com)
+# (c) 1998-2020 all rights reserved
+#
+
+# add me to the pile
+projects += reverso
+
+# project meta-data
+reverso.major := $(repo.major)
+reverso.minor := $(repo.minor)
+reverso.micro := $(repo.micro)
+reverso.revision := $(repo.revision)
+
+# the top level directory
+reverso.home := $(project.home)/models/reverso
+
+# use the altar area for build temporaries
+reverso.tmpdir = ${builder.dest.staging}altar/models/reverso/
+
+# reverso consists of a python package
+reverso.packages := reverso.pkg
+
+# the reverso package meta-data
+reverso.pkg.root := reverso/
+reverso.pkg.pycdir := $(builder.dest.pyc)altar/models/reverso/
+reverso.pkg.drivers := reverso
+
+# end of file
