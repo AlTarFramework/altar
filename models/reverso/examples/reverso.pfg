@@ -1,0 +1,57 @@
+;
+; michael a.g. aïvázis (michael.aivazis@para-sim.com)
+; grace bato           (mary.grace.p.bato@jpl.nasa.gov)
+; eric m. gurrola      (eric.m.gurrola@jpl.nasa.gov)
+;
+; (c) 2013-2020 parasim inc
+; (c) 2010-2020 california institute of technology
+; all rights reserved
+
+
+reverso:
+    ; for running with MPI
+    ; shell = mpi.mpirun
+
+    controller:
+        ; saving the results of the calculation
+        archiver:
+            theta = theta.asc
+            sigma = sigma.asc
+            llk = posterior.asc
+
+    ; job layout
+    job:
+        hosts = 1       ; number of MPI hosts
+        tasks = 1       ; number of tasks per host
+        gpus = 0        ; number of gpus per task
+        chains = 2**12  ; number of chains per task
+        steps = 20      ; the length of each chain
+
+    monitors:
+       prof = altar.bayesian.profiler
+
+    ; model configuration
+    model:
+        ; the cdm engine: native or fast
+        mode = fast
+
+        ; parameter sets
+        psets:
+            location = contiguous
+
+            location:
+                count = 2
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (-1000, 1000)
+                prior:
+                    support = (-1000, 1000)
+
+
+; for parallel runs
+mpi.shells.mpirun # cdm.shell:
+    hostfile = localhost
+    extra = -mca btl self,tcp
+
+; end of file
