@@ -23,6 +23,8 @@ reverso.tmpdir = ${builder.dest.staging}altar/models/reverso/
 reverso.packages := reverso.pkg
 # a librray
 reverso.libraries := reverso.lib
+# and an extension
+reverso.extensions := reverso.ext
 
 # the reverso package meta-data
 reverso.pkg.root := reverso/
@@ -34,5 +36,13 @@ reverso.lib.root := lib/libreverso
 reverso.lib.incdir := $(builder.dest.inc)altar/models/reverso/
 reverso.lib.extern := gsl pyre
 reverso.lib.c++.flags += $($(compiler.c++).std.c++17)
+
+# the reverso extension meta-data
+reverso.ext.root := ext/reverso/
+reverso.ext.pkg := reverso.pkg
+reverso.ext.wraps := reverso.lib
+reverso.ext.extern := reverso.lib gsl pyre python
+# compile options for the sources
+reverso.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # end of file
