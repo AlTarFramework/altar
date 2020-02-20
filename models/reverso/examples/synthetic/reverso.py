@@ -9,6 +9,8 @@
 # all rights reserved
 
 
+# externals
+import math
 # framework
 import altar
 # my model
@@ -107,7 +109,7 @@ class Reverso(altar.application, family="altar.applications.reverso"):
         displacements = source.displacements(locations=ticks)
 
         # compute the displacements
-        for i,((t,x,y), (u_r, u_z)) in enumerate(zip(ticks, displacements)):
+        for i,((t,x,y), (u_r, u_Z)) in enumerate(zip(ticks, displacements)):
             # make a new entry in the data sheer
             rec = data.pyre_new()
 
@@ -118,11 +120,21 @@ class Reverso(altar.application, family="altar.applications.reverso"):
             rec.x = x
             rec.y = y
 
-            # record the displacements
-            rec.uZ = u_z
+            # find the polar angle of the vector to the observation location
+            phi = math.atan2(y,x)
+            # compute the E and N components
+            u_E = u_r * math.sin(phi)
+            u_N = u_r * math.cos(phi)
 
-            # record the variances
-            rec.σZ = (0.1*u_z)**2
+            # record the displacements
+            rec.uE = u_E
+            rec.uN = u_N
+            rec.uZ = u_Z
+
+            # estimate the variance base on a 5% deviation from the mean value
+            rec.σE = (0.05*u_E)**2
+            rec.σN = (0.05*u_N)**2
+            rec.σZ = (0.05*u_Z)**2
 
         # all done
         return data
@@ -132,12 +144,6 @@ class Reverso(altar.application, family="altar.applications.reverso"):
         """
         Generate times and locations for the observations
         """
-
-        yield (0, 1000, 0)
-        yield (86400, 1000, 0)
-
-        return
-
         # get time
         year = altar.units.time.year.value
         # max time
