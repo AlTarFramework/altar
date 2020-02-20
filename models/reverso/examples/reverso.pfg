@@ -33,20 +33,60 @@ reverso:
     ; model configuration
     model:
         ; the cdm engine: native or fast
-        mode = fast
+        mode = analytic
 
         ; parameter sets
         psets:
-            location = contiguous
+            H_s = contiguous
+            H_d = contiguous
+            a_s = contiguous
+            a_d = contiguous
+            a_c = contiguous
 
-            location:
-                count = 2
+            H_s:
+                count = 1
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (-1000, 1000)
+                    support = (2500, 3500)
                 prior:
-                    support = (-1000, 1000)
+                    support = (2500, 3500)
+
+            H_d:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (3500, 4500)
+                prior:
+                    support = (3500, 4500)
+
+            a_s:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (1500, 2500)
+                prior:
+                    support = (1500, 2500)
+
+            a_d:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (1500, 2500)
+                prior:
+                    support = (1500, 2500)
+
+            a_c:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (1, 2)
+                prior:
+                    support = (1, 2)
 
 
 ; for parallel runs
