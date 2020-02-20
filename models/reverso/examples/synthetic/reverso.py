@@ -25,6 +25,12 @@ class Reverso(altar.application, family="altar.applications.reverso"):
 
 
     # public data
+    H_s = altar.properties.float(default=3.0e3)
+    H_s.doc = "depth of the shallow reservoir"
+
+    H_d = altar.properties.float(default=4.0e3)
+    H_d.doc = "depth of the deep reservoir"
+
     a_s = altar.properties.float(default=2.0e3)
     a_s.doc = "radius of the shallow magma reservoir"
 
@@ -33,12 +39,6 @@ class Reverso(altar.application, family="altar.applications.reverso"):
 
     a_c = altar.properties.float(default=1.5)
     a_c.doc = "radius of the hydraulic pipe connecting two magma reservoirs"
-
-    H_s = altar.properties.float(default=3.0e3)
-    H_s.doc = "depth of the shallow reservoir"
-
-    H_d = altar.properties.float(default=4.0e3)
-    H_d.doc = "depth of the deep reservoir"
 
     Qin = altar.properties.float(default=0.6)
     Qin.doc = "basal magma inflow rate"
@@ -132,9 +132,9 @@ class Reverso(altar.application, family="altar.applications.reverso"):
             rec.uZ = u_Z
 
             # estimate the variance base on a 5% deviation from the mean value
-            rec.σE = (0.05*u_E)**2
-            rec.σN = (0.05*u_N)**2
-            rec.σZ = (0.05*u_Z)**2
+            rec.σE = max(0.05*u_E, .01)**2
+            rec.σN = max(0.05*u_N, .01)**2
+            rec.σZ = max(0.05*u_Z, .01)**2
 
         # all done
         return data
