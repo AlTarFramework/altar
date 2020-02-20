@@ -24,7 +24,7 @@ class Fast:
 
 
     # interface
-    def initiaize(self, model, **kwds):
+    def initialize(self, model, **kwds):
         """
         Initialize the strategy with {model} information
         """
@@ -42,7 +42,7 @@ class Fast:
         # and the observations
         libreverso.data(source, displacements.data)
         # inform the source about the sample layout; assume contiguous parameter sets
-        libcdm.layout(source,
+        libreverso.layout(source,
                       model.HsIdx, model.HdIdx, model.asIdx, model.adIdx, model.acIdx)
 
         # all done
@@ -58,15 +58,13 @@ class Fast:
         source = self.source
         # compute the portion of the sample that belongs to me
         θ = model.restrict(theta=step.theta)
-        # get the observation locations and times
-        ticks = self.ticks
         # allocate a matrix to hold the predicted displacements
         predicted = altar.matrix(shape=(step.samples, 3*model.observations))
 
         # compute the predicted displacements
-        libcdm.displacements(source, ticks.data, θ.capsule, predicted.data)
+        libreverso.displacements(source, θ.capsule, predicted.data)
         # compute the residuals (in place)
-        libcdm.residuals(source, predicted.data)
+        libreverso.residuals(source, predicted.data)
 
         # get the norm
         norm = model.norm
