@@ -21,10 +21,18 @@ reverso.tmpdir = ${builder.dest.staging}altar/models/reverso/
 
 # reverso consists of a python package
 reverso.packages := reverso.pkg
+# a librray
+reverso.libraries := reverso.lib
 
 # the reverso package meta-data
 reverso.pkg.root := reverso/
 reverso.pkg.pycdir := $(builder.dest.pyc)altar/models/reverso/
 reverso.pkg.drivers := reverso
+
+# the reverso library
+reverso.lib.root := lib/libreverso
+reverso.lib.incdir := $(builder.dest.inc)altar/models/reverso/
+reverso.lib.extern := gsl pyre
+reverso.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # end of file
