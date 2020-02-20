@@ -33,7 +33,7 @@ reverso:
     ; model configuration
     model:
         ; the cdm engine: native or fast
-        mode = analytic
+        mode = fast
 
         ; parameter sets
         psets:

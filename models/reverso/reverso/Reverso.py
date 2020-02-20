@@ -30,9 +30,9 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
     case.doc = "the directory with the input files; output will be placed here as well"
 
     # the computational strategy to use
-    mode = altar.properties.str(default="analytic")
+    mode = altar.properties.str(default="fast")
     mode.doc = "the implementation strategy"
-    mode.validators = altar.constraints.isMember("analytic")
+    mode.validators = altar.constraints.isMember("analytic", "fast")
 
     # the norm to use for computing the data log likelihood
     norm = altar.norms.norm()
