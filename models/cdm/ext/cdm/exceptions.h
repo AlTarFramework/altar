@@ -11,17 +11,11 @@
 
 
 // place everything in my private namespace
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace cdm {
-                // base class for altar errors
-                extern PyObject * Error;
-                extern const char * const Error__name__;
-            } // of namespace cdm
-        } // of namespace models
-    } // of namespace extensions
-} // of namespace altar
+namespace altar::extensions::models::cdm {
+    // base class for altar errors
+    extern PyObject * Error;
+    extern const char * const Error__name__;
+}
 
 #endif
 

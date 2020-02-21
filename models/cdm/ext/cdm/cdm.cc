@@ -19,17 +19,11 @@
 
 
 // put everything in my private namespace
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace cdm {
-                // the module method table
-                extern PyMethodDef module_methods[];
-                extern PyModuleDef module_definition;
-            } // of namespace cdm
-        } // of namespace models
-    } // of namespace extensions
-} // of namespace altar
+namespace altar::extensions::models::cdm {
+    // the module method table
+    extern PyMethodDef module_methods[];
+    extern PyModuleDef module_definition;
+}
 
 PyMethodDef
 altar::extensions::models::cdm::
