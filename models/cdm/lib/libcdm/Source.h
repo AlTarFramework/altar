@@ -13,16 +13,12 @@
 #include <vector>
 
 // forward declarations
-namespace altar {
-    namespace models {
-        namespace cdm {
-            // forwards declarations
-            class Source;
+namespace altar::models::cdm {
+    // forwards declarations
+    class Source;
 
-            // type aliases
-            using source_t = Source;
-        }
-    }
+    // type aliases
+    using source_t = Source;
 }
 
 

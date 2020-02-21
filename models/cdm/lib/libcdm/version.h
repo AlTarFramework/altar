@@ -9,12 +9,8 @@
 #if !defined(altar_models_cdm_version_h)
 #define altar_models_cdm_version_h
 
-namespace altar {
-    namespace models {
-        namespace cdm {
-            const char * version();
-        }
-    }
+namespace altar::models::cdm {
+    const char * version();
 }
 
 #endif
