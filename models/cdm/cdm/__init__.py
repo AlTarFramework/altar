@@ -16,7 +16,7 @@ from .Source import Source as source
 # and the layout of the input file
 from .Data import Data as data
 
-# implementations
+# model foundry
 @altar.foundry(implements=altar.models.model, tip="a multi-parameter CDM model")
 def cdm():
     # grab the factory
