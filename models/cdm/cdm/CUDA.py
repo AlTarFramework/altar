@@ -11,14 +11,14 @@
 
 # externals
 import altar
-# the pure python implementation of the CDM source
+# the CUDA accelerated implementation
 from altar.models.cdm.ext import libcudacdm
 
 
 # declaration
 class CUDA:
     """
-    A strategy for computing the data log likelihood that is written in pure python
+    A CUDA accelerated strategy for computing the data log likelihood
     """
 
     # interface

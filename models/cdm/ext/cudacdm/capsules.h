@@ -11,14 +11,8 @@
 #define altar_extensions_models_cudacdm_capsules_h
 
 // capsules
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace cudacdm {
-                const char * const source_capst = "altar.models.cudacdm.source";
-            }
-        }
-    }
+namespace altar::extensions::models::cudacdm {
+    const char * const source_capst = "altar.models.cudacdm.source";
 }
 
 #endif

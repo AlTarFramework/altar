@@ -11,15 +11,16 @@
 
 # externals
 import altar
-# the pure python implementation of the CDM source
+# a CDM source that delegates the time consuming calculation to an implementation in C++
 from altar.models.cdm.ext import libcdm
 
 
 # declaration
 class Fast:
     """
-    A strategy for computing the data log likelihood that is written in pure python
+    A C++ accelerated strategy for computing the data log likelihood
     """
+
 
     # interface
     def initialize(self, model, **kwds):

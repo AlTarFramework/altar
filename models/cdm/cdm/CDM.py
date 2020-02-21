@@ -21,11 +21,23 @@ from .Data import Data as datasheet
 class CDM(altar.models.bayesian, family="altar.models.cdm"):
     """
     An implementation of the Compound Dislocation Model, Nikhoo et al. [2017]
-
     """
 
 
     # user configurable state
+    # the name of the workspace
+    case = altar.properties.path(default="synthetic")
+    case.doc = "the directory with the input files"
+
+    # operating strategies
+    mode = altar.properties.str(default="fast")
+    mode.doc = "the implementation strategy"
+    mode.validators = altar.constraints.isMember("native", "fast")
+
+    # the material properties
+    nu = altar.properties.float(default=.25)
+    nu.doc = "the Poisson ratio"
+
     # parameters
     psets = altar.properties.dict(schema=altar.models.parameters())
     psets.doc = "the model parameter meta-data"
@@ -39,25 +51,12 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     norm.default = altar.norms.l2()
     norm.doc = "the norm to use when computing the data log likelihood"
 
-    # the name of the test case
-    case = altar.properties.path(default="synthetic")
-    case.doc = "the directory with the input files"
-
     # the file based inputs
     displacements = altar.properties.path(default="displacements.csv")
     displacements.doc = "the name of the file with the displacements"
 
     covariance = altar.properties.path(default="cd.txt")
     covariance.doc = "the name of the file with the data covariance"
-
-    # the material properties
-    nu = altar.properties.float(default=.25)
-    nu.doc = "the Poisson ratio"
-
-    # operating strategies
-    mode = altar.properties.str(default="fast")
-    mode.doc = "the implementation strategy"
-    mode.validators = altar.constraints.isMember("native", "fast")
 
     # public data
     parameters = 0 # adjusted during model initialization
@@ -427,9 +426,7 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
 
 
     # private data
-    ifs = None # filesystem with the input data
-
-    # input
+    # inputs
     d = None # the vector of displacements for each control point
     los = None # the list of LOS vectors for each observation
     oid = None # dataset id that each observation belongs to; tied to the {offset} parameter set
@@ -448,6 +445,9 @@ class CDM(altar.models.bayesian, family="altar.models.cdm"):
     omegaYIdx = 0
     omegaZIdx = 0
     offsetIdx = 0
+
+    # the workspace filesystem
+    ifs = None # filesystem with the input data
 
     # computed
     cd_inv = None # the inverse of my data covariance matrix

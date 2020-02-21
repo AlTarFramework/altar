@@ -19,17 +19,11 @@
 
 
 // put everything in my private namespace
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace cudacdm {
-                // the module method table
-                extern PyMethodDef module_methods[];
-                extern PyModuleDef module_definition;
-            } // of namespace cudacdm
-        } // of namespace models
-    } // of namespace extensions
-} // of namespace altar
+namespace altar::extensions::models::cudacdm {
+    // the module method table
+    extern PyMethodDef module_methods[];
+    extern PyModuleDef module_definition;
+}
 
 PyMethodDef
 altar::extensions::models::cudacdm::

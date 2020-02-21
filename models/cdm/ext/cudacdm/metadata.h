@@ -11,18 +11,12 @@
 
 
 // place everything in my private namespace
-namespace altar {
-    namespace extensions {
-        namespace models {
-            namespace cudacdm {
-                // version
-                extern const char * const version__name__;
-                extern const char * const version__doc__;
-                PyObject * version(PyObject *, PyObject *);
-            } // of namespace cudacdm
-        } // of namespace models
-    } // of namespace extensions
-} // of namespace altar
+namespace altar::extensions::models::cudacdm {
+    // version
+    extern const char * const version__name__;
+    extern const char * const version__doc__;
+    PyObject * version(PyObject *, PyObject *);
+}
 
 #endif
 

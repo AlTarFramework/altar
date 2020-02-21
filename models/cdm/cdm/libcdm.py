@@ -35,6 +35,7 @@ def norm(v):
     return numpy.sqrt(v.dot(v))
 
 
+# the response function
 def CDM(X, Y, X0, Y0, depth, ax, ay, az, omegaX, omegaY, omegaZ, opening, nu):
     """
     CDM
