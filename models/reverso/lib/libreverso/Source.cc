@@ -1,7 +1,6 @@
 // -*- C++ -*-
 //
-// eric m. gurrola <eric.m.gurrola@jpl.nasa.gov>
-// california institute of technology * jet propulsion lab * nasa
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
 // (c) 2013-2020 parasim inc
 // all rights reserved
 //
@@ -43,17 +42,6 @@ altar::models::reverso::Source::
             << pyre::journal::endl;
     }
 
-    // if we were handed a matrix of line of sight vectors
-    if (_los) {
-        // release it
-        gsl_matrix_free(_los);
-        // tell me
-        channel
-            << pyre::journal::at(__HERE__)
-            << "  released {_los} matrix at" << _los
-            << pyre::journal::endl;
-    }
-
     // all done
     channel
         << pyre::journal::at(__HERE__)
@@ -76,40 +64,23 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
     // go through all the samples
     for (auto sample=0; sample<nSamples; ++sample) {
         // unpack the parameters
-        // x, y position of the center of the connecting tube = space origin (z0Src=0)
-        auto x0Src = gsl_matrix_get(&samples->matrix, sample, _x0Idx);
-        auto y0Src = gsl_matrix_get(&samples->matrix, sample, _y0Idx);
-        // time origin
-        auto t0Src = gsl_matrix_get(&samples->matrix, sample, _t0Idx);
-        // depth and radius of the shallow reservoir
-        auto hsSrc = gsl_matrix_get(&samples->matrix, sample, _hsIdx);
-        auto asSrc = gsl_matrix_get(&samples->matrix, sample, _asIdx);
-        // depth and radius of the deep reservoir
-        auto hdSrc = gsl_matrix_get(&samples->matrix, sample, _hdIdx);
-        auto adSrc = gsl_matrix_get(&samples->matrix, sample, _adIdx);
-        // radius of the connecting tube between the two reservoirs
-        auto acSrc = gsl_matrix_get(&samples->matrix, sample, _acIdx);
-        // base magma inflow rate from below the deep reservoir
-        auto qSrc  = gsl_matrix_get(&samples->matrix, sample, _qIdx);
+        // the flow rate
+        auto Qin = gsl_matrix_get(&samples->matrix, sample, _QinIdx);
+        // the chamber locations
+        auto H_s = gsl_matrix_get(&samples->matrix, sample, _HsIdx);
+        auto H_d = gsl_matrix_get(&samples->matrix, sample, _HdIdx);
+        // the chamber sizes
+        auto a_s = gsl_matrix_get(&samples->matrix, sample, _asIdx);
+        auto a_d = gsl_matrix_get(&samples->matrix, sample, _adIdx);
+        // the hydraulic pipe radius
+        auto a_c = gsl_matrix_get(&samples->matrix, sample, _acIdx);
 
-        //compute the displacements
-        reverso(sample, _locations, _los,
-                x0Src, y0Src, t0Src,
-                hsSrc, asSrc,
-                hdSrc, adSrc,
-                acSrc, qSrc,
-                _nu, _mu,
-        // apply the location specific projection to LOS vector and dataset shift
-        for (auto loc=0; loc<_locations->size1; ++loc) {
-            // get the current value
-            auto u = gsl_matrix_get(predicted, sample, loc);
-            // find the shift that corresponds to this observation
-            auto shift = gsl_matrix_get(&samples->matrix, sample, _offsetIdx+_oids[loc]);
-            // and apply it to the projected displacement
-            u -= shift;
-            // save
-            gsl_matrix_set(predicted, sample, loc, u);
-        }
+        // compute the displacements
+        reverso(sample, _locations,
+                H_s, H_d, a_s, a_d, a_c,
+                Qin,
+                _G, _v, _mu, _drho, _g,
+                predicted);
     }
 
     // all done

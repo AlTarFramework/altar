@@ -1,118 +1,92 @@
-# -*- python -*-
 # -*- coding: utf-8 -*-
 #
-# eric m. gurrola
+# michael a.g. aïvázis (michael.aivazis@para-sim.com)
+# grace bato           (mary.grace.p.bato@jpl.nasa.gov)
+# eric m. gurrola      (eric.m.gurrola@jpl.nasa.gov)
 #
-# (c) 2018 california institute of technology
+# (c) 2013-2020 parasim inc
+# (c) 2010-2020 california institute of technology
 # all rights reserved
-#
-#
 
 
-# framework
-import altar
-# externals
-import numpy
-from math import sqrt, pi as π
 # library
-from .libreverso import Reverso
+from .libreverso import REVERSO
 
 
-# declaration
+# the source
 class Source:
     """
-    The source response for a Reverso (Connected Two Magma Chambers Volcano) Model.
+    The source response for a Reverso model
     """
 
 
     # public data
-    # radius of the hydraulic pipe connecting two magma reservoirs
-    ac = 0
     # radius of the shallow magma reservoir
-    as = 0
+    a_s = 0
     # radius of the deep magma reservoir
-    ad = 0
+    a_d = 0
+    # radius of the hydraulic pipe connecting two magma reservoirs
+    a_c = 0
     # depth of the shallow reservoir
-    hs = 0
+    H_s = 0
     # depth of the deep reservoir
-    hd = 0
-    # basal magma inflow rate from below the deep chamber
-    q = 0
+    H_d = 0
 
-    # material properties
-    v = .25 # Poisson ratio
+    # physical parameters
+    # shear modulus, [Pa, kg-m/s**2]
+    G = 20.0E9
+    # Poisson's ratio
+    v = 0.25
+    # viscosity [Pa-s]
+    mu = 2000.0
+    # density difference (ρ_r-ρ_m), [kg/m**3]
+    drho = 300.0
+    # gravitational acceleration [m/s**2]
+    g = 9.81
+
+    # basal magma inflow rate
+    Qin = 0.6
 
 
     # interface
-    def displacements(self, locations, los):
+    def displacements(self, locations):
         """
-        Compute the expected displacements at a set of observation locations from a
-        two magma chamber (reverso) volcano model
+        Compute the expected displacements at a set of observation locations and times
         """
-        # the radius of the shallow reservoir
-        as_src = self.as
-        # the radius of the deep reservoir
-        ad_src = self.ad
-        # the radius of the connecting pipe between the two reservoirs
-        ac_src = self.ac
-        # depth of the shallow reservoir
-        hs_src = self.hs
-        # depth of the deep reservoir
-        hd_src = self.hd
-        # the basal magma inflow rate
-        q_src  = self.q
-
-        # get the material properties
-        v = self.v
-
-        # from locations, a vector of (x,y) tuples, create the flattened vectors Xf, Yf required by
-        # CDM
-        Xf = numpy.zeros(len(locations), dtype=float)
-        Yf = numpy.zeros(len(locations), dtype=float)
-        for i, loc in enumerate(locations):
-            Xf[i] = loc[0]
-            Yf[i] = loc[1]
-
-        # allocate space for the result
-        u = altar.vector(shape=len(locations))
         # compute the displacements
-        ue, un, uv =  Reverso(X=Xf, Y=Yf, X0=x_src, Y0=y_src, depth=d_src,
-                          ax=ax_src, ay=ay_src, az=az_src,
-                          omegaX=omegaX_src, omegaY=omegaY_src, omegaZ=omegaZ_src,
-                          opening=opening, nu=v)
-        # go through each observation location
-        for idx, (ux,uy,uz) in enumerate(zip(ue, un, uv)):
-            # project the expected displacement along LOS and store
-            u[idx] = ux * los[idx,0] + uy * los[idx,1] + uz * los[idx,2]
-
+        yield from REVERSO(locations=locations,
+                           H_s=self.H_s, H_d=self.H_d, a_s=self.a_s, a_d=self.a_d, a_c=self.a_c,
+                           Qin=self.Qin,
+                           G=self.G, v=self.v, mu=self.mu, drho=self.drho, g=self.g)
         # all done
-        return u
+        return
 
 
     # meta-methods
-    def __init__(self, x=x, y=y, d=d,
-                 ax=ax, ay=ay, az=az, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
-                 opening=opening, v=v, **kwds):
+    def __init__(self,
+                 H_s=H_s, H_d=H_d, a_s=a_s, a_d=a_d, a_c=a_c,
+                 Qin=Qin,
+                 G=G, v=v, mu=mu, drho=drho, g=g,
+                 **kwds):
         # chain up
         super().__init__(**kwds)
-        # store the location
-        self.x = x
-        self.y = y
-        self.d = d
-        # the semi-axes
-        self.ax = ax
-        self.ay = ay
-        self.az = az
-        # the rotation angles
-        self.omegaX = omegaX
-        self.omegaY = omegaY
-        self.omegaZ = omegaZ
-        # the opening
-        self.opening = opening
-        # and the Poisson ratio
+
+        # store the radii
+        self.a_c = a_c
+        self.a_s = a_s
+        self.a_d = a_d
+        # store the chamber locations
+        self.H_s = H_s
+        self.H_d = H_d
+
+        # store the rest of the parameters
+        self.Qin = Qin
+        self.G = G
         self.v = v
-        # the strength
-        self.dV =  4*(ax*ay + ax*az + ay*az) * opening
+        self.mu = mu
+        self.drho = drho
+        self.g = g
+
         # all done
         return
 

@@ -64,5 +64,6 @@ add_subdirectory(models/gaussian)
 add_subdirectory(models/mogi)
 add_subdirectory(models/cdm)
 add_subdirectory(models/linear)
+add_subdirectory(models/reverso)
 
 # end of file

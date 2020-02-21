@@ -59,7 +59,7 @@ function(altar_mogi_buildLibrary)
     )
 
   # copy the mogi headers; note the trickery with the terminating slash in the source
-  # directory that let's us place the files in the correct destination
+  # directory that lets us place the files in the correct destination
   file(
     COPY lib/libmogi/
     DESTINATION ${CMAKE_INSTALL_PREFIX}/${ALTAR_DEST_INCLUDE}/altar/models/mogi

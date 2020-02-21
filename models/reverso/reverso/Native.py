@@ -1,14 +1,19 @@
-# -*- python -*-
 # -*- coding: utf-8 -*-
 #
-# eric m. gurrola <eric.gurrola@jpl.nasa.gov>
+# michael a.g. aïvázis (michael.aivazis@para-sim.com)
+# grace bato           (mary.grace.p.bato@jpl.nasa.gov)
+# eric m. gurrola      (eric.m.gurrola@jpl.nasa.gov)
 #
-# (c) 2018 california institute of technology
+# (c) 2013-2020 parasim inc
+# (c) 2010-2020 california institute of technology
 # all rights reserved
-#
-#
 
-# the pure python implementation of the REVERSO source
+
+# externals
+import math
+# the framework
+import altar
+# the pure python implementation of the CDM source
 from .Source import Source as source
 
 
@@ -51,53 +56,55 @@ class Native:
         psets = model.psets
 
         # get the offsets of the various parameter sets
-        # radius of the shallow reservoir
-        asIdx = model.asIdx
-        # radius of the connecting tube
-        acIdx = model.acIdx
-        # radius of the deep reservoir
-        adIdx = model.adIdx
-        # depth of the shallow reservoir
-        hsIdx = model.hsIdx
-        # depth of the shallow reservoir
-        hdIdx = model.hdIdx
-        # the basal magma flow rate
-        qIdx  = model.qIdx
+        QinIdx = model.Qin_idx
+        HsIdx = model.Hs_idx
+        HdIdx = model.Hd_idx
+        asIdx = model.as_idx
+        adIdx = model.ad_idx
+        acIdx = model.ac_idx
 
-        # get the observations
-        los = model.los
-        oid = model.oid
-        locations = model.points
-        observations = model.observations
+        # get the locations and times of the observations
+        ticks = model.ticks
+        # initialize a vector to hold the expected displacements
+        u = altar.vector(shape=(3*model.observations))
 
         # for each sample in the sample set
         for sample in range(samples):
             # extract the parameters
             parameters = θ.getRow(sample)
-            # get the radius and depth of the shallow reservoir
-            as = parameters[asIdx]
-            hs = parameters[hsIdx]
-            # get the radius and depth of the deep reservoir
-            ad = parameters[adIdx]
-            hd = parameters[hdIdx]
-            # get the radius of the hydraulic pipe connecting the two reservoirs
-            ac = parameters[acIdx]
-            # get the basal magma inflow rate
-            q  = parameters[qIdx]
+            # get the flow rate
+            Qin = parameters[QinIdx]
+            # get the locations of the chambers
+            H_s = parameters[HsIdx]
+            H_d = parameters[HdIdx]
+            # get the sizes
+            a_s = parameters[asIdx]
+            a_d = parameters[adIdx]
+            a_c = parameters[acIdx]
 
             # make a source using the sample parameters
-            reverso = source(as=as, hs=hs, ad=ad, hd=hd,
-                         ax=aX, ay=aY, az=aZ, omegaX=omegaX, omegaY=omegaY, omegaZ=omegaZ,
-                         v=model.nu)
-            # compute the expected displacement
-            u = reverso.displacements(locations=locations, los=los)
+            reverso = source(H_s=H_s, H_d=H_d,
+                             a_s=a_s, a_d=a_d, a_c=a_c,
+                             Qin=Qin,
+                             G=model.G, v=model.v, mu=model.mu, drho=model.drho, g=model.g)
+
+            # prime the displacement calculator
+            predicted = reverso.displacements(locations=ticks)
+
+            # compute the displacements
+            for idx, ((t,x,y), (u_R,u_Z)) in enumerate(zip(ticks, predicted)):
+                # find the polar angle of the vector to the observation location
+                phi = math.atan2(y,x)
+                # compute the E and N components
+                u_E = u_R * math.sin(phi)
+                u_N = u_R * math.cos(phi)
+                # save
+                u[3*idx + 0] = u_E
+                u[3*idx + 1] = u_N
+                u[3*idx + 2] = u_Z
 
             # subtract the observed displacements
             u -= displacements
-            # adjust using the offset
-            for obs in range(observations):
-                # appropriate for the corresponding dataset
-                u[obs] -= parameters[offsetIdx + oid[obs]]
 
             # compute the norm of the displacements
             nrm = norm.eval(v=u, sigma_inv=cd_inv)

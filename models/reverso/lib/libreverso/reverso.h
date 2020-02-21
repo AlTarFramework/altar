@@ -1,29 +1,20 @@
 // -*- C++ -*-
 //
-// eric m. gurrola <eric.m.gurrola@jpl.nasa.gov>
-//
-// (c) 2019 jet propulsion laboratory
-// california institute of technology
-// all rights reserved
+// michael a.g. aïvázis <michael.aivazis@para-sim.com>
+// parasim
+// (c) 2013-2020 all rights reserved
 //
 
 // code guard
-#if !defined(altar_models_cdm_cdm_h)
-#define altar_models_cdm_cdm_h
+#if !defined(altar_models_reverso_reverso_h)
+#define altar_models_reverso_reverso_h
 
-namespace altar {
-    namespace models {
-        namespace reverso {
-            void reverso(int sample,
-                     const gsl_matrix * locations, const gsl_matrix * los,
-                     double g, double Gsm, double nu, double mu, double drho,
-                     double x0, double y0, double t0,
-                     double as, double ac, double ad,
-                     double hs, double hd, double qin,
-                     gsl_matrix * predicted
-                     );
-        }
-    }
+namespace altar::models::reverso {
+    void reverso(int sample, const gsl_matrix * locations,
+                 double H_s, double H_d, double a_s, double a_d, double a_c,
+                 double _Qin,
+                 double G, double v, double mu, double drho, double g,
+                 gsl_matrix * predicted);
 }
 
 #endif

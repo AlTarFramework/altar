@@ -3,134 +3,134 @@
 # michael a.g. aïvázis <michael.aivazis@para-sim.com>
 # (c) 2003-2020 all rights reserved
 
-# build the cdm package
-function(altar_cdm_buildPackage)
+# build the reverso package
+function(altar_reverso_buildPackage)
   # install the sources straight from the source directory
   install(
-    DIRECTORY cdm
+    DIRECTORY reverso
     DESTINATION ${ALTAR_DEST_PACKAGES}/altar/models
     FILES_MATCHING PATTERN *.py
     )
   # build the package meta-data
   configure_file(
-    cdm/meta.py.in cdm/meta.py
+    reverso/meta.py.in reverso/meta.py
     @ONLY
     )
   # install the generated package meta-data file
   install(
-    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cdm
+    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/reverso
     DESTINATION ${ALTAR_DEST_PACKAGES}/altar/models
     FILES_MATCHING PATTERN *.py
     )
   # all done
-endfunction(altar_cdm_buildPackage)
+endfunction(altar_reverso_buildPackage)
 
 
-# buld the cdm libraries
-function(altar_cdm_buildLibrary)
-  # the libcdm target
-  add_library(libcdm SHARED)
+# buld the reverso libraries
+function(altar_reverso_buildLibrary)
+  # the libreverso target
+  add_library(libreverso SHARED)
   # adjust the name
   set_target_properties(
-    libcdm PROPERTIES
-    LIBRARY_OUTPUT_NAME cdm
+    libreverso PROPERTIES
+    LIBRARY_OUTPUT_NAME reverso
     )
   # set the include directories
   target_include_directories(
-    libcdm PRIVATE
+    libreverso PRIVATE
     ${CMAKE_INSTALL_PREFIX}/include
     ${GSL_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS}
     )
   # set the link directories
   target_link_directories(
-    libcdm PRIVATE
+    libreverso PRIVATE
     ${CMAKE_INSTALL_PREFIX}/lib
     )
   # add the dependencies
   target_link_libraries(
-    libcdm PRIVATE
+    libreverso PRIVATE
     ${GSL_LIBRARIES} journal
     )
   # add the sources
   target_sources(
-    libcdm PRIVATE
-    lib/libcdm/cdm.cc
-    lib/libcdm/version.cc
-    lib/libcdm/Source.cc
+    libreverso PRIVATE
+    lib/libreverso/reverso.cc
+    lib/libreverso/version.cc
+    lib/libreverso/Source.cc
     )
 
-  # copy the cdm headers; note the trickery with the terminating slash in the source
+  # copy the reverso headers; note the trickery with the terminating slash in the source
   # directory that lets us place the files in the correct destination
   file(
-    COPY lib/libcdm/
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/${ALTAR_DEST_INCLUDE}/altar/models/cdm
+    COPY lib/libreverso/
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/${ALTAR_DEST_INCLUDE}/altar/models/reverso
     FILES_MATCHING PATTERN *.h PATTERN *.icc
     )
 
   # install the library
   install(
-    TARGETS libcdm
+    TARGETS libreverso
     LIBRARY DESTINATION lib
     )
 
   # all done
-endfunction(altar_cdm_buildLibrary)
+endfunction(altar_reverso_buildLibrary)
 
 
-# build the cdm extension module
-function(altar_cdm_buildModule)
-  # cdm
-  Python3_add_library(cdmmodule MODULE)
+# build the reverso extension module
+function(altar_reverso_buildModule)
+  # reverso
+  Python3_add_library(reversomodule MODULE)
   # adjust the name to match what python expects
   set_target_properties(
-    cdmmodule PROPERTIES
-    LIBRARY_OUTPUT_NAME cdm
+    reversomodule PROPERTIES
+    LIBRARY_OUTPUT_NAME reverso
     SUFFIX ${PYTHON3_SUFFIX}
     )
   # set the include directories
   target_include_directories(
-    cdmmodule PRIVATE
+    reversomodule PRIVATE
     ${CMAKE_INSTALL_PREFIX}/include
     ${GSL_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS}
     )
   # set the link directories
   target_link_directories(
-    cdmmodule PRIVATE
+    reversomodule PRIVATE
     ${CMAKE_INSTALL_PREFIX}/lib
     )
   # set the libraries to link against
-  target_link_libraries(cdmmodule PUBLIC libcdm libaltar journal)
+  target_link_libraries(reversomodule PUBLIC libreverso libaltar journal)
   # add the sources
-  target_sources(cdmmodule PRIVATE
-    ext/cdm/cdm.cc
-    ext/cdm/metadata.cc
-    ext/cdm/exceptions.cc
-    ext/cdm/source.cc
+  target_sources(reversomodule PRIVATE
+    ext/reverso/reverso.cc
+    ext/reverso/metadata.cc
+    ext/reverso/exceptions.cc
+    ext/reverso/source.cc
     )
 
   # install the capsule
   install(
-    FILES ext/cdm/capsules.h
-    DESTINATION ${ALTAR_DEST_INCLUDE}/altar/models/cdm
+    FILES ext/reverso/capsules.h
+    DESTINATION ${ALTAR_DEST_INCLUDE}/altar/models/reverso
     )
 
-  # install the cdm extension
+  # install the reverso extension
   install(
-    TARGETS cdmmodule
+    TARGETS reversomodule
     LIBRARY
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/packages/altar/models/cdm/ext
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/packages/altar/models/reverso/ext
     )
-endfunction(altar_cdm_buildModule)
+endfunction(altar_reverso_buildModule)
 
 
 # the scripts
-function(altar_cdm_buildDriver)
+function(altar_reverso_buildDriver)
   # install the scripts
   install(
-    PROGRAMS bin/cdm
+    PROGRAMS bin/reverso
     DESTINATION bin
     )
   # all done
-endfunction(altar_cdm_buildDriver)
+endfunction(altar_reverso_buildDriver)
 
 # end of file

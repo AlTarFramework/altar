@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+# michael a.g. aïvázis (michael.aivazis@para-sim.com)
 # eric m. gurrola (eric.m.gurrola@jpl.nasa.gov)
 #
+# (c) 2013-2020 parasim inc
 # (c) 2010-2020 california institute of technology
 # all rights reserved
-#
 
 
 # get the package
@@ -19,6 +20,7 @@ class Reverso(altar.shells.application, family='altar.applications.reverso'):
     """
 
     # user configurable state
+    # make reverso the default model
     model = altar.models.model(default='reverso')
     model.doc = "the AlTar model to sample"
 

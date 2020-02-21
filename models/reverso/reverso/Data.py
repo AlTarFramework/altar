@@ -1,42 +1,55 @@
-# -*- python -*-
 # -*- coding: utf-8 -*-
 #
-# michael a.g. aïvázis <michael.aivazis@para-sim.com>
+# michael a.g. aïvázis (michael.aivazis@para-sim.com)
+# grace bato           (mary.grace.p.bato@jpl.nasa.gov)
+# eric m. gurrola      (eric.m.gurrola@jpl.nasa.gov)
 #
 # (c) 2013-2020 parasim inc
 # (c) 2010-2020 california institute of technology
 # all rights reserved
-#
 
 
 # framework
 import altar
 
 
-# declaration
+# the dataset
 class Data(altar.tabular.sheet):
     """
-    The layout of the input data file
+    The layout of the input file
     """
+
 
     # the layout
     oid = altar.tabular.int()
     oid.doc = "an integer identifying the data source"
 
+    t = altar.tabular.float()
+    t.doc = "the time of the observation"
+
     x = altar.tabular.float()
-    x.doc = "the EW coordinate of the location of the source"
+    x.doc = "the EW coordinate of the location of the observation"
 
     y = altar.tabular.float()
-    y.doc = "the NS coordinate of the location of the source"
+    y.doc = "the NS coordinate of the location of the observation"
 
-    d = altar.tabular.float()
-    d.doc = "the displacement projected along the line of sight (LOS)"
+    uE = altar.tabular.float()
+    uE.doc = "the E component of the displacement"
 
-    theta = altar.tabular.float()
-    theta.doc = "the azimuthal angle of the LOS vector to the observing craft"
+    uN = altar.tabular.float()
+    uN.doc = "the N component of the displacement"
 
-    phi = altar.tabular.float()
-    phi.doc = "the polar angle of the LOS vector to the observing craft"
+    uZ = altar.tabular.float()
+    uZ.doc = "the up component of the displacement"
+
+    σE = altar.tabular.float()
+    σE.doc = "the σ^2 of the E component of the displacement"
+
+    σN = altar.tabular.float()
+    σN.doc = "the σ^2 of the N component of the displacement"
+
+    σZ = altar.tabular.float()
+    σZ.doc = "the σ^2 of the up component of the displacement"
 
 
     # load data from a csv file

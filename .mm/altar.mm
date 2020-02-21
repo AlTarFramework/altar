@@ -9,6 +9,6 @@
 include altar.def
 
 # models
-include emhp.def gaussian.def mogi.def cdm.def linear.def
+include emhp.def gaussian.def mogi.def cdm.def linear.def reverso.def
 
 # end of file
