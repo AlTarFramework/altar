@@ -37,11 +37,21 @@ reverso:
 
         ; parameter sets
         psets:
+            Qin = contiguous
             H_s = contiguous
             H_d = contiguous
             a_s = contiguous
             a_d = contiguous
             a_c = contiguous
+
+            Qin:
+                count = 1
+                prep = uniform
+                prior = uniform
+                prep:
+                    support = (.4, .8)
+                prior:
+                    support = (.4, .8)
 
             H_s:
                 count = 1

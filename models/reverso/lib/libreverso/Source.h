@@ -31,13 +31,14 @@ public:
     // meta-methods
 public:
     virtual ~Source();
-    inline Source(double Qin, double G, double v, double mu, double drho, double g);
+    inline Source(double G, double v, double mu, double drho, double g);
 
     // interface
 public:
     inline void data(gsl_vector * data);
     inline void locations(gsl_matrix * locations);
-    inline void layout(size_type HsIdx, size_type HdIdx,
+    inline void layout(size_type QinIdx,
+                       size_type HsIdx, size_type HdIdx,
                        size_type asIdx, size_type adIdx, size_type acIdx);
 
     void displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const;
@@ -49,7 +50,6 @@ private:
     gsl_matrix * _locations;   // owned
 
     // the Poisson ratio
-    double _Qin;
     double _G;
     double _v;
     double _mu;
@@ -57,6 +57,7 @@ private:
     double _g;
 
     // the layout of the various parameters within a sample
+    size_type _QinIdx;
     size_type _HsIdx;
     size_type _HdIdx;
     size_type _asIdx;

@@ -48,13 +48,6 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
     displacements.doc = "the name of the file with the displacements"
 
     # material parameters
-    Qin = altar.properties.float(default=0.6)
-    Qin.doc = "basal magma inflow rate"
-
-    # physical parameters
-    G = altar.properties.float(default=20.0E9)
-    G.doc = "shear modulus, [Pa, kg-m/s**2]"
-
     v = altar.properties.float(default=0.25)
     v.doc = "Poisson's ratio"
 
@@ -63,6 +56,10 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
 
     drho = altar.properties.float(default=300.0)
     drho.doc = "density difference (ρ_r-ρ_m), [kg/m**3]"
+
+    # physical parameters
+    G = altar.properties.float(default=20.0E9)
+    G.doc = "shear modulus, [Pa, kg-m/s**2]"
 
     g = altar.properties.float(default=9.81)
     g.doc = "gravitational acceleration [m/s**2]"
@@ -225,11 +222,12 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
 
         # record the layout of the sample vector
         # transfer the offsets of the various slots to members
-        self.HsIdx = psets["H_s"].offset
-        self.HdIdx = psets["H_d"].offset
-        self.asIdx = psets["a_s"].offset
-        self.adIdx = psets["a_d"].offset
-        self.acIdx = psets["a_c"].offset
+        self.Qin_idx = psets["Qin"].offset
+        self.Hs_idx = psets["H_s"].offset
+        self.Hd_idx = psets["H_d"].offset
+        self.as_idx = psets["a_s"].offset
+        self.ad_idx = psets["a_d"].offset
+        self.ac_idx = psets["a_c"].offset
 
         # all done
         return
@@ -395,6 +393,7 @@ class Reverso(altar.models.bayesian, family="altar.models.reverso"):
 
     # private data
     # the sample layout; patched during {initialize}
+    Qin_idx = 0
     Hs_idx = 0
     Hd_idx = 0
     as_idx = 0

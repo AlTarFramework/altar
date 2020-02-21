@@ -29,8 +29,7 @@ class Fast:
         Initialize the strategy with {model} information
         """
         # build the calculator and attach it
-        self.source = source = libreverso.newSource(
-            model.Qin, model.G, model.v, model.mu, model.drho, model.g)
+        self.source = source = libreverso.newSource(model.G, model.v, model.mu, model.drho, model.g)
 
         # get the locations and time of the observations
         ticks = model.ticks
@@ -43,7 +42,8 @@ class Fast:
         libreverso.data(source, displacements.data)
         # inform the source about the sample layout; assume contiguous parameter sets
         libreverso.layout(source,
-                      model.HsIdx, model.HdIdx, model.asIdx, model.adIdx, model.acIdx)
+                          model.Qin_idx,
+                          model.Hs_idx, model.Hd_idx, model.as_idx, model.ad_idx, model.ac_idx)
 
         # all done
         return self

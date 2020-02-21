@@ -56,11 +56,12 @@ class Native:
         psets = model.psets
 
         # get the offsets of the various parameter sets
-        HsIdx = model.HsIdx
-        HdIdx = model.HdIdx
-        asIdx = model.asIdx
-        adIdx = model.adIdx
-        acIdx = model.acIdx
+        QinIdx = model.Qin_idx
+        HsIdx = model.Hs_idx
+        HdIdx = model.Hd_idx
+        asIdx = model.as_idx
+        adIdx = model.ad_idx
+        acIdx = model.ac_idx
 
         # get the locations and times of the observations
         ticks = model.ticks
@@ -71,6 +72,8 @@ class Native:
         for sample in range(samples):
             # extract the parameters
             parameters = θ.getRow(sample)
+            # get the flow rate
+            Qin = parameters[QinIdx]
             # get the locations of the chambers
             H_s = parameters[HsIdx]
             H_d = parameters[HdIdx]
@@ -82,7 +85,7 @@ class Native:
             # make a source using the sample parameters
             reverso = source(H_s=H_s, H_d=H_d,
                              a_s=a_s, a_d=a_d, a_c=a_c,
-                             Qin=model.Qin,
+                             Qin=Qin,
                              G=model.G, v=model.v, mu=model.mu, drho=model.drho, g=model.g)
 
             # prime the displacement calculator

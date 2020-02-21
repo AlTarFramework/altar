@@ -46,7 +46,6 @@ altar::extensions::models::reverso::
 newSource(PyObject *, PyObject * args)
 {
     // storage
-    double Qin;
     double G;
     double v;
     double mu;
@@ -54,8 +53,7 @@ newSource(PyObject *, PyObject * args)
     double g;
     // extract the material parameters
     int status = PyArg_ParseTuple(args,
-                                  "dddddd:newSource",
-                                  &Qin,
+                                  "ddddd:newSource",
                                   &G, &v, &mu, &drho, &g);
     // if something went wrong
     if (!status) {
@@ -64,7 +62,7 @@ newSource(PyObject *, PyObject * args)
     }
 
     // make a new source
-    source_t * source = new source_t(Qin, G, v, mu, drho, g);
+    source_t * source = new source_t(G, v, mu, drho, g);
     // wrap it in a capsule and return it
     return PyCapsule_New(source, source_capst, freeSource);
 }
@@ -230,13 +228,13 @@ layout(PyObject *, PyObject * args)
 {
     // storage
     PyObject * pySource;
-    std::size_t HsIdx, HdIdx, asIdx, adIdx, acIdx;
+    std::size_t QinIdx, HsIdx, HdIdx, asIdx, adIdx, acIdx;
 
     // unpack the arguments
     int status = PyArg_ParseTuple(args,
-                                  "O!kkkkk:layout",
+                                  "O!kkkkkk:layout",
                                   &PyCapsule_Type, &pySource,
-                                  &HsIdx, &HdIdx, &asIdx, &adIdx, &acIdx);
+                                  &QinIdx, &HsIdx, &HdIdx, &asIdx, &adIdx, &acIdx);
     // if something went wrong
     if (!status) {
         // complain
@@ -263,7 +261,7 @@ layout(PyObject *, PyObject * args)
         << pyre::journal::endl;
 
     // attach the map
-    source->layout(HsIdx, HdIdx, asIdx, adIdx, acIdx);
+    source->layout(QinIdx, HsIdx, HdIdx, asIdx, adIdx, acIdx);
 
     // all done
     Py_INCREF(Py_None);

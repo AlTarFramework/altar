@@ -64,6 +64,8 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
     // go through all the samples
     for (auto sample=0; sample<nSamples; ++sample) {
         // unpack the parameters
+        // the flow rate
+        auto Qin = gsl_matrix_get(&samples->matrix, sample, _QinIdx);
         // the chamber locations
         auto H_s = gsl_matrix_get(&samples->matrix, sample, _HsIdx);
         auto H_d = gsl_matrix_get(&samples->matrix, sample, _HdIdx);
@@ -76,7 +78,7 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
         // compute the displacements
         reverso(sample, _locations,
                 H_s, H_d, a_s, a_d, a_c,
-                _Qin,
+                Qin,
                 _G, _v, _mu, _drho, _g,
                 predicted);
     }
