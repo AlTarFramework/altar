@@ -55,7 +55,6 @@ function(altar_reverso_buildLibrary)
   target_sources(
     libreverso PRIVATE
     lib/libreverso/reverso.cc
-    lib/libreverso/version.cc
     lib/libreverso/Source.cc
     )
 
@@ -103,7 +102,6 @@ function(altar_reverso_buildModule)
   # add the sources
   target_sources(reversomodule PRIVATE
     ext/reverso/reverso.cc
-    ext/reverso/metadata.cc
     ext/reverso/exceptions.cc
     ext/reverso/source.cc
     )
