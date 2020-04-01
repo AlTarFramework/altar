@@ -20,6 +20,7 @@ __pycache__
 
 # reverso examples folder
 /models/reverso/examples
+/models/reverso/examples/*.*
 
 # auctex lint
 /doc/**/auto
