@@ -6,6 +6,7 @@ __pycache__
 .DS_Store
 
 # the default build locations
+/build
 /builds
 /products
 
