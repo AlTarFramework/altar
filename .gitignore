@@ -17,6 +17,9 @@ __pycache__
 /models/cdm/examples/**/*.txt
 /models/cdm/examples/**/*.csv
 
+# reverso examples folder
+/models/reverso/examples
+
 # auctex lint
 /doc/**/auto
 # tex lint

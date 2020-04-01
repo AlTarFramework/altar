@@ -147,7 +147,7 @@ class Reverso(altar.application, family="altar.applications.reverso"):
         # get time
         year = altar.units.time.year.value
         # max time
-        tMax = 1 * year
+        tMax =  1 * year
         # build the time value
         for exponent in range(-6,1):
             # compute the time mark

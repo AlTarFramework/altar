@@ -53,7 +53,7 @@ def REVERSO(locations,
 
     # the analytic solution
     # the characteristic time constant (eq. 10)
-    tau = (8.0 * mu * H_c**gamma_s * gamma_d * k * a_s**3) / (G * a_c**4 * gamma_r)
+    tau = (8.0 * mu * H_c *gamma_s * gamma_d * k * a_s**3) / (G * a_c**4 * gamma_r)
 
     A  = gamma_d*k / gamma_r
     A *= dPd0 - dPs0 + drho*g*H_c - 8*gamma_s*mu*Qin*H_c / (pi * a_c**4 * gamma_r)

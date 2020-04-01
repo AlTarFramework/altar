@@ -25,7 +25,7 @@ reverso:
         tasks = 1       ; number of tasks per host
         gpus = 0        ; number of gpus per task
         chains = 2**12  ; number of chains per task
-        steps = 20      ; the length of each chain
+        steps = 50      ; the length of each chain
 
     monitors:
        prof = altar.bayesian.profiler
@@ -49,9 +49,9 @@ reverso:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (.4, .8)
+                    support = (0.55, 0.65)
                 prior:
-                    support = (.4, .8)
+                    support = (0.1, 6.0)
 
             H_s:
                 count = 1
@@ -67,18 +67,18 @@ reverso:
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (3500, 4500)
+                    support = (5000, 8000)
                 prior:
-                    support = (3500, 4500)
+                    support = (4000, 10000)
 
             a_s:
                 count = 1
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (1500, 2500)
+                    support = (2100, 2300)
                 prior:
-                    support = (1500, 2500)
+                    support = (2000, 2500)
 
             a_d:
                 count = 1
@@ -87,14 +87,14 @@ reverso:
                 prep:
                     support = (1500, 2500)
                 prior:
-                    support = (1500, 2500)
+                    support = (1000, 3500)
 
             a_c:
                 count = 1
                 prep = uniform
                 prior = uniform
                 prep:
-                    support = (1, 2)
+                    support = (1.25, 1.75)
                 prior:
                     support = (1, 2)
 

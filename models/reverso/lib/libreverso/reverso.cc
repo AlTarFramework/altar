@@ -10,6 +10,7 @@
 #include <array>
 #include <stdexcept>
 #include <gsl/gsl_matrix.h>
+
 // declarations
 #include "reverso.h"
 
@@ -57,7 +58,7 @@ reverso(int sample, const gsl_matrix * locations,
 
     // the analytic solution
     // the characteristic time constant (eq. 10)
-    auto tau = (8.0 * mu * std::pow(H_c, gamma_s) * gamma_d * k * std::pow(a_s,3))
+    auto tau = (8.0 * mu * H_c * gamma_s * gamma_d * k * std::pow(a_s,3))
         / (G * std::pow(a_c,4) * gamma_r);
 
     auto A  = gamma_d*k / gamma_r;
