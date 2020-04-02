@@ -13,6 +13,7 @@ __pycache__
 # the synthetic data from the mogi model
 /models/mogi/examples/**/*.txt
 /models/mogi/examples/**/*.csv
+/models/mogi/examples
 
 # the synthetic data from the cdm model
 /models/cdm/examples/**/*.txt
