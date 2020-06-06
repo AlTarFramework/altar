@@ -12,6 +12,7 @@ altar.micro := $(repo.micro)
 altar.revision := $(repo.revision)
 
 # the top level directory
+# DO NOT PUT A TERMINATING SLASH HERE: this must mimick what mm passes in
 altar.home := $(project.home)/altar
 
 # altar consists of a python package
@@ -28,6 +29,8 @@ altar.pkg.root := altar/
 altar.pkg.drivers := altar
 
 # libaltar meta-data
+altar.lib.stem := libaltar
+altar.lib.incstem := altar
 altar.lib.extern := gsl pyre
 altar.lib.c++.flags += $($(compiler.c++).std.c++17)
 
@@ -40,7 +43,7 @@ altar.ext.extern := altar.lib gsl pyre python
 altar.ext.lib.c++.flags += $($(compiler.c++).std.c++17)
 
 # the altar test suite
-altar.pkg.tests.root := tests/altar/
+altar.pkg.tests.stem := altar
 altar.pkg.tests.prerequisites := altar.pkg altar.ext
 # individual test cases
 tests.altar.application_run.clean = \
