@@ -53,7 +53,7 @@ mogi.cudalib.incdir := $(builder.dest.inc)altar/models/cudamogi/
 mogi.cudalib.extern := gsl pyre cuda
 # compile options for the sources
 mogi.cudalib.c++.flags += $($(compiler.c++).std.c++17)
-mogi.cudalib.cuda.flags += $(nvcc.std.c++14)
+mogi.cudalib.cuda.flags += $(nvcc.std.c++17)
 
 # the mogi CUDA extension meta-data
 mogi.cudaext.stem := cudamogi
@@ -63,7 +63,7 @@ mogi.cudaext.wraps := mogi.cudalib
 mogi.cudaext.extern := mogi.cudalib gsl pyre python cuda
 # compile options for the sources
 mogi.cudaext.lib.c++.flags += $($(compiler.c++).std.c++17)
-mogi.cudaext.lib.cuda.flags += $(nvcc.std.c++14)
+mogi.cudaext.lib.cuda.flags += $(nvcc.std.c++17)
 
 # specify the CUDA libraries
 cuda.libraries += cudart cudadevrt

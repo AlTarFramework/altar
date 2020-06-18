@@ -53,7 +53,7 @@ cdm.cudalib.incdir := $(builder.dest.inc)altar/models/cudacdm/
 cdm.cudalib.extern := gsl pyre cuda
 # compile options for the sources
 cdm.cudalib.c++.flags += $($(compiler.c++).std.c++17)
-cdm.cudalib.cuda.flags += $(nvcc.std.c++14)
+cdm.cudalib.cuda.flags += $(nvcc.std.c++17)
 
 # the cdm CUDA extension meta-data
 cdm.cudaext.stem := cudacdm
@@ -63,7 +63,7 @@ cdm.cudaext.wraps := cdm.cudalib
 cdm.cudaext.extern := cdm.cudalib gsl pyre python cuda
 # compile options for the sources
 cdm.cudaext.lib.c++.flags += $($(compiler.c++).std.c++17)
-cdm.cudaext.lib.cuda.flags += $(nvcc.std.c++14)
+cdm.cudaext.lib.cuda.flags += $(nvcc.std.c++17)
 
 # specify the CUDA libraries
 cuda.libraries += cudart cudadevrt
