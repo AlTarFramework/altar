@@ -80,7 +80,7 @@ displacements(gsl_matrix_view * samples, gsl_matrix * predicted) const {
                 H_s, H_d, a_s, a_d, a_c,
                 Qin,
                 _G, _v, _mu, _drho, _g,
-                predicted);
+                predicted);        
     }
 
     // all done
