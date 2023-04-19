@@ -1,0 +1,40 @@
+{
+    "configurations": [
+        {
+            "name": "mm: linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:vs_prefix_prj}/include/**",
+                "${env:vs_prefix_usr}/include/**",
+                "/usr/lib/x86_64-linux-gnu/openmpi/include/**",
+                "/usr/include/hdf5/openmpi/**",
+                "/usr/include/python3.9/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/${env:vs_compiler}",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-${env:vs_compiler}-${env:vs_arch}"
+        },
+        {
+            "name": "mm: mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:vs_prefix_prj}/include/**",
+                "${env:vs_prefix_usr}/include/**",
+                "/opt/local/Library/Frameworks/Python.framework/Versions/3.10/include/**",
+                "/opt/local/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/pybind11/include",
+                "/opt/local/include/**"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/opt/local/bin/${env:vs_compiler}",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-${env:vs_compiler}-${env:vs_arch}"
+        }
+    ],
+    "version": 4
+}
