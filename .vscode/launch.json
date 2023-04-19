@@ -10,7 +10,9 @@
             "request": "launch",
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}/models/linear/examples",
-            "program": "${env:mm_prefix}/bin/linear",
+            "program": "${workspaceFolder}/models/linear/bin/linear",
+            "args": [
+            ],
             "console": "integratedTerminal"
         }
     ]
