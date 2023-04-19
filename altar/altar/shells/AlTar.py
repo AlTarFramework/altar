@@ -10,6 +10,7 @@
 
 # support
 import altar
+import textwrap
 
 
 # the plexus
@@ -37,7 +38,6 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
     monitors = altar.properties.dict(schema=altar.simulations.monitor())
     monitors.doc = "a collection of event handlers"
 
-
     # protocol obligations
     @altar.export
     def main(self, *args, **kwds):
@@ -56,7 +56,6 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
         # chain up
         return super().main(*args, **kwds)
 
-
     # pyre framework hooks
     # support for the help system
     def pyre_banner(self):
@@ -64,8 +63,9 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
         Place the application banner in the {info} channel
         """
         # show the package header
-        return altar.meta.header
-
+        yield from textwrap.dedent(altar.meta.header).splitlines()
+        # all done
+        return
 
     # interactive session management
     def pyre_interactiveSessionContext(self, context):
@@ -78,7 +78,7 @@ class AlTar(altar.plexus, family="altar.shells.altar", namespace="altar"):
             context = {}
 
         # add some symbols
-        context["altar"] = altar # my package
+        context["altar"] = altar  # my package
 
         # and chain up
         return super().pyre_interactiveSessionContext(context=context)
